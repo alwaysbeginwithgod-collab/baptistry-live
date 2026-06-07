@@ -350,3 +350,97 @@ body {
   position: relative;
   z-index: 1;
 }
+
+/* ============================================ */
+/* MANUAL MARKDOWN STYLES (Prose Fallback)      */
+/* ============================================ */
+
+/* Blockquote styling for rhyming quotes */
+.prose blockquote {
+  border-left-width: 4px;
+  border-left-color: #3b82f6;
+  padding-left: 1rem;
+  font-style: italic;
+  margin: 1rem 0;
+  color: #4b5563;
+}
+
+.dark .prose blockquote {
+  color: #9ca3af;
+  border-left-color: #60a5fa;
+}
+
+/* Horizontal rule styling for scene breaks */
+.prose hr {
+  margin: 1.5rem 0;
+  border-color: #e5e7eb;
+}
+
+.dark .prose hr {
+  border-color: #374151;
+}
+
+/* Bold text styling */
+.prose strong {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.dark .prose strong {
+  color: #f3f4f6;
+}
+
+/* Italic text styling */
+.prose em {
+  font-style: italic;
+  color: #4b5563;
+}
+
+.dark .prose em {
+  color: #9ca3af;
+}
+
+/* Paragraph spacing */
+.prose p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+/* Heading styling */
+.prose h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* List styling */
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.prose li {
+  margin-bottom: 0.25rem;
+}
