@@ -4,6 +4,7 @@ import './globals.css'
 import { ThemeProvider } from './context/ThemeContext'
 import { ClerkProvider } from '@clerk/nextjs'
 import Script from 'next/script';
+import { Analytics } from '@vercel/analytics/react';
 
 export default function RootLayout({
   children,
@@ -26,6 +27,7 @@ export default function RootLayout({
               strategy="afterInteractive"
             />
             {children}
+            <Analytics />
           </body>
         </html>
       </ThemeProvider>
