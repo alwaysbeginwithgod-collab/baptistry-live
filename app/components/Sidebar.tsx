@@ -147,7 +147,7 @@ export default function Sidebar({
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">BAPTISTRY</h1>
-              <p className="text-xs text-gray-600 dark:text-gray-400">KJV Bible Teaching</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Your Bible Study Tool</p>
             </div>
           </div>
         </div>
