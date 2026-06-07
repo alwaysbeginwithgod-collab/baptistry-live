@@ -176,42 +176,47 @@ export async function POST(request) {
       );
     }
 
-    // ============================================================
-    // STEP 1: ALWAYS try Dify Knowledge Base FIRST
-    // ============================================================
-    console.log('STEP 1: Trying Dify Knowledge Base for:', message);
+// ============================================================
+// STEP 1: ALWAYS try Dify Knowledge Base FIRST
+// ============================================================
+console.log('STEP 1: Trying Dify Knowledge Base for:', message);
 
-    let difyResponse = null;
-    let difyError = null;
+let difyResponse = null;
+let difyError = null;
+let rawDifyData = null;
 
-    try {
-      const response = await fetch(DIFY_API_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${DIFY_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          inputs: {},
-          query: message,
-          response_mode: 'blocking',
-          user: 'baptistry_user',
-        }),
-      });
+try {
+  const response = await fetch(DIFY_API_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${DIFY_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      inputs: {},
+      query: message,
+      response_mode: 'blocking',
+      user: 'baptistry_user',
+    }),
+  });
 
-      const data = await response.json();
-      
-      if (response.ok && data.answer) {
-        difyResponse = data.answer;
-        console.log('Dify returned a response, length:', difyResponse.length);
-      } else {
-        difyError = data.message || 'No answer from Dify';
-        console.log('Dify returned no answer:', difyError);
-      }
-    } catch (error) {
-      difyError = error.message;
-      console.error('Dify API error:', difyError);
-    }
+  const data = await response.json();
+  rawDifyData = data;
+  console.log('RAW DIFY RESPONSE:', JSON.stringify(data, null, 2));
+  
+  if (response.ok && data.answer) {
+    // Preserve the EXACT response without any modification
+    difyResponse = data.answer;
+    console.log('Dify answer length:', difyResponse.length);
+    console.log('Dify answer preview:', difyResponse.substring(0, 200));
+  } else {
+    difyError = data.message || 'No answer from Dify';
+    console.log('Dify returned no answer:', difyError);
+  }
+} catch (error) {
+  difyError = error.message;
+  console.error('Dify API error:', difyError);
+}
 
     // ============================================================
     // STEP 2: If Dify has a substantive answer, USE IT

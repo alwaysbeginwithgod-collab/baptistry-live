@@ -38,7 +38,7 @@ export default function MessageBubble({ message, onFeedback }: MessageBubbleProp
       {/* Avatar for BAPTISTRY only (assistant messages) */}
       {!isUser && (
         <div className="flex-shrink-0 mt-1">
-          <div className="w-40 h-40 rounded-full overflow-hidden flex items-center justify-center">
+          <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center">
             <img 
               src="/baptistry-logo.png" 
               alt="BAPTISTRY"
