@@ -96,7 +96,7 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
               </svg>
             </button>
 
-            {/* Message History Dropdown - positioned absolutely to not affect header layout */}
+            {/* Message History Dropdown - Absolutely positioned to not affect header layout */}
             {isHistoryOpen && (
               <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
                 <div className="p-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
