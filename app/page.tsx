@@ -127,7 +127,16 @@ export default function Home() {
       pinned: false,
     };
     
-    setConversations(prev => [newConversation, ...prev]);
+    setConversations(prev => {
+      // Sort: pinned first, then new chat below pinned
+      const withNew = [newConversation, ...prev];
+      const sorted = [...withNew].sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      });
+      return sorted;
+    });
     setCurrentConversationId(newConversation.id);
     setMessages([]);
     setInput('');
@@ -142,6 +151,13 @@ export default function Home() {
     
     const conversation = conversations.find(c => c.id === conversationId);
     if (conversation) {
+      // Update the updatedAt timestamp when loading (moves it to top of unpinned section)
+      setConversations(prev => prev.map(conv =>
+        conv.id === conversationId
+          ? { ...conv, updatedAt: new Date() }
+          : conv
+      ));
+      
       // Set messages first
       setMessages(conversation.messages);
       setCurrentConversationId(conversationId);
@@ -156,12 +172,11 @@ export default function Home() {
   };
 
   const renameConversation = (conversationId: string, newTitle: string) => {
-    const updatedConversations = conversations.map(conv =>
+    setConversations(prev => prev.map(conv =>
       conv.id === conversationId
         ? { ...conv, title: newTitle, updatedAt: new Date() }
         : conv
-    );
-    setConversations(updatedConversations);
+    ));
   };
 
   const deleteConversation = (conversationId: string) => {
@@ -176,42 +191,45 @@ export default function Home() {
     }
   };
 
-const pinConversation = (conversationId: string) => {
-  setConversations(prevConversations => {
-    // First, find if the clicked conversation is already pinned
-    const clickedConv = prevConversations.find(conv => conv.id === conversationId);
-    const isCurrentlyPinned = clickedConv?.pinned || false;
-    
-    let updated;
-    
-    if (isCurrentlyPinned) {
-      // If it's already pinned, just unpin it (remove pin)
-      updated = prevConversations.map(conv =>
-        conv.id === conversationId ? { ...conv, pinned: false, updatedAt: new Date() } : conv
-      );
-    } else {
-      // If it's not pinned, unpin all first, then pin this one
-      const unpinnedAll = prevConversations.map(conv => ({
-        ...conv,
-        pinned: false,
-        updatedAt: conv.updatedAt
-      }));
+  const pinConversation = (conversationId: string) => {
+    setConversations(prevConversations => {
+      // First, find if the clicked conversation is already pinned
+      const clickedConv = prevConversations.find(conv => conv.id === conversationId);
+      const isCurrentlyPinned = clickedConv?.pinned || false;
       
-      updated = unpinnedAll.map(conv =>
-        conv.id === conversationId ? { ...conv, pinned: true, updatedAt: new Date() } : conv
-      );
-    }
-    
-    // Sort: pinned first, then by updated date
-    const sorted = [...updated].sort((a, b) => {
-      if (a.pinned && !b.pinned) return -1;
-      if (!a.pinned && b.pinned) return 1;
-      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      let updated;
+      
+      if (isCurrentlyPinned) {
+        // If it's already pinned, just unpin it (remove pin)
+        updated = prevConversations.map(conv =>
+          conv.id === conversationId ? { ...conv, pinned: false, updatedAt: new Date() } : conv
+        );
+      } else {
+        // If it's not pinned, unpin all first, then pin this one
+        const unpinnedAll = prevConversations.map(conv => ({
+          ...conv,
+          pinned: false,
+          updatedAt: conv.updatedAt
+        }));
+        
+        updated = unpinnedAll.map(conv =>
+          conv.id === conversationId ? { ...conv, pinned: true, updatedAt: new Date() } : conv
+        );
+      }
+      
+      // Sort: ALL pinned conversations first, then all unpinned by updatedAt (newest first)
+      const sorted = [...updated].sort((a, b) => {
+        // If both are pinned or both are unpinned, sort by updatedAt (newest first)
+        if (a.pinned === b.pinned) {
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        }
+        // Pinned comes first
+        return a.pinned ? -1 : 1;
+      });
+      
+      return sorted;
     });
-    
-    return sorted;
-  });
-};
+  };
 
   const scrollToMessage = (messageId: string) => {
     const messageElement = document.getElementById(`message-${messageId}`);
@@ -251,7 +269,15 @@ const pinConversation = (conversationId: string) => {
         updatedAt: new Date(),
         pinned: false,
       };
-      setConversations(prev => [newConversation, ...prev]);
+      setConversations(prev => {
+        const withNew = [newConversation, ...prev];
+        const sorted = [...withNew].sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        });
+        return sorted;
+      });
       setCurrentConversationId(newConversation.id);
     }
 
