@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { getDailyEncouragement } from '../lib/dailyEncouragements';
 
 interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'update';
+  type: 'update' | 'encouragement';
   link?: string;
   date: Date;
   read: boolean;
@@ -62,6 +63,34 @@ export default function NotificationBell() {
       localStorage.setItem('baptistry_notifications', JSON.stringify(sampleNotifications));
     }
   }, []);
+
+  // Add daily encouragement notification (once per day)
+  useEffect(() => {
+    const today = new Date().toDateString();
+    const lastEncouragementDate = localStorage.getItem('last_encouragement_date');
+    const encouragement = getDailyEncouragement();
+    
+    if (lastEncouragementDate !== today) {
+      // Remove any previous daily encouragement to avoid duplicates
+      const filtered = notifications.filter(n => !n.id.startsWith('daily-enc-'));
+      
+      const newEncouragement: Notification = {
+        id: `daily-enc-${Date.now()}`,
+        title: '☀️ Daily Encouragement',
+        message: encouragement.message,
+        type: 'encouragement',
+        link: '#',
+        date: new Date(),
+        read: false,
+      };
+      
+      const updated = [newEncouragement, ...filtered];
+      setNotifications(updated);
+      setUnreadCount(updated.filter(n => !n.read).length);
+      localStorage.setItem('baptistry_notifications', JSON.stringify(updated));
+      localStorage.setItem('last_encouragement_date', today);
+    }
+  }, [notifications]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -132,6 +161,11 @@ export default function NotificationBell() {
     return `${days} days ago`;
   };
 
+  const getIcon = (type: string) => {
+    if (type === 'encouragement') return '☀️';
+    return '🚀';
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Bell Icon */}
@@ -154,7 +188,7 @@ export default function NotificationBell() {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
           <div className="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-sm font-semibold text-gray-800 dark:text-white">BAPTISTRY Updates</h3>
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-white">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
@@ -168,7 +202,7 @@ export default function NotificationBell() {
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
               <div className="p-6 text-center text-gray-400 dark:text-gray-500 text-sm">
-                No updates yet
+                No notifications yet
               </div>
             ) : (
               notifications.map((notif) => (
@@ -180,7 +214,9 @@ export default function NotificationBell() {
                   }`}
                 >
                   <div className="flex items-start gap-2">
-                    <span className="text-lg">🚀</span>
+                    <span className="text-lg">
+                      {getIcon(notif.type)}
+                    </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-800 dark:text-white">
                         {notif.title}
@@ -201,13 +237,12 @@ export default function NotificationBell() {
             )}
           </div>
           
-          {/* Footer with two lines */}
           <div className="p-2 border-t border-gray-200 dark:border-gray-700 text-center space-y-1">
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Stay tuned for future BAPTISTRY updates
             </p>
             <a
-              href="https://www.facebook.com/BeginWithGod/"
+              href="https://www.facebook.com/BeginWithGod"
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs text-blue-600 hover:underline block"
