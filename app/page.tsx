@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MessageBubble from './components/MessageBubble';
+import { useUser } from '@clerk/nextjs';
 
 type Message = {
   id: string;
@@ -23,6 +24,9 @@ type Conversation = {
 };
 
 export default function Home() {
+  const { user } = useUser();
+  const userId = user?.id;
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
@@ -38,6 +42,11 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Immediate scroll to bottom without animation (for loading conversations)
+  const scrollToBottomImmediate = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' });
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages, streamingText]);
@@ -46,9 +55,28 @@ export default function Home() {
     textareaRef.current?.focus();
   }, []);
 
+  // Auto-resize textarea function
+  const autoResizeTextarea = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      const newHeight = Math.min(textareaRef.current.scrollHeight, 120);
+      textareaRef.current.style.height = `${newHeight}px`;
+    }
+  };
+
+  // Handle input change with auto-resize
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    autoResizeTextarea();
+  };
+
   // Load conversations from localStorage
   useEffect(() => {
-    const savedConversations = localStorage.getItem('baptistry_conversations');
+    if (!userId) {
+      setConversations([]);
+      return;
+    }
+    const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
     if (savedConversations) {
       try {
         const parsed = JSON.parse(savedConversations);
@@ -57,14 +85,14 @@ export default function Home() {
         console.error('Failed to load conversations', e);
       }
     }
-  }, []);
+  }, [userId]);
 
   // Save conversations to localStorage
   useEffect(() => {
-    if (conversations.length > 0) {
-      localStorage.setItem('baptistry_conversations', JSON.stringify(conversations));
+    if (conversations.length > 0 && userId) {
+      localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
     }
-  }, [conversations]);
+  }, [conversations, userId]);
 
   // Save current conversation when messages change
   useEffect(() => {
@@ -103,6 +131,8 @@ export default function Home() {
     setCurrentConversationId(newConversation.id);
     setMessages([]);
     setInput('');
+    
+    setTimeout(autoResizeTextarea, 0);
   };
 
   const loadConversation = (conversationId: string) => {
@@ -112,8 +142,16 @@ export default function Home() {
     
     const conversation = conversations.find(c => c.id === conversationId);
     if (conversation) {
+      // Set messages first
       setMessages(conversation.messages);
       setCurrentConversationId(conversationId);
+      
+      // Use requestAnimationFrame to ensure messages are rendered before scrolling
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          scrollToBottomImmediate();
+        }, 50);
+      });
     }
   };
 
@@ -134,23 +172,23 @@ export default function Home() {
       setMessages([]);
       setCurrentConversationId(null);
       setInput('');
+      setTimeout(autoResizeTextarea, 0);
     }
   };
 
   const pinConversation = (conversationId: string) => {
-    const updatedConversations = conversations.map(conv =>
-      conv.id === conversationId
-        ? { ...conv, pinned: !conv.pinned, updatedAt: new Date() }
-        : conv
-    );
-    
-    const sorted = [...updatedConversations].sort((a, b) => {
-      if (a.pinned && !b.pinned) return -1;
-      if (!a.pinned && b.pinned) return 1;
-      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    setConversations(prevConversations => {
+      const updated = prevConversations.map(conv =>
+        conv.id === conversationId ? { ...conv, pinned: !conv.pinned, updatedAt: new Date() } : conv
+      );
+      
+      const sorted = [...updated].sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      });
+      return sorted;
     });
-    
-    setConversations(sorted);
   };
 
   const scrollToMessage = (messageId: string) => {
@@ -207,6 +245,8 @@ export default function Home() {
     setIsLoading(true);
     setIsStreaming(false);
     setStreamingText('');
+    
+    setTimeout(autoResizeTextarea, 0);
 
     try {
       const response = await fetch('/api/chat', {
@@ -277,12 +317,14 @@ export default function Home() {
   const handleReturnToWelcome = () => {
     setMessages([]);
     setInput('');
+    setTimeout(autoResizeTextarea, 0);
   };
 
   const fillInput = (text: string) => {
     if (textareaRef.current) {
       textareaRef.current.value = text;
       setInput(text);
+      autoResizeTextarea();
       textareaRef.current.focus();
     }
   };
@@ -436,10 +478,10 @@ export default function Home() {
               <textarea
                 ref={textareaRef}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about Scripture, doctrine, or request a devotion..."
-                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
                 rows={1}
                 style={{ minHeight: '48px', maxHeight: '120px' }}
                 disabled={isLoading}

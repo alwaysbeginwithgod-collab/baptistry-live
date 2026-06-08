@@ -225,7 +225,7 @@ export default function RightSidebar() {
               {activeTool === 'reference' && (
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Trusted Baptist resources for study and research.
+                    Resources for study and research.
                   </p>
 
                   {/* Doctrinal Defense */}

@@ -42,7 +42,7 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 w-full">
+    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-20 w-full shadow-sm">
       <div className="flex items-center justify-between px-4 py-3">
         {/* Left side */}
         <div className="flex items-center gap-3">
@@ -96,9 +96,9 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
               </svg>
             </button>
 
-            {/* Message History Dropdown */}
+            {/* Message History Dropdown - positioned absolutely to not affect header layout */}
             {isHistoryOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
+              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
                 <div className="p-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
                   <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Message History</h3>
                   <p className="text-xs text-gray-400 dark:text-gray-500">Click any message to jump to it</p>
