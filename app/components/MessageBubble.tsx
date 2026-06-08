@@ -34,7 +34,7 @@ export default function MessageBubble({ message, onFeedback }: MessageBubbleProp
   };
 
   return (
-    <div className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div id={message.id} className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
       {/* Avatar for BAPTISTRY only (assistant messages) */}
       {!isUser && (
         <div className="flex-shrink-0 mt-1">
