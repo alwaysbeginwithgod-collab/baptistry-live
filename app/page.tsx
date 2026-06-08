@@ -333,6 +333,7 @@ export default function Home() {
     id: conv.id,
     content: conv.title,
     timestamp: conv.updatedAt,
+    pinned: conv.pinned || false,
   }));
 
   return (
