@@ -23,7 +23,6 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
   const historyDropdownRef = useRef<HTMLDivElement>(null);
   const { isSignedIn } = useUser();
 
-  // Close history dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (historyDropdownRef.current && !historyDropdownRef.current.contains(event.target as Node)) {
@@ -42,7 +41,7 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-20 w-full shadow-sm">
+    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-20 w-full shadow-sm overflow-visible">
       <div className="flex items-center justify-between px-4 py-3">
         {/* Left side */}
         <div className="flex items-center gap-3">
@@ -63,24 +62,17 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
 
         {/* Right side */}
         <div className="flex items-center gap-3">
-          {/* Sign In / User Menu */}
           {!isSignedIn ? (
             <SignInButton mode="modal">
-              <button className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                Sign In
-              </button>
+              <button className="text-sm text-blue-600 dark:text-blue-400 hover:underline">Sign In</button>
             </SignInButton>
           ) : (
-            <UserMenu 
-              onHelpClick={() => setIsHelpOpen(true)}
-              onFeedbackClick={() => setIsFeedbackOpen(true)}
-            />
+            <UserMenu onHelpClick={() => setIsHelpOpen(true)} onFeedbackClick={() => setIsFeedbackOpen(true)} />
           )}
 
-          {/* Separator */}
           <div className="w-px h-5 bg-gray-300 dark:bg-gray-600"></div>
 
-          {/* Clickable Message Count - Isolated Dropdown */}
+          {/* Message Count Dropdown */}
           <div className="relative" ref={historyDropdownRef}>
             <button
               onClick={(e) => {
@@ -88,7 +80,6 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
                 setIsHistoryOpen(!isHistoryOpen);
               }}
               className="text-sm text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer flex items-center gap-1"
-              aria-label="View message history"
             >
               <span>{messageCount} {messageCount === 1 ? 'message' : 'messages'}</span>
               <svg className={`w-3 h-3 transition-transform ${isHistoryOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,9 +87,15 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
               </svg>
             </button>
 
-            {/* Message History Dropdown - Absolutely positioned, independent of header flow */}
             {isHistoryOpen && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
+              <div 
+                className="fixed right-4 top-auto mt-1 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto"
+                style={{
+                  position: 'fixed',
+                  top: '60px',
+                  right: '16px',
+                }}
+              >
                 <div className="p-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
                   <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Message History</h3>
                   <p className="text-xs text-gray-400 dark:text-gray-500">Click any message to jump to it</p>
@@ -119,15 +116,11 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
                         <div className="flex items-start gap-2">
                           <div className="flex-shrink-0 mt-0.5">
                             <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                                #{userMessages.length - index}
-                              </span>
+                              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">#{userMessages.length - index}</span>
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm text-gray-800 dark:text-gray-200 font-medium truncate">
-                              {getPreview(msg.content)}
-                            </p>
+                            <p className="text-sm text-gray-800 dark:text-gray-200 font-medium truncate">{getPreview(msg.content)}</p>
                             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                               {new Date(msg.timestamp).toLocaleDateString()} at {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
@@ -146,21 +139,11 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
             )}
           </div>
 
-          {/* Separator before notification bell */}
           <div className="w-px h-5 bg-gray-300 dark:bg-gray-600"></div>
-
-          {/* Notification Bell */}
           <NotificationBell />
-
-          {/* Separator before theme toggle */}
           <div className="w-px h-5 bg-gray-300 dark:bg-gray-600"></div>
 
-          {/* Theme Toggle Button */}
-          <button
-            onClick={toggleDarkMode}
-            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            aria-label="Toggle theme"
-          >
+          <button onClick={toggleDarkMode} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             {darkMode ? (
               <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -174,7 +157,6 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
         </div>
       </div>
 
-      {/* Modals */}
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
       <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
     </header>
