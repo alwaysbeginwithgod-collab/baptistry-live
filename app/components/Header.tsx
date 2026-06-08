@@ -80,7 +80,7 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
           {/* Separator */}
           <div className="w-px h-5 bg-gray-300 dark:bg-gray-600"></div>
 
-          {/* Clickable Message Count */}
+          {/* Clickable Message Count - Isolated Dropdown */}
           <div className="relative" ref={historyDropdownRef}>
             <button
               onClick={(e) => {
@@ -96,9 +96,9 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
               </svg>
             </button>
 
-            {/* Message History Dropdown - Absolutely positioned to not affect header layout */}
+            {/* Message History Dropdown - Absolutely positioned, independent of header flow */}
             {isHistoryOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
+              <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
                 <div className="p-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
                   <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Message History</h3>
                   <p className="text-xs text-gray-400 dark:text-gray-500">Click any message to jump to it</p>
