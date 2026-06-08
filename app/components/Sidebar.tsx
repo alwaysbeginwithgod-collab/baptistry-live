@@ -229,10 +229,14 @@ export default function Sidebar({
                 const isPinned = conv.pinned === true;
                 return (
                   <div key={conv.id} className={`group relative rounded-lg transition-colors ${currentConversationId === conv.id ? 'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                    {/* PINNED Ribbon - NO TEXT, just visual ribbon */}
+                    {/* PINNED Icon - small pin icon instead of triangle */}
                     {isPinned && (
                       <div className="absolute -top-1 -right-1 z-10">
-                        <div className="w-0 h-0 border-l-[15px] border-l-transparent border-t-[15px] border-t-yellow-500 border-r-[15px] border-r-transparent rotate-45 shadow-sm"></div>
+                        <div className="bg-yellow-500 rounded-full p-0.5 shadow-sm">
+                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                          </svg>
+                        </div>
                       </div>
                     )}
                     
@@ -257,8 +261,14 @@ export default function Sidebar({
                         </button>
                         {onPinConversation && (
                           <button onClick={() => handlePin(conv.id)} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
-                            <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
-                            <span>Pin</span>
+                            <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              {isPinned ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.5 3H5.5A1.5 1.5 0 004 4.5v15A1.5 1.5 0 005.5 21h9a1.5 1.5 0 001.5-1.5v-12L12 3z" />
+                              ) : (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                              )}
+                            </svg>
+                            <span>{isPinned ? 'Unpin' : 'Pin'}</span>
                           </button>
                         )}
                         <button onClick={() => handleDelete(conv.id)} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors duration-150">
