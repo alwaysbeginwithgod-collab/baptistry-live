@@ -11,7 +11,7 @@ interface SidebarProps {
   onToggle: () => void;
   onNewChat: () => void;
   onReturnToWelcome: () => void;
-  conversations: Array<{ id: string; content: string; timestamp: Date }>;
+  conversations: Array<{ id: string; content: string; timestamp: Date; pinned?: boolean }>;
   onLoadConversation: (id: string) => void;
   onRenameConversation: (id: string, newTitle: string) => void;
   onDeleteConversation: (id: string) => void;
@@ -226,18 +226,13 @@ export default function Sidebar({
             <div className="space-y-1">
               {filteredConversations.map((conv) => {
                 // Check if this conversation is pinned
-                const isPinned = (conversations.find(c => c.id === conv.id) as any)?.pinned;
+                const isPinned = conv.pinned === true;
                 return (
                   <div key={conv.id} className={`group relative rounded-lg transition-colors ${currentConversationId === conv.id ? 'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                    {/* PINNED Ribbon */}
+                    {/* PINNED Ribbon - NO TEXT, just visual ribbon */}
                     {isPinned && (
-                      <div className="absolute -top-2 -right-2 z-10">
-                        <div className="bg-yellow-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-                          </svg>
-                          <span>PINNED</span>
-                        </div>
+                      <div className="absolute -top-1 -right-1 z-10">
+                        <div className="w-0 h-0 border-l-[15px] border-l-transparent border-t-[15px] border-t-yellow-500 border-r-[15px] border-r-transparent rotate-45 shadow-sm"></div>
                       </div>
                     )}
                     
