@@ -36,6 +36,7 @@ interface ChatContextType {
   pinConversation: (id: string) => void;
   setMessages: (messages: Message[]) => void;
   setCurrentConversationId: (id: string | null) => void;
+  editMessage: (messageId: string, newContent: string) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -239,6 +240,26 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     console.log('Send message:', content);
   };
 
+  // EDIT MESSAGE FUNCTION
+  const editMessage = async (messageId: string, newContent: string) => {
+    // Find the message to edit
+    const messageIndex = messages.findIndex(m => m.id === messageId);
+    if (messageIndex === -1) return;
+    
+    // Get the original message
+    const originalMessage = messages[messageIndex];
+    
+    // Only allow editing user messages (not assistant replies)
+    if (originalMessage.role !== 'user') return;
+    
+    // Remove this message and all messages after it
+    const newMessages = messages.slice(0, messageIndex);
+    setMessages(newMessages);
+    
+    // Resend the edited message
+    await sendMessage(newContent);
+  };
+
   return (
     <ChatContext.Provider
       value={{
@@ -256,6 +277,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         pinConversation,
         setMessages,
         setCurrentConversationId,
+        editMessage,
       }}
     >
       {children}

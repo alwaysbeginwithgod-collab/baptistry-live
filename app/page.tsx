@@ -262,6 +262,32 @@ export default function Home() {
     console.log('Feedback recorded:', { messageId, feedback });
   };
 
+  // EDIT MESSAGE FUNCTION
+  const editMessage = (messageId: string, newContent: string) => {
+    // Find the message to edit
+    const messageIndex = messages.findIndex(m => m.id === messageId);
+    if (messageIndex === -1) return;
+    
+    // Get the original message
+    const originalMessage = messages[messageIndex];
+    
+    // Only allow editing user messages
+    if (originalMessage.role !== 'user') return;
+    
+    // Remove this message and all messages after it
+    const newMessages = messages.slice(0, messageIndex);
+    setMessages(newMessages);
+    
+    // Set input to the edited content
+    setInput(newContent);
+    
+    // Auto-resize textarea
+    setTimeout(() => {
+      autoResizeTextarea();
+      textareaRef.current?.focus();
+    }, 50);
+  };
+
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -474,6 +500,7 @@ export default function Home() {
                   key={message.id} 
                   message={message} 
                   onFeedback={handleFeedback}
+                  onEdit={editMessage}
                 />
               ))}
               
