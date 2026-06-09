@@ -59,42 +59,25 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Load conversations from Convex when user signs in
   useEffect(() => {
-    if (userId && loadConversationsFromCloud && loadConversationsFromCloud !== "skip") {
-      const cloudConversations = loadConversationsFromCloud as Conversation[];
-      if (cloudConversations && cloudConversations.length > 0) {
-        setConversations(cloudConversations);
-      } else {
-        // No cloud conversations yet — check LocalStorage for guest data
-        const guestKey = 'baptistry_conversations_guest';
-        const guestData = localStorage.getItem(guestKey);
-        if (guestData) {
-          try {
-            const parsed = JSON.parse(guestData);
-            const withDates = parsed.map((conv: any) => ({
-              ...conv,
-              createdAt: new Date(conv.createdAt),
-              updatedAt: new Date(conv.updatedAt),
-              messages: conv.messages.map((msg: any) => ({
-                ...msg,
-                timestamp: new Date(msg.timestamp),
-              })),
-            }));
-            setConversations(withDates);
-            // Save guest data to cloud
-            saveConversationsToCloud({ userId, conversations: withDates });
-            localStorage.removeItem(guestKey);
-          } catch (e) {
-            console.error('Failed to merge guest conversations', e);
-          }
-        }
-      }
-    } else if (!userId) {
-      // Guest user — load from LocalStorage
+    // Skip if no userId
+    if (!userId) return;
+    
+    // Skip if query is still loading or returned "skip"
+    if (loadConversationsFromCloud === undefined) return;
+    if (loadConversationsFromCloud === "skip") return;
+    
+    // Now we know we have actual conversation data
+    const cloudConversations = loadConversationsFromCloud as Conversation[];
+    
+    if (cloudConversations && cloudConversations.length > 0) {
+      setConversations(cloudConversations);
+    } else {
+      // No cloud conversations yet — check LocalStorage for guest data
       const guestKey = 'baptistry_conversations_guest';
-      const savedConversations = localStorage.getItem(guestKey);
-      if (savedConversations) {
+      const guestData = localStorage.getItem(guestKey);
+      if (guestData) {
         try {
-          const parsed = JSON.parse(savedConversations);
+          const parsed = JSON.parse(guestData);
           const withDates = parsed.map((conv: any) => ({
             ...conv,
             createdAt: new Date(conv.createdAt),
@@ -105,14 +88,42 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             })),
           }));
           setConversations(withDates);
+          // Save guest data to cloud
+          saveConversationsToCloud({ userId, conversations: withDates });
+          localStorage.removeItem(guestKey);
         } catch (e) {
-          console.error('Failed to load guest conversations', e);
+          console.error('Failed to merge guest conversations', e);
         }
-      } else {
-        setConversations([]);
       }
     }
   }, [userId, loadConversationsFromCloud]);
+
+  // Load guest conversations (when not signed in)
+  useEffect(() => {
+    if (userId) return; // Only run for guests
+    
+    const guestKey = 'baptistry_conversations_guest';
+    const savedConversations = localStorage.getItem(guestKey);
+    if (savedConversations) {
+      try {
+        const parsed = JSON.parse(savedConversations);
+        const withDates = parsed.map((conv: any) => ({
+          ...conv,
+          createdAt: new Date(conv.createdAt),
+          updatedAt: new Date(conv.updatedAt),
+          messages: conv.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          })),
+        }));
+        setConversations(withDates);
+      } catch (e) {
+        console.error('Failed to load guest conversations', e);
+      }
+    } else {
+      setConversations([]);
+    }
+  }, [userId]);
 
   // Save conversations to Convex (when signed in) or LocalStorage (guest)
   useEffect(() => {
