@@ -6,6 +6,8 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MessageBubble from './components/MessageBubble';
 import { useUser } from '@clerk/nextjs';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '../convex/_generated/api';
 
 type Message = {
   id: string;
@@ -27,6 +29,13 @@ export default function Home() {
   const { user } = useUser();
   const userId = user?.id;
 
+  // Convex mutations and queries
+  const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
+  const loadConversationsFromCloud = useQuery(
+    api.conversations.loadConversations,
+    userId ? { userId } : "skip"
+  );
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
@@ -42,7 +51,6 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Immediate scroll to bottom without animation (for loading conversations)
   const scrollToBottomImmediate = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' });
   };
@@ -55,7 +63,6 @@ export default function Home() {
     textareaRef.current?.focus();
   }, []);
 
-  // Auto-resize textarea function
   const autoResizeTextarea = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -64,33 +71,48 @@ export default function Home() {
     }
   };
 
-  // Handle input change with auto-resize
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     autoResizeTextarea();
   };
 
-  // Load conversations from localStorage
+  // Load conversations from Convex cloud and fallback to localStorage
   useEffect(() => {
     if (!userId) {
       setConversations([]);
       return;
     }
+    
+    if (loadConversationsFromCloud === undefined) return;
+    
+    if (loadConversationsFromCloud && loadConversationsFromCloud !== "skip") {
+      const cloudConversations = loadConversationsFromCloud as Conversation[];
+      if (cloudConversations.length > 0) {
+        setConversations(cloudConversations);
+        localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(cloudConversations));
+        return;
+      }
+    }
+    
     const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
     if (savedConversations) {
       try {
         const parsed = JSON.parse(savedConversations);
         setConversations(parsed);
+        saveConversationsToCloud({ userId, conversations: parsed });
       } catch (e) {
         console.error('Failed to load conversations', e);
       }
+    } else {
+      setConversations([]);
     }
-  }, [userId]);
+  }, [userId, loadConversationsFromCloud]);
 
-  // Save conversations to localStorage
+  // Save conversations to Convex cloud AND localStorage
   useEffect(() => {
     if (conversations.length > 0 && userId) {
       localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
+      saveConversationsToCloud({ userId, conversations });
     }
   }, [conversations, userId]);
 
@@ -128,7 +150,6 @@ export default function Home() {
     };
     
     setConversations(prev => {
-      // Sort: pinned first, then new chat below pinned
       const withNew = [newConversation, ...prev];
       const sorted = [...withNew].sort((a, b) => {
         if (a.pinned && !b.pinned) return -1;
@@ -151,18 +172,15 @@ export default function Home() {
     
     const conversation = conversations.find(c => c.id === conversationId);
     if (conversation) {
-      // Update the updatedAt timestamp when loading (moves it to top of unpinned section)
       setConversations(prev => prev.map(conv =>
         conv.id === conversationId
           ? { ...conv, updatedAt: new Date() }
           : conv
       ));
       
-      // Set messages first
       setMessages(conversation.messages);
       setCurrentConversationId(conversationId);
       
-      // Use requestAnimationFrame to ensure messages are rendered before scrolling
       requestAnimationFrame(() => {
         setTimeout(() => {
           scrollToBottomImmediate();
@@ -193,19 +211,16 @@ export default function Home() {
 
   const pinConversation = (conversationId: string) => {
     setConversations(prevConversations => {
-      // First, find if the clicked conversation is already pinned
       const clickedConv = prevConversations.find(conv => conv.id === conversationId);
       const isCurrentlyPinned = clickedConv?.pinned || false;
       
       let updated;
       
       if (isCurrentlyPinned) {
-        // If it's already pinned, just unpin it (remove pin)
         updated = prevConversations.map(conv =>
           conv.id === conversationId ? { ...conv, pinned: false, updatedAt: new Date() } : conv
         );
       } else {
-        // If it's not pinned, unpin all first, then pin this one
         const unpinnedAll = prevConversations.map(conv => ({
           ...conv,
           pinned: false,
@@ -217,13 +232,10 @@ export default function Home() {
         );
       }
       
-      // Sort: ALL pinned conversations first, then all unpinned by updatedAt (newest first)
       const sorted = [...updated].sort((a, b) => {
-        // If both are pinned or both are unpinned, sort by updatedAt (newest first)
         if (a.pinned === b.pinned) {
           return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
         }
-        // Pinned comes first
         return a.pinned ? -1 : 1;
       });
       
@@ -232,7 +244,6 @@ export default function Home() {
   };
 
   const scrollToMessage = (messageId: string) => {
-    // Small delay to ensure DOM is fully rendered
     setTimeout(() => {
       const messageElement = document.getElementById(messageId);
       if (messageElement) {
@@ -262,26 +273,17 @@ export default function Home() {
     console.log('Feedback recorded:', { messageId, feedback });
   };
 
-  // EDIT MESSAGE FUNCTION
   const editMessage = (messageId: string, newContent: string) => {
-    // Find the message to edit
     const messageIndex = messages.findIndex(m => m.id === messageId);
     if (messageIndex === -1) return;
     
-    // Get the original message
     const originalMessage = messages[messageIndex];
-    
-    // Only allow editing user messages
     if (originalMessage.role !== 'user') return;
     
-    // Remove this message and all messages after it
     const newMessages = messages.slice(0, messageIndex);
     setMessages(newMessages);
-    
-    // Set input to the edited content
     setInput(newContent);
     
-    // Auto-resize textarea
     setTimeout(() => {
       autoResizeTextarea();
       textareaRef.current?.focus();
