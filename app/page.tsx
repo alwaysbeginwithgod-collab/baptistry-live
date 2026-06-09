@@ -83,9 +83,13 @@ export default function Home() {
       return;
     }
     
+    // Skip if query is still loading
     if (loadConversationsFromCloud === undefined) return;
     
-    if (loadConversationsFromCloud && loadConversationsFromCloud !== "skip") {
+    // Check if we have cloud data (not the "skip" string)
+    const hasCloudData = loadConversationsFromCloud !== "skip" && Array.isArray(loadConversationsFromCloud);
+    
+    if (hasCloudData) {
       const cloudConversations = loadConversationsFromCloud as Conversation[];
       if (cloudConversations.length > 0) {
         setConversations(cloudConversations);
@@ -94,11 +98,13 @@ export default function Home() {
       }
     }
     
+    // No cloud data — try localStorage as fallback
     const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
     if (savedConversations) {
       try {
         const parsed = JSON.parse(savedConversations);
         setConversations(parsed);
+        // Back up localStorage data to cloud
         saveConversationsToCloud({ userId, conversations: parsed });
       } catch (e) {
         console.error('Failed to load conversations', e);
