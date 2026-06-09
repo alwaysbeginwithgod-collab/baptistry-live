@@ -232,14 +232,19 @@ export default function Home() {
   };
 
   const scrollToMessage = (messageId: string) => {
-    const messageElement = document.getElementById(`message-${messageId}`);
-    if (messageElement) {
-      messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      messageElement.classList.add('bg-yellow-50', 'dark:bg-yellow-900/30', 'transition-colors', 'duration-500');
-      setTimeout(() => {
-        messageElement.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/30');
-      }, 2000);
-    }
+    // Small delay to ensure DOM is fully rendered
+    setTimeout(() => {
+      const messageElement = document.getElementById(messageId);
+      if (messageElement) {
+        messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        messageElement.classList.add('bg-yellow-50', 'dark:bg-yellow-900/30', 'transition-colors', 'duration-500');
+        setTimeout(() => {
+          messageElement.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/30');
+        }, 2000);
+      } else {
+        console.log('Message element not found:', messageId);
+      }
+    }, 100);
   };
 
   const handleFeedback = (messageId: string, feedback: 'helpful' | 'unhelpful') => {

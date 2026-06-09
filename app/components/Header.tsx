@@ -104,7 +104,7 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
                   {userMessages.length === 0 ? (
                     <div className="p-4 text-center text-gray-400 dark:text-gray-500 text-sm">No messages yet</div>
                   ) : (
-                    userMessages.slice().reverse().map((msg, index) => (
+                    userMessages.map((msg, index) => (
                       <button
                         key={msg.id}
                         onClick={() => {
@@ -116,7 +116,7 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
                         <div className="flex items-start gap-2">
                           <div className="flex-shrink-0 mt-0.5">
                             <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">#{userMessages.length - index}</span>
+                              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">#{index + 1}</span>
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
