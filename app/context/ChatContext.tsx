@@ -51,25 +51,28 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingText, setStreamingText] = useState('');
 
-  // Convex mutations and queries
+  // Convex mutations and queries - only pass userId when signed in
   const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
-  const loadConversationsFromCloud = useQuery(api.conversations.loadConversations, 
+  const loadConversationsFromCloud = useQuery(
+    api.conversations.loadConversations,
     userId ? { userId } : "skip"
   );
 
   // Load conversations from Convex when user signs in
   useEffect(() => {
-    // Skip if no userId
+    // Only run for signed-in users
     if (!userId) return;
     
-    // Skip if query is still loading or returned "skip"
+    // Wait for data to load
     if (loadConversationsFromCloud === undefined) return;
-    if (loadConversationsFromCloud === "skip") return;
     
-    // Now we know we have actual conversation data
-    const cloudConversations = loadConversationsFromCloud as Conversation[];
+    // If we got a "skip" string or no data, treat as empty
+    let cloudConversations: Conversation[] = [];
+    if (loadConversationsFromCloud !== "skip" && Array.isArray(loadConversationsFromCloud)) {
+      cloudConversations = loadConversationsFromCloud as Conversation[];
+    }
     
-    if (cloudConversations && cloudConversations.length > 0) {
+    if (cloudConversations.length > 0) {
       setConversations(cloudConversations);
     } else {
       // No cloud conversations yet — check LocalStorage for guest data
