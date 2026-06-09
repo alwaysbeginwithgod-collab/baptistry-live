@@ -36,14 +36,23 @@ export const saveConversations = mutation({
   },
 });
 
-// Load conversations for a user
+// Load conversations for a user - returns null if no userId provided
 export const loadConversations = query({
-  args: { userId: v.string() },
+  args: { userId: v.optional(v.string()) },
   handler: async (ctx, args) => {
+    // If no userId provided, return null
+    if (!args.userId) {
+      return null;
+    }
+    
     const conversations = await ctx.db
       .query("conversations")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .collect();
+    
+    if (conversations.length === 0) {
+      return null;
+    }
     
     return conversations.map((conv) => ({
       id: conv.conversationId,
