@@ -22,6 +22,7 @@ export default function MessageBubble({ message, onFeedback, onEdit }: MessageBu
   const [showMenu, setShowMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(message.content);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const cleanContent = (content: string) => {
     return content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
@@ -52,6 +53,17 @@ export default function MessageBubble({ message, onFeedback, onEdit }: MessageBu
   const handleCancel = () => {
     setIsEditing(false);
     setEditedText(message.content);
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(cleanedContent);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+    setShowMenu(false);
   };
 
   return (
@@ -178,39 +190,45 @@ export default function MessageBubble({ message, onFeedback, onEdit }: MessageBu
             </>
           )}
 
-          {/* Timestamp and menu for user messages */}
+          {/* Timestamp and action buttons for user messages */}
           <div className={`text-xs mt-1 flex justify-between items-center ${isUser ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
             <span>
               {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
             
-            {/* Three dots menu for user messages (only when not editing) */}
+            {/* Action buttons for user messages (only when not editing) */}
             {isUser && onEdit && !isEditing && (
-              <div className="relative">
-                <button
-                  onClick={() => setShowMenu(!showMenu)}
-                  className="text-blue-200 hover:text-white dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded"
-                  title="Edit message"
-                >
-                  ⋮
-                </button>
+              <div className="flex gap-1 items-center">
+                {/* Copy button */}
+                <div className="relative">
+                  <button
+                    onClick={handleCopy}
+                    className="text-blue-200 hover:text-white dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded transition-colors"
+                    title="Copy message"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                  </button>
+                  {copySuccess && (
+                    <span className="absolute bottom-full right-0 mb-1 px-2 py-1 text-xs bg-gray-800 text-white rounded whitespace-nowrap">
+                      Copied!
+                    </span>
+                  )}
+                </div>
                 
-                {showMenu && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setShowMenu(false)}
-                    />
-                    <div className="absolute right-0 mt-1 z-20 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-lg">
-                      <button
-                        onClick={handleEdit}
-                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-200"
-                      >
-                        ✏️ Edit message
-                      </button>
-                    </div>
-                  </>
-                )}
+                {/* Edit button */}
+                <div className="relative">
+                  <button
+                    onClick={handleEdit}
+                    className="text-blue-200 hover:text-white dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded transition-colors"
+                    title="Edit message"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             )}
           </div>
