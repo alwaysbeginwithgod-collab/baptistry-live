@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useUser } from '@clerk/nextjs';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 
 type Message = {
   id: string;
@@ -49,110 +51,80 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingText, setStreamingText] = useState('');
 
-  // Get storage key based on user (guest or signed-in)
-  const getStorageKey = () => {
-    if (userId) {
-      return `baptistry_conversations_${userId}`;
-    }
-    return 'baptistry_conversations_guest';
-  };
+  // Convex mutations and queries
+  const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
+  const loadConversationsFromCloud = useQuery(api.conversations.loadConversations, 
+    userId ? { userId } : "skip"
+  );
 
-  // Merge guest conversations into user account when signing in
-  const mergeGuestConversations = () => {
-    if (!userId) return;
-
-    const guestKey = 'baptistry_conversations_guest';
-    const guestData = localStorage.getItem(guestKey);
-    
-    if (!guestData) return;
-
-    try {
-      const guestConversations = JSON.parse(guestData);
-      if (guestConversations.length === 0) return;
-
-      // Convert date strings back to Date objects
-      const parsedGuest = guestConversations.map((conv: any) => ({
-        ...conv,
-        createdAt: new Date(conv.createdAt),
-        updatedAt: new Date(conv.updatedAt),
-        messages: conv.messages.map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp),
-        })),
-      }));
-
-      // Check if user already has conversations
-      const userKey = getStorageKey();
-      const userData = localStorage.getItem(userKey);
-      let existingConversations: Conversation[] = [];
-      
-      if (userData) {
-        existingConversations = JSON.parse(userData).map((conv: any) => ({
-          ...conv,
-          createdAt: new Date(conv.createdAt),
-          updatedAt: new Date(conv.updatedAt),
-          messages: conv.messages.map((msg: any) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp),
-          })),
-        }));
-      }
-
-      // Merge: combine guest + existing, remove duplicates by ID
-      const allConversations = [...parsedGuest, ...existingConversations];
-      const uniqueConversations = allConversations.filter(
-        (conv, index, self) => index === self.findIndex((c) => c.id === conv.id)
-      );
-
-      // Save merged conversations
-      setConversations(uniqueConversations);
-      localStorage.setItem(userKey, JSON.stringify(uniqueConversations));
-      
-      // Remove guest data after merge
-      localStorage.removeItem(guestKey);
-      
-      console.log(`Merged ${parsedGuest.length} guest conversations into user account`);
-    } catch (e) {
-      console.error('Failed to merge guest conversations', e);
-    }
-  };
-
-  // Load conversations from localStorage when user changes
+  // Load conversations from Convex when user signs in
   useEffect(() => {
-    const storageKey = getStorageKey();
-    const savedConversations = localStorage.getItem(storageKey);
-    if (savedConversations) {
-      try {
-        const parsed = JSON.parse(savedConversations);
-        // Convert date strings back to Date objects
-        const withDates = parsed.map((conv: any) => ({
-          ...conv,
-          createdAt: new Date(conv.createdAt),
-          updatedAt: new Date(conv.updatedAt),
-          messages: conv.messages.map((msg: any) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp),
-          })),
-        }));
-        setConversations(withDates);
-      } catch (e) {
-        console.error('Failed to load conversations', e);
+    if (userId && loadConversationsFromCloud && loadConversationsFromCloud !== "skip") {
+      const cloudConversations = loadConversationsFromCloud as Conversation[];
+      if (cloudConversations && cloudConversations.length > 0) {
+        setConversations(cloudConversations);
+      } else {
+        // No cloud conversations yet — check LocalStorage for guest data
+        const guestKey = 'baptistry_conversations_guest';
+        const guestData = localStorage.getItem(guestKey);
+        if (guestData) {
+          try {
+            const parsed = JSON.parse(guestData);
+            const withDates = parsed.map((conv: any) => ({
+              ...conv,
+              createdAt: new Date(conv.createdAt),
+              updatedAt: new Date(conv.updatedAt),
+              messages: conv.messages.map((msg: any) => ({
+                ...msg,
+                timestamp: new Date(msg.timestamp),
+              })),
+            }));
+            setConversations(withDates);
+            // Save guest data to cloud
+            saveConversationsToCloud({ userId, conversations: withDates });
+            localStorage.removeItem(guestKey);
+          } catch (e) {
+            console.error('Failed to merge guest conversations', e);
+          }
+        }
       }
+    } else if (!userId) {
+      // Guest user — load from LocalStorage
+      const guestKey = 'baptistry_conversations_guest';
+      const savedConversations = localStorage.getItem(guestKey);
+      if (savedConversations) {
+        try {
+          const parsed = JSON.parse(savedConversations);
+          const withDates = parsed.map((conv: any) => ({
+            ...conv,
+            createdAt: new Date(conv.createdAt),
+            updatedAt: new Date(conv.updatedAt),
+            messages: conv.messages.map((msg: any) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp),
+            })),
+          }));
+          setConversations(withDates);
+        } catch (e) {
+          console.error('Failed to load guest conversations', e);
+        }
+      } else {
+        setConversations([]);
+      }
+    }
+  }, [userId, loadConversationsFromCloud]);
+
+  // Save conversations to Convex (when signed in) or LocalStorage (guest)
+  useEffect(() => {
+    if (conversations.length === 0) return;
+    
+    if (userId) {
+      // Save to cloud
+      saveConversationsToCloud({ userId, conversations });
     } else {
-      setConversations([]);
-    }
-    
-    // If user is signed in, merge any guest conversations into their account
-    if (userId) {
-      mergeGuestConversations();
-    }
-  }, [userId]);
-
-  // Save conversations to localStorage whenever they change
-  useEffect(() => {
-    if (conversations.length > 0) {
-      const storageKey = getStorageKey();
-      localStorage.setItem(storageKey, JSON.stringify(conversations));
+      // Save to LocalStorage (guest)
+      const guestKey = 'baptistry_conversations_guest';
+      localStorage.setItem(guestKey, JSON.stringify(conversations));
     }
   }, [conversations, userId]);
 
@@ -244,7 +216,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   };
 
   const sendMessage = async (content: string) => {
-    // This will be implemented with the API call
+    // This will be implemented later with AI
     console.log('Send message:', content);
   };
 
