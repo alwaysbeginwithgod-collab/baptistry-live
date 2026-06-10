@@ -276,16 +276,19 @@ export default function MainContent() {
     }, 50);
   };
 
-  // STOP FUNCTION - cancels the ongoing response
+  // STOP FUNCTION - only clears the streaming state, keeps conversation intact
   const stopResponse = () => {
-    if (abortController) {
-      abortController.abort();
-      setAbortController(null);
-    }
+    // Clear the typing interval
     if (typingInterval) {
       clearInterval(typingInterval);
       setTypingInterval(null);
     }
+    // Abort the fetch request
+    if (abortController) {
+      abortController.abort();
+      setAbortController(null);
+    }
+    // Reset streaming states only
     setIsLoading(false);
     setIsStreaming(false);
     setStreamingText('');
@@ -354,7 +357,7 @@ export default function MainContent() {
 
       let currentIndex = 0;
       const chunkSize = 10;
-      const typingSpeed = 30; // Faster typing for better response
+      const typingSpeed = 30;
       
       const interval = setInterval(() => {
         if (currentIndex <= fullResponse.length) {
@@ -382,7 +385,10 @@ export default function MainContent() {
     } catch (error: any) {
       if (error.name === 'AbortError') {
         console.log('Response stopped by user');
-        // Don't add error message when user intentionally stops
+        // Don't add error message - just reset states
+        setIsLoading(false);
+        setIsStreaming(false);
+        setStreamingText('');
       } else {
         console.error('Error:', error);
         const errorMessage: Message = {
@@ -392,10 +398,10 @@ export default function MainContent() {
           timestamp: new Date(),
         };
         setMessages(prev => [...prev, errorMessage]);
+        setIsLoading(false);
+        setIsStreaming(false);
+        setStreamingText('');
       }
-      setIsLoading(false);
-      setIsStreaming(false);
-      setStreamingText('');
       setTypingInterval(null);
       setAbortController(null);
     }
@@ -458,7 +464,7 @@ export default function MainContent() {
         />
 
         <div className="flex-1 overflow-y-auto">
-          {messages.length === 0 && !isStreaming ? (
+          {messages.length === 0 && !isStreaming && !isLoading ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center max-w-md px-6">
                 <div className="flex justify-center mb-6">
