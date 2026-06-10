@@ -339,7 +339,7 @@ export default function MainContent() {
           return;
         }
         setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 8));
+        await new Promise(resolve => setTimeout(resolve, 5));
       }
       
       // Add the complete message to the chat
