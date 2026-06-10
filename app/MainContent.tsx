@@ -275,22 +275,21 @@ export default function MainContent() {
     }, 50);
   };
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-
-    // If there's an ongoing response, STOP it
+  // STOP FUNCTION
+  const stopResponse = () => {
     if (stopController) {
-      // Abort the fetch request
       stopController.abort();
-      // Clear the typing interval
       if (stopController.interval) clearInterval(stopController.interval);
-      // Reset states
       setStopController(null);
       setIsLoading(false);
       setIsStreaming(false);
       setStreamingText('');
-      return;
     }
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    if (isLoading || isStreaming) return;
 
     if (!currentConversationId) {
       const newConversation: Conversation = {
@@ -328,7 +327,6 @@ export default function MainContent() {
     
     setTimeout(autoResizeTextarea, 0);
 
-    // Create abort controller for stopping the request
     const abortController = new AbortController();
 
     try {
@@ -374,7 +372,6 @@ export default function MainContent() {
         }
       }, typingSpeed);
 
-      // Store controller and interval for stop button
       setStopController({
         abort: () => abortController.abort(),
         interval: interval,
@@ -383,7 +380,6 @@ export default function MainContent() {
     } catch (error: any) {
       if (error.name === 'AbortError') {
         console.log('Request cancelled by user');
-        // Don't add an error message, just let the user edit and resend
       } else {
         console.error('Error:', error);
         const errorMessage: Message = {
@@ -584,19 +580,24 @@ export default function MainContent() {
                 className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
                 rows={1}
                 style={{ minHeight: '48px', maxHeight: '120px' }}
-                disabled={isLoading}
+                disabled={isLoading || isStreaming}
               />
-              <button
-                onClick={sendMessage}
-                disabled={false}
-                className={`px-6 py-3 rounded-xl transition-colors font-medium ${
-                  (isLoading || isStreaming)
-                    ? 'bg-red-600 hover:bg-red-700 text-white'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed'
-                }`}
-              >
-                {(isLoading || isStreaming) ? '⏹️ Stop' : 'Send'}
-              </button>
+              {(isLoading || isStreaming) ? (
+                <button
+                  onClick={stopResponse}
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2"
+                >
+                  ⏹️ Stop
+                </button>
+              ) : (
+                <button
+                  onClick={sendMessage}
+                  disabled={!input.trim()}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  Send
+                </button>
+              )}
             </div>
             
             <p className="text-xs text-gray-600 dark:text-gray-400 text-center italic mt-3">
