@@ -274,6 +274,28 @@ export default function MainContent() {
     }, 50);
   };
 
+  const stopResponse = () => {
+    stopRequested.current = true;
+    setIsGenerating(false);
+    
+    let friendlyMessage = "";
+    
+    if (streamingText) {
+      friendlyMessage = "⏹️ I was in the middle of answering, but you stopped me. No worries! ✏️ **Edit your message** and try again, or ask me something new. 🙏";
+    } else {
+      friendlyMessage = "⏹️ You stopped me while I was thinking. That's okay! Feel free to **edit your message**, **resend**, or **start a fresh chat**. I'm here to help! 📖🙏";
+    }
+    
+    const stopMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: friendlyMessage,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, stopMessage]);
+    setStreamingText('');
+  };
+
   const sendMessage = async () => {
     if (!input.trim()) return;
     if (isGenerating) return;
@@ -330,10 +352,9 @@ export default function MainContent() {
       fullResponse = fullResponse.replace(/^I need to.*?\.\s*/i, '');
       fullResponse = fullResponse.trim();
 
-      // Type the response character by character (same as test page)
-      for (let i = 0; i <= fullResponse.length; i += 2) { // 2 characters at a time
+      // Type the response character by character
+      for (let i = 0; i <= fullResponse.length; i++) {
         if (stopRequested.current) {
-          // Stop was requested - don't add the message
           setIsGenerating(false);
           setStreamingText('');
           return;
@@ -342,7 +363,6 @@ export default function MainContent() {
         await new Promise(resolve => setTimeout(resolve, 5));
       }
       
-      // Add the complete message to the chat
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -366,42 +386,6 @@ export default function MainContent() {
       setStreamingText('');
     }
   };
-
-const stopResponse = () => {
-  stopRequested.current = true;
-  setIsGenerating(false);
-  
-  let friendlyMessage = "";
-  
-  if (streamingText) {
-    // Stopped while typing
-    friendlyMessage = "⏹️ I was in the middle of answering, but you stopped me. No worries! ✏️ **Edit your message** and try again, or ask me something new. 🙏";
-  } else {
-    // Stopped while thinking
-    friendlyMessage = "⏹️ You stopped me while I was thinking. That's okay! Feel free to **edit your message**, **resend**, or **start a fresh chat**. I'm here to help! 📖🙏";
-  }
-  
-  setStreamingText('');
-  
-  const stopMessage: Message = {
-    id: (Date.now() + 1).toString(),
-    role: 'assistant',
-    content: friendlyMessage,
-    timestamp: new Date(),
-  };
-  setMessages(prev => [...prev, stopMessage]);
-};
-  
-  setStreamingText('');
-  
-  const stopMessage: Message = {
-    id: (Date.now() + 1).toString(),
-    role: 'assistant',
-    content: friendlyMessage,
-    timestamp: new Date(),
-  };
-  setMessages(prev => [...prev, stopMessage]);
-};
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
