@@ -31,13 +31,12 @@ export default function MainContent() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [input, setInput] = useState('');
-  const [isResponding, setIsResponding] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [streamingText, setStreamingText] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const activeInterval = useRef<NodeJS.Timeout | null>(null);
-  const activeController = useRef<AbortController | null>(null);
+  const stopRequestedRef = useRef(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -103,10 +102,10 @@ export default function MainContent() {
 
   // Save current conversation when messages change
   useEffect(() => {
-    if (messages.length > 0 && currentConversationId && !isResponding) {
+    if (messages.length > 0 && currentConversationId && !isGenerating) {
       saveCurrentConversation();
     }
-  }, [messages, isResponding]);
+  }, [messages, isGenerating]);
 
   const saveCurrentConversation = () => {
     if (!currentConversationId) return;
@@ -259,18 +258,6 @@ export default function MainContent() {
   };
 
   const editMessage = (messageId: string, newContent: string) => {
-    // Stop any ongoing response first
-    if (activeInterval.current) {
-      clearInterval(activeInterval.current);
-      activeInterval.current = null;
-    }
-    if (activeController.current) {
-      activeController.current.abort();
-      activeController.current = null;
-    }
-    setIsResponding(false);
-    setStreamingText('');
-    
     const messageIndex = messages.findIndex(m => m.id === messageId);
     if (messageIndex === -1) return;
     
@@ -287,29 +274,9 @@ export default function MainContent() {
     }, 50);
   };
 
-  // STOP FUNCTION
-  const stopResponse = () => {
-    if (activeInterval.current) {
-      clearInterval(activeInterval.current);
-      activeInterval.current = null;
-    }
-    if (activeController.current) {
-      activeController.current.abort();
-      activeController.current = null;
-    }
-    setIsResponding(false);
-    setStreamingText('');
-  };
-
   const sendMessage = async () => {
     if (!input.trim()) return;
-    if (isResponding) return;
-
-    // Stop any existing response
-    if (activeInterval.current) {
-      clearInterval(activeInterval.current);
-      activeInterval.current = null;
-    }
+    if (isGenerating) return;
 
     if (!currentConversationId) {
       const newConversation: Conversation = {
@@ -342,20 +309,17 @@ export default function MainContent() {
     setMessages(prev => [...prev, userMessage]);
     const sentInput = input;
     setInput('');
-    setIsResponding(true);
+    setIsGenerating(true);
     setStreamingText('');
+    stopRequestedRef.current = false;
     
     setTimeout(autoResizeTextarea, 0);
-
-    const controller = new AbortController();
-    activeController.current = controller;
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: sentInput, history: messages }),
-        signal: controller.signal,
       });
 
       const data = await response.json();
@@ -366,50 +330,47 @@ export default function MainContent() {
       fullResponse = fullResponse.replace(/^I need to.*?\.\s*/i, '');
       fullResponse = fullResponse.trim();
 
-      let currentIndex = 0;
-      const chunkSize = 10;
-      
-      const interval = setInterval(() => {
-        if (currentIndex <= fullResponse.length) {
-          setStreamingText(fullResponse.substring(0, currentIndex));
-          currentIndex += chunkSize;
-        } else {
-          clearInterval(interval);
-          activeInterval.current = null;
-          
-          const assistantMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: fullResponse,
-            timestamp: new Date(),
-          };
-          setMessages(prev => [...prev, assistantMessage]);
+      // Type the response character by character
+      for (let i = 0; i <= fullResponse.length; i++) {
+        if (stopRequestedRef.current) {
+          // Stop was requested - don't add the message
+          setIsGenerating(false);
           setStreamingText('');
-          setIsResponding(false);
-          activeController.current = null;
+          return;
         }
-      }, 20);
-      
-      activeInterval.current = interval;
-
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        console.log('Response stopped by user');
-      } else {
-        console.error('Error:', error);
-        const errorMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: 'I apologize, but I am unable to respond at this moment. Please try again later.',
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, errorMessage]);
+        setStreamingText(fullResponse.substring(0, i));
+        await new Promise(resolve => setTimeout(resolve, 15));
       }
-      setIsResponding(false);
+      
+      // Add the complete message to the chat
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: fullResponse,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, assistantMessage]);
       setStreamingText('');
-      activeInterval.current = null;
-      activeController.current = null;
+      setIsGenerating(false);
+
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I apologize, but I am unable to respond at this moment. Please try again later.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setIsGenerating(false);
+      setStreamingText('');
     }
+  };
+
+  const stopResponse = () => {
+    stopRequestedRef.current = true;
+    setIsGenerating(false);
+    setStreamingText('');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -469,7 +430,7 @@ export default function MainContent() {
         />
 
         <div className="flex-1 overflow-y-auto">
-          {messages.length === 0 && !isResponding ? (
+          {messages.length === 0 && !isGenerating ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center max-w-md px-6">
                 <div className="flex justify-center mb-6">
@@ -534,7 +495,7 @@ export default function MainContent() {
                 />
               ))}
               
-              {isResponding && !streamingText && (
+              {isGenerating && !streamingText && (
                 <div className="flex justify-start gap-2">
                   <div className="flex-shrink-0 mt-1">
                     <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center">
@@ -595,14 +556,14 @@ export default function MainContent() {
                 className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
                 rows={1}
                 style={{ minHeight: '48px', maxHeight: '120px' }}
-                disabled={isResponding}
+                disabled={isGenerating}
               />
-              {isResponding ? (
+              {isGenerating ? (
                 <button
                   onClick={stopResponse}
                   className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2"
                 >
-                  🔵 Stop
+                  ⏹️ Stop
                 </button>
               ) : (
                 <button
