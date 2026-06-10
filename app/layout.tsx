@@ -25,7 +25,7 @@ export default function RootLayout({
               <head>
                 <title>BAPTISTRY - KJV Bible Teaching</title>
                 <meta name="description" content="Biblical teaching from the King James Version" />
-                <link rel="icon" href="/baptistrylogo.png" />
+                <link rel="icon" href="/baptistry-logo.png" />
               </head>
               <body>
                 {/* PayPal SDK - Loads once */}

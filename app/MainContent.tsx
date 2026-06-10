@@ -6,8 +6,6 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MessageBubble from './components/MessageBubble';
 import { useUser } from '@clerk/nextjs';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '../convex/_generated/api';
 
 type Message = {
   id: string;
@@ -28,12 +26,6 @@ type Conversation = {
 export default function MainContent() {
   const { user } = useUser();
   const userId = user?.id;
-
-  const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
-  const loadConversationsFromCloud = useQuery(
-    api.conversations.loadConversations,
-    userId ? { userId } : null
-  );
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -75,43 +67,31 @@ export default function MainContent() {
     autoResizeTextarea();
   };
 
+  // Load conversations from localStorage
   useEffect(() => {
     if (!userId) {
       setConversations([]);
       return;
     }
-    
-    if (loadConversationsFromCloud === undefined) return;
-    if (loadConversationsFromCloud === null) return;
-    
-    const cloudConversations = loadConversationsFromCloud as Conversation[];
-    if (cloudConversations.length > 0) {
-      setConversations(cloudConversations);
-      localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(cloudConversations));
-      return;
-    }
-    
     const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
     if (savedConversations) {
       try {
         const parsed = JSON.parse(savedConversations);
         setConversations(parsed);
-        saveConversationsToCloud({ userId, conversations: parsed });
       } catch (e) {
         console.error('Failed to load conversations', e);
       }
-    } else {
-      setConversations([]);
     }
-  }, [userId, loadConversationsFromCloud]);
+  }, [userId]);
 
+  // Save conversations to localStorage
   useEffect(() => {
     if (conversations.length > 0 && userId) {
       localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
-      saveConversationsToCloud({ userId, conversations });
     }
   }, [conversations, userId]);
 
+  // Save current conversation when messages change
   useEffect(() => {
     if (messages.length > 0 && currentConversationId) {
       saveCurrentConversation();
