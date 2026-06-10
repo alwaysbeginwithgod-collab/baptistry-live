@@ -31,14 +31,13 @@ export default function MainContent() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isStreaming, setIsStreaming] = useState(false);
+  const [isResponding, setIsResponding] = useState(false);
   const [streamingText, setStreamingText] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [typingInterval, setTypingInterval] = useState<NodeJS.Timeout | null>(null);
-  const [abortController, setAbortController] = useState<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const activeInterval = useRef<NodeJS.Timeout | null>(null);
+  const activeController = useRef<AbortController | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -104,10 +103,10 @@ export default function MainContent() {
 
   // Save current conversation when messages change
   useEffect(() => {
-    if (messages.length > 0 && currentConversationId) {
+    if (messages.length > 0 && currentConversationId && !isResponding) {
       saveCurrentConversation();
     }
-  }, [messages]);
+  }, [messages, isResponding]);
 
   const saveCurrentConversation = () => {
     if (!currentConversationId) return;
@@ -260,6 +259,18 @@ export default function MainContent() {
   };
 
   const editMessage = (messageId: string, newContent: string) => {
+    // Stop any ongoing response first
+    if (activeInterval.current) {
+      clearInterval(activeInterval.current);
+      activeInterval.current = null;
+    }
+    if (activeController.current) {
+      activeController.current.abort();
+      activeController.current = null;
+    }
+    setIsResponding(false);
+    setStreamingText('');
+    
     const messageIndex = messages.findIndex(m => m.id === messageId);
     if (messageIndex === -1) return;
     
@@ -276,27 +287,29 @@ export default function MainContent() {
     }, 50);
   };
 
-  // STOP FUNCTION - only clears the streaming state, keeps conversation intact
+  // STOP FUNCTION
   const stopResponse = () => {
-    // Clear the typing interval
-    if (typingInterval) {
-      clearInterval(typingInterval);
-      setTypingInterval(null);
+    if (activeInterval.current) {
+      clearInterval(activeInterval.current);
+      activeInterval.current = null;
     }
-    // Abort the fetch request
-    if (abortController) {
-      abortController.abort();
-      setAbortController(null);
+    if (activeController.current) {
+      activeController.current.abort();
+      activeController.current = null;
     }
-    // Reset streaming states only
-    setIsLoading(false);
-    setIsStreaming(false);
+    setIsResponding(false);
     setStreamingText('');
   };
 
   const sendMessage = async () => {
     if (!input.trim()) return;
-    if (isLoading || isStreaming) return;
+    if (isResponding) return;
+
+    // Stop any existing response
+    if (activeInterval.current) {
+      clearInterval(activeInterval.current);
+      activeInterval.current = null;
+    }
 
     if (!currentConversationId) {
       const newConversation: Conversation = {
@@ -327,20 +340,21 @@ export default function MainContent() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const sentInput = input;
     setInput('');
-    setIsLoading(true);
+    setIsResponding(true);
     setStreamingText('');
     
     setTimeout(autoResizeTextarea, 0);
 
     const controller = new AbortController();
-    setAbortController(controller);
+    activeController.current = controller;
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input, history: messages }),
+        body: JSON.stringify({ message: sentInput, history: messages }),
         signal: controller.signal,
       });
 
@@ -352,12 +366,8 @@ export default function MainContent() {
       fullResponse = fullResponse.replace(/^I need to.*?\.\s*/i, '');
       fullResponse = fullResponse.trim();
 
-      setIsLoading(false);
-      setIsStreaming(true);
-
       let currentIndex = 0;
       const chunkSize = 10;
-      const typingSpeed = 30;
       
       const interval = setInterval(() => {
         if (currentIndex <= fullResponse.length) {
@@ -365,7 +375,7 @@ export default function MainContent() {
           currentIndex += chunkSize;
         } else {
           clearInterval(interval);
-          setIsStreaming(false);
+          activeInterval.current = null;
           
           const assistantMessage: Message = {
             id: (Date.now() + 1).toString(),
@@ -375,20 +385,16 @@ export default function MainContent() {
           };
           setMessages(prev => [...prev, assistantMessage]);
           setStreamingText('');
-          setTypingInterval(null);
-          setAbortController(null);
+          setIsResponding(false);
+          activeController.current = null;
         }
-      }, typingSpeed);
+      }, 20);
       
-      setTypingInterval(interval);
+      activeInterval.current = interval;
 
     } catch (error: any) {
       if (error.name === 'AbortError') {
         console.log('Response stopped by user');
-        // Don't add error message - just reset states
-        setIsLoading(false);
-        setIsStreaming(false);
-        setStreamingText('');
       } else {
         console.error('Error:', error);
         const errorMessage: Message = {
@@ -398,12 +404,11 @@ export default function MainContent() {
           timestamp: new Date(),
         };
         setMessages(prev => [...prev, errorMessage]);
-        setIsLoading(false);
-        setIsStreaming(false);
-        setStreamingText('');
       }
-      setTypingInterval(null);
-      setAbortController(null);
+      setIsResponding(false);
+      setStreamingText('');
+      activeInterval.current = null;
+      activeController.current = null;
     }
   };
 
@@ -464,7 +469,7 @@ export default function MainContent() {
         />
 
         <div className="flex-1 overflow-y-auto">
-          {messages.length === 0 && !isStreaming && !isLoading ? (
+          {messages.length === 0 && !isResponding ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center max-w-md px-6">
                 <div className="flex justify-center mb-6">
@@ -529,7 +534,7 @@ export default function MainContent() {
                 />
               ))}
               
-              {isLoading && !isStreaming && (
+              {isResponding && !streamingText && (
                 <div className="flex justify-start gap-2">
                   <div className="flex-shrink-0 mt-1">
                     <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center">
@@ -553,7 +558,7 @@ export default function MainContent() {
                 </div>
               )}
               
-              {isStreaming && streamingText && (
+              {streamingText && (
                 <div className="flex justify-start gap-2">
                   <div className="flex-shrink-0 mt-1">
                     <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center">
@@ -590,14 +595,14 @@ export default function MainContent() {
                 className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
                 rows={1}
                 style={{ minHeight: '48px', maxHeight: '120px' }}
-                disabled={isLoading || isStreaming}
+                disabled={isResponding}
               />
-              {(isLoading || isStreaming) ? (
+              {isResponding ? (
                 <button
                   onClick={stopResponse}
                   className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2"
                 >
-                  ⏹️ Stop
+                  🔵 Stop
                 </button>
               ) : (
                 <button
