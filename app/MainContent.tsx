@@ -352,8 +352,9 @@ export default function MainContent() {
       fullResponse = fullResponse.replace(/^I need to.*?\.\s*/i, '');
       fullResponse = fullResponse.trim();
 
-      // Type the response character by character
-      for (let i = 0; i <= fullResponse.length; i++) {
+      // Type the response with chunking for speed
+      const chunkSize = 4; // Type 4 characters at a time
+      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
           setStreamingText('');
