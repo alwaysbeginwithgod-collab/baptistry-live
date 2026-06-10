@@ -35,7 +35,8 @@ export default function MainContent() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingText, setStreamingText] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [stopController, setStopController] = useState<{ abort: () => void; interval: NodeJS.Timeout | null } | null>(null);
+  const [typingInterval, setTypingInterval] = useState<NodeJS.Timeout | null>(null);
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -275,16 +276,19 @@ export default function MainContent() {
     }, 50);
   };
 
-  // STOP FUNCTION
+  // STOP FUNCTION - cancels the ongoing response
   const stopResponse = () => {
-    if (stopController) {
-      stopController.abort();
-      if (stopController.interval) clearInterval(stopController.interval);
-      setStopController(null);
-      setIsLoading(false);
-      setIsStreaming(false);
-      setStreamingText('');
+    if (abortController) {
+      abortController.abort();
+      setAbortController(null);
     }
+    if (typingInterval) {
+      clearInterval(typingInterval);
+      setTypingInterval(null);
+    }
+    setIsLoading(false);
+    setIsStreaming(false);
+    setStreamingText('');
   };
 
   const sendMessage = async () => {
@@ -322,19 +326,19 @@ export default function MainContent() {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
-    setIsStreaming(false);
     setStreamingText('');
     
     setTimeout(autoResizeTextarea, 0);
 
-    const abortController = new AbortController();
+    const controller = new AbortController();
+    setAbortController(controller);
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input, history: messages }),
-        signal: abortController.signal,
+        signal: controller.signal,
       });
 
       const data = await response.json();
@@ -345,12 +349,12 @@ export default function MainContent() {
       fullResponse = fullResponse.replace(/^I need to.*?\.\s*/i, '');
       fullResponse = fullResponse.trim();
 
-      setIsStreaming(true);
       setIsLoading(false);
+      setIsStreaming(true);
 
       let currentIndex = 0;
       const chunkSize = 10;
-      const typingSpeed = 5;
+      const typingSpeed = 30; // Faster typing for better response
       
       const interval = setInterval(() => {
         if (currentIndex <= fullResponse.length) {
@@ -368,18 +372,17 @@ export default function MainContent() {
           };
           setMessages(prev => [...prev, assistantMessage]);
           setStreamingText('');
-          setStopController(null);
+          setTypingInterval(null);
+          setAbortController(null);
         }
       }, typingSpeed);
-
-      setStopController({
-        abort: () => abortController.abort(),
-        interval: interval,
-      });
+      
+      setTypingInterval(interval);
 
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        console.log('Request cancelled by user');
+        console.log('Response stopped by user');
+        // Don't add error message when user intentionally stops
       } else {
         console.error('Error:', error);
         const errorMessage: Message = {
@@ -393,7 +396,8 @@ export default function MainContent() {
       setIsLoading(false);
       setIsStreaming(false);
       setStreamingText('');
-      setStopController(null);
+      setTypingInterval(null);
+      setAbortController(null);
     }
   };
 
