@@ -367,11 +367,41 @@ export default function MainContent() {
     }
   };
 
-  const stopResponse = () => {
-    stopRequested.current = true;
-    setIsGenerating(false);
-    setStreamingText('');
+const stopResponse = () => {
+  stopRequested.current = true;
+  setIsGenerating(false);
+  
+  let friendlyMessage = "";
+  
+  if (streamingText) {
+    // Stopped while typing
+    friendlyMessage = "⏹️ I was in the middle of answering, but you stopped me. No worries! ✏️ **Edit your message** and try again, or ask me something new. 🙏";
+  } else {
+    // Stopped while thinking
+    friendlyMessage = "⏹️ You stopped me while I was thinking. That's okay! Feel free to **edit your message**, **resend**, or **start a fresh chat**. I'm here to help! 📖🙏";
+  }
+  
+  setStreamingText('');
+  
+  const stopMessage: Message = {
+    id: (Date.now() + 1).toString(),
+    role: 'assistant',
+    content: friendlyMessage,
+    timestamp: new Date(),
   };
+  setMessages(prev => [...prev, stopMessage]);
+};
+  
+  setStreamingText('');
+  
+  const stopMessage: Message = {
+    id: (Date.now() + 1).toString(),
+    role: 'assistant',
+    content: friendlyMessage,
+    timestamp: new Date(),
+  };
+  setMessages(prev => [...prev, stopMessage]);
+};
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
