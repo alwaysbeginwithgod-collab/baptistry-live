@@ -35,6 +35,7 @@ export default function MainContent() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingText, setStreamingText] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [stopController, setStopController] = useState<{ abort: () => void; interval: NodeJS.Timeout | null } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -275,7 +276,21 @@ export default function MainContent() {
   };
 
   const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim()) return;
+
+    // If there's an ongoing response, STOP it
+    if (stopController) {
+      // Abort the fetch request
+      stopController.abort();
+      // Clear the typing interval
+      if (stopController.interval) clearInterval(stopController.interval);
+      // Reset states
+      setStopController(null);
+      setIsLoading(false);
+      setIsStreaming(false);
+      setStreamingText('');
+      return;
+    }
 
     if (!currentConversationId) {
       const newConversation: Conversation = {
@@ -313,11 +328,15 @@ export default function MainContent() {
     
     setTimeout(autoResizeTextarea, 0);
 
+    // Create abort controller for stopping the request
+    const abortController = new AbortController();
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input, history: messages }),
+        signal: abortController.signal,
       });
 
       const data = await response.json();
@@ -351,20 +370,34 @@ export default function MainContent() {
           };
           setMessages(prev => [...prev, assistantMessage]);
           setStreamingText('');
+          setStopController(null);
         }
       }, typingSpeed);
 
-    } catch (error) {
-      console.error('Error:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'I apologize, but I am unable to respond at this moment. Please try again later.',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      // Store controller and interval for stop button
+      setStopController({
+        abort: () => abortController.abort(),
+        interval: interval,
+      });
+
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('Request cancelled by user');
+        // Don't add an error message, just let the user edit and resend
+      } else {
+        console.error('Error:', error);
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'I apologize, but I am unable to respond at this moment. Please try again later.',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
       setIsLoading(false);
       setIsStreaming(false);
+      setStreamingText('');
+      setStopController(null);
     }
   };
 
@@ -555,10 +588,14 @@ export default function MainContent() {
               />
               <button
                 onClick={sendMessage}
-                disabled={isLoading || !input.trim()}
-                className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                disabled={false}
+                className={`px-6 py-3 rounded-xl transition-colors font-medium ${
+                  (isLoading || isStreaming)
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed'
+                }`}
               >
-                Send
+                {(isLoading || isStreaming) ? '⏹️ Stop' : 'Send'}
               </button>
             </div>
             
