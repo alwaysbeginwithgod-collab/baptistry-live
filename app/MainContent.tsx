@@ -77,7 +77,16 @@ export default function MainContent() {
     if (savedConversations) {
       try {
         const parsed = JSON.parse(savedConversations);
-        setConversations(parsed);
+        const withDates = parsed.map((conv: any) => ({
+          ...conv,
+          createdAt: new Date(conv.createdAt),
+          updatedAt: new Date(conv.updatedAt),
+          messages: conv.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          })),
+        }));
+        setConversations(withDates);
       } catch (e) {
         console.error('Failed to load conversations', e);
       }

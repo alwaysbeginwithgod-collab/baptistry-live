@@ -18,41 +18,34 @@ export const saveConversations = mutation({
       await ctx.db.delete(conv._id);
     }
     
-    // Save new conversations
+    // Save new conversations - convert Dates to numbers
     for (const conv of args.conversations) {
       await ctx.db.insert("conversations", {
         userId: args.userId,
         conversationId: conv.id,
         title: conv.title,
         messages: conv.messages.map((m: any) => ({
-          ...m,
-          timestamp: new Date(m.timestamp).getTime(),
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          timestamp: m.timestamp instanceof Date ? m.timestamp.getTime() : m.timestamp,
         })),
-        createdAt: new Date(conv.createdAt).getTime(),
-        updatedAt: new Date(conv.updatedAt).getTime(),
+        createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
+        updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
         pinned: conv.pinned || false,
       });
     }
   },
 });
 
-// Load conversations for a user - returns null if no userId provided
+// Load conversations for a user - convert numbers back to Dates
 export const loadConversations = query({
-  args: { userId: v.optional(v.string()) },
+  args: { userId: v.string() },
   handler: async (ctx, args) => {
-    // If no userId provided, return null
-    if (!args.userId) {
-      return null;
-    }
-    
     const conversations = await ctx.db
       .query("conversations")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .collect();
-    
-    if (conversations.length === 0) {
-      return null;
-    }
     
     return conversations.map((conv) => ({
       id: conv.conversationId,
