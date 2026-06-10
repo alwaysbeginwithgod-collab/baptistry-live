@@ -36,7 +36,7 @@ export default function MainContent() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const stopRequestedRef = useRef(false);
+  const stopRequested = useRef(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -311,7 +311,7 @@ export default function MainContent() {
     setInput('');
     setIsGenerating(true);
     setStreamingText('');
-    stopRequestedRef.current = false;
+    stopRequested.current = false;
     
     setTimeout(autoResizeTextarea, 0);
 
@@ -330,9 +330,9 @@ export default function MainContent() {
       fullResponse = fullResponse.replace(/^I need to.*?\.\s*/i, '');
       fullResponse = fullResponse.trim();
 
-      // Type the response character by character
+      // Type the response character by character (same as test page)
       for (let i = 0; i <= fullResponse.length; i++) {
-        if (stopRequestedRef.current) {
+        if (stopRequested.current) {
           // Stop was requested - don't add the message
           setIsGenerating(false);
           setStreamingText('');
@@ -368,7 +368,7 @@ export default function MainContent() {
   };
 
   const stopResponse = () => {
-    stopRequestedRef.current = true;
+    stopRequested.current = true;
     setIsGenerating(false);
     setStreamingText('');
   };
