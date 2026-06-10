@@ -331,7 +331,7 @@ export default function MainContent() {
       fullResponse = fullResponse.trim();
 
       // Type the response character by character (same as test page)
-      for (let i = 0; i <= fullResponse.length; i++) {
+      for (let i = 0; i <= fullResponse.length; i += 2) { // 2 characters at a time
         if (stopRequested.current) {
           // Stop was requested - don't add the message
           setIsGenerating(false);
