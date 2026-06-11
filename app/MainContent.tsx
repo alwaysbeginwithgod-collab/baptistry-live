@@ -274,6 +274,38 @@ export default function MainContent() {
     }, 50);
   };
 
+const regenerateMessage = async (assistantMessageId: string) => {
+  // Find the assistant message
+  const assistantIndex = messages.findIndex(m => m.id === assistantMessageId);
+  if (assistantIndex === -1) return;
+  if (messages[assistantIndex].role !== 'assistant') return;
+  
+  // Find the user message before this assistant message
+  let userMessageIndex = assistantIndex - 1;
+  while (userMessageIndex >= 0 && messages[userMessageIndex].role !== 'user') {
+    userMessageIndex--;
+  }
+  if (userMessageIndex < 0) return;
+  
+  const userMessageContent = messages[userMessageIndex].content;
+  
+  // Remove the assistant message and all messages after it (if any)
+  const newMessages = messages.slice(0, assistantIndex);
+  setMessages(newMessages);
+  setCurrentConversationId(currentConversationId);
+  
+  // Set the input to the user's original message and send it
+  setInput(userMessageContent);
+  setTimeout(() => {
+    autoResizeTextarea();
+    textareaRef.current?.focus();
+    // Send the message after a short delay
+    setTimeout(() => {
+      sendMessage();
+    }, 100);
+  }, 50);
+};
+
   const stopResponse = () => {
     stopRequested.current = true;
     setIsGenerating(false);
@@ -507,6 +539,7 @@ export default function MainContent() {
                   message={message} 
                   onFeedback={handleFeedback}
                   onEdit={editMessage}
+                  onRegenerate={message.role === 'assistant' ? regenerateMessage : undefined}
                 />
               ))}
               

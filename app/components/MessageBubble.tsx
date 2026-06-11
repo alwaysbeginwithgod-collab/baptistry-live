@@ -14,9 +14,10 @@ interface MessageBubbleProps {
   message: Message;
   onFeedback?: (messageId: string, feedback: 'helpful' | 'unhelpful') => void;
   onEdit?: (messageId: string, newContent: string) => void;
+  onRegenerate?: (messageId: string) => void;
 }
 
-export default function MessageBubble({ message, onFeedback, onEdit }: MessageBubbleProps) {
+export default function MessageBubble({ message, onFeedback, onEdit, onRegenerate }: MessageBubbleProps) {
   const isUser = message.role === 'user';
   const [feedbackGiven, setFeedbackGiven] = useState<'helpful' | 'unhelpful' | null>(null);
   const [showMenu, setShowMenu] = useState(false);
@@ -66,6 +67,12 @@ export default function MessageBubble({ message, onFeedback, onEdit }: MessageBu
     setShowMenu(false);
   };
 
+  const handleRegenerate = () => {
+    if (onRegenerate) {
+      onRegenerate(message.id);
+    }
+  };
+
   return (
     <div id={message.id} className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
       {/* Avatar for BAPTISTRY only (assistant messages) */}
@@ -92,7 +99,7 @@ export default function MessageBubble({ message, onFeedback, onEdit }: MessageBu
             }
           `}
         >
-          {/* Edit mode */}
+          {/* Edit mode for user messages */}
           {isUser && isEditing ? (
             <div className="mt-2">
               <textarea
@@ -152,8 +159,38 @@ export default function MessageBubble({ message, onFeedback, onEdit }: MessageBu
                     </p>
                   </div>
 
-                  {/* Feedback Buttons */}
+                  {/* 4 Icons for Assistant Messages: Copy, Regenerate, Helpful, Not Helpful */}
                   <div className="mt-2 flex justify-end gap-3">
+                    {/* Copy Button */}
+                    <div className="relative">
+                      <button
+                        onClick={handleCopy}
+                        className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-1 rounded"
+                        title="Copy"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                      </button>
+                      {copySuccess && (
+                        <span className="absolute bottom-full right-0 mb-1 px-2 py-1 text-xs bg-gray-800 text-white rounded whitespace-nowrap">
+                          Copied!
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Regenerate Button */}
+                    <button
+                      onClick={handleRegenerate}
+                      className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-1 rounded"
+                      title="Regenerate"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    </button>
+
+                    {/* Helpful Button */}
                     <button
                       onClick={() => handleFeedback('helpful')}
                       disabled={feedbackGiven !== null}
@@ -167,8 +204,9 @@ export default function MessageBubble({ message, onFeedback, onEdit }: MessageBu
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
                       </svg>
-                      <span>Helpful</span>
                     </button>
+
+                    {/* Not Helpful Button */}
                     <button
                       onClick={() => handleFeedback('unhelpful')}
                       disabled={feedbackGiven !== null}
@@ -182,7 +220,6 @@ export default function MessageBubble({ message, onFeedback, onEdit }: MessageBu
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v5a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13v-9m-7 10h2M17 4h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
                       </svg>
-                      <span>Not helpful</span>
                     </button>
                   </div>
                 </>
@@ -195,7 +232,7 @@ export default function MessageBubble({ message, onFeedback, onEdit }: MessageBu
             <span>
               {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
-            
+
             {/* Action buttons for user messages (only when not editing) */}
             {isUser && onEdit && !isEditing && (
               <div className="flex gap-1 items-center">
@@ -216,7 +253,7 @@ export default function MessageBubble({ message, onFeedback, onEdit }: MessageBu
                     </span>
                   )}
                 </div>
-                
+
                 {/* Edit button */}
                 <div className="relative">
                   <button
