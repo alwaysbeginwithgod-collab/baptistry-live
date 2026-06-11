@@ -171,13 +171,13 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       </svg>
                     </button>
 
-                    {/* Thumbs Up */}
+                    {/* Thumbs Up - Now with background color like the pin ribbon */}
                     <button
                       onClick={() => handleFeedback('helpful')}
                       className={`p-1 rounded transition-all ${
                         isHelpfulSelected 
-                          ? 'text-yellow-500 dark:text-yellow-300' 
-                          : 'text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400'
+                          ? 'bg-yellow-500 text-white' 
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-500 hover:bg-yellow-500 hover:text-white'
                       }`}
                       title="Helpful"
                     >
@@ -186,13 +186,13 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       </svg>
                     </button>
 
-                    {/* Thumbs Down */}
+                    {/* Thumbs Down - Now with background color like the pin ribbon */}
                     <button
                       onClick={() => handleFeedback('unhelpful')}
                       className={`p-1 rounded transition-all ${
                         isUnhelpfulSelected 
-                          ? 'text-thumbs-yellow-light dark:text-thumbs-yellow-dark' 
-                          : 'text-gray-400 hover:text-thumbs-yellow-light dark:hover:text-thumbs-yellow-dark'
+                          ? 'bg-yellow-500 text-white'  
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-500 hover:bg-yellow-500 hover:text-white'
                       }`}
                       title="Not helpful"
                     >
