@@ -45,12 +45,10 @@ export default function Sidebar({
     conv.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Load daily verse
   useEffect(() => {
     setBibleVerse(getDailyVerse());
   }, []);
 
-  // Handle Escape key and click outside
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && menuOpenId) {
@@ -132,7 +130,6 @@ export default function Sidebar({
           lg:translate-x-0
         `}
       >
-        {/* Logo Area */}
         <div 
           onClick={onReturnToWelcome}
           className="p-6 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -152,10 +149,8 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* Navigation Menu */}
         <div className="px-4 pb-2 pt-4">
           <div className="space-y-1">
-            {/* Bible Button */}
             <button
               onClick={() => window.open('https://kingjamesbibleonline.org', '_blank')}
               className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
@@ -166,7 +161,7 @@ export default function Sidebar({
               <span className="text-sm font-medium">Bible</span>
             </button>
 
-            {/* About Button - NEW */}
+            {/* About Button */}
             <button
               onClick={() => setIsAboutOpen(true)}
               className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
@@ -177,7 +172,6 @@ export default function Sidebar({
               <span className="text-sm font-medium">About</span>
             </button>
 
-            {/* My Books Button */}
             <button
               onClick={() => setIsBooksOpen(true)}
               className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
@@ -190,7 +184,6 @@ export default function Sidebar({
             </button>
           </div>
 
-          {/* Donation Button */}
           <div className="mt-4 text-center">
             <button
               onClick={() => setIsSupportOpen(true)}
@@ -204,7 +197,6 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* New Chat Button */}
         <div className="px-4 pb-4">
           <button onClick={onNewChat} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-700 dark:text-gray-300 font-medium">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -212,12 +204,10 @@ export default function Sidebar({
           </button>
         </div>
 
-        {/* Search */}
         <div className="px-4 pb-4">
           <input type="text" placeholder="Search conversations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
 
-        {/* Chat History */}
         <div className="flex-1 overflow-y-auto px-4 pb-4">
           <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">CHAT HISTORY</div>
           {filteredConversations.length === 0 ? (
@@ -282,25 +272,17 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* Footer */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           {bibleVerse.text && (
             <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <p className="text-xs text-blue-600 dark:text-blue-400 text-center font-medium">
-                📖 Daily Bible Promise
-              </p>
-              <p className="text-xs text-gray-600 dark:text-gray-400 text-center italic mt-1">
-                "{bibleVerse.text}"
-              </p>
-              <p className="text-xs text-blue-500 dark:text-blue-500 text-center mt-1">
-                — {bibleVerse.reference} (KJV)
-              </p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 text-center font-medium">📖 Daily Bible Promise</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 text-center italic mt-1">"{bibleVerse.text}"</p>
+              <p className="text-xs text-blue-500 dark:text-blue-500 text-center mt-1">— {bibleVerse.reference} (KJV)</p>
             </div>
           )}
         </div>
       </aside>
 
-      {/* Modals */}
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
       <BooksModal isOpen={isBooksOpen} onClose={() => setIsBooksOpen(false)} />
       <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
