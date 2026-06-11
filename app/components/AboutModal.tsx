@@ -233,7 +233,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
               📧 <a href="mailto:always.begin.with.god@gmail.com" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">always.begin.with.god@gmail.com</a>
             </p>
             <p className="text-gray-800 dark:text-gray-200 text-base">
-              🏛️ <a href="https://www.bordergatebaptistchurch.net" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">bordergatebaptistchurch.net</a>
+              🏛️ <a href="https://www.bordergatebaptist.net/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">bordergatebaptistchurch.net</a>
             </p>
           </div>
 
