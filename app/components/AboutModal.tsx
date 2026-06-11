@@ -71,7 +71,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   In a digital age flooded with misinformation, shallow teaching, and compromised doctrine, finding a <strong>trustworthy, free, and biblically sound</strong> study tool has never been harder — or more urgent.
                 </p>
                 <p className="text-gray-700 dark:text-gray-300 mt-2 leading-relaxed">
-                  <strong>BAPTISTRY is not just another chatbot.</strong> It's a labor of love born from prayer, countless hours of development, and a burning desire to put <strong>solid, KJV-based resources</strong> into the hands of every believer — regardless of their ability to pay.
+                  <strong>BAPTISTRY is not just another chatbot.</strong> It's a labor of love born from prayer, countless hours of development, and a burning desire to put <strong>solid, KJV-based resources</strong> into the hands of every believer — regardless of their ability to study.
                 </p>
                 <p className="text-amber-700 dark:text-amber-300 mt-3 font-semibold text-sm">
                   🕊️ <em>"My people are destroyed for lack of knowledge..." — Hosea 4:6 (KJV)</em>
@@ -214,7 +214,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
           {/* Glory to God */}
           <div className="text-center py-4 border-t border-gray-200 dark:border-gray-700">
             <p className="text-gray-600 dark:text-gray-400 italic text-sm">
-              "I am just a pen here. Any glory in BAPTISTRY does not belong to me but to our Lord Saviour Jesus Christ alone."
+              "I am just a pen here. Any glory in BAPTISTRY does not belong to me but to our Lord and Saviour Jesus Christ alone."
             </p>
             <p className="text-gray-500 dark:text-gray-500 mt-1 text-xs">— Soli Deo Gloria</p>
           </div>
