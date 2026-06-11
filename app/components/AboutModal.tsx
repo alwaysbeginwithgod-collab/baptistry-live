@@ -18,9 +18,9 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop with blur effect */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity"
+        className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-50 transition-opacity"
         onClick={onClose}
       />
       
@@ -28,35 +28,60 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-4">
           <div 
-            className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            className="relative bg-gradient-to-br from-white via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-950 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-fade-in-up"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-10"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-10 bg-white/80 dark:bg-gray-800/80 rounded-full p-1.5 backdrop-blur-sm"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
-            {/* Content */}
-            <div className="p-8">
-              {/* Logo and Title */}
-              <div className="text-center mb-8">
+            {/* Hero Section with Wallpaper Background */}
+            <div 
+              className="relative rounded-t-2xl bg-cover bg-center bg-no-repeat p-12 text-center"
+              style={{ 
+                backgroundImage: 'url("https://images.unsplash.com/photo-1504052434569-70ad5836ab41?q=80&w=2070&auto=format")',
+                backgroundBlendMode: 'overlay',
+                backgroundColor: 'rgba(0,0,0,0.5)'
+              }}
+            >
+              <div className="relative z-10">
                 <img 
                   src="/baptistry-logo.png" 
                   alt="BAPTISTRY Logo" 
-                  className="w-24 h-24 mx-auto mb-4 rounded-full object-cover"
+                  className="w-28 h-28 mx-auto mb-4 rounded-full object-cover border-4 border-white shadow-xl"
                 />
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-white">BAPTISTRY</h1>
-                <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">A Free KJV Bible Study Tool</p>
+                <h1 className="text-5xl font-bold text-white mb-2 drop-shadow-lg">BAPTISTRY</h1>
+                <p className="text-xl text-white/90 drop-shadow">A Free KJV Bible Study Tool</p>
+                <div className="inline-block mt-4 px-4 py-1 bg-yellow-500 text-white rounded-full text-sm font-semibold shadow-lg">
+                  🚀 Launched June 8, 2026
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-8">
+              {/* FOMO Effect - Why this world needs this tool */}
+              <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30 rounded-xl p-6 mb-8 border-l-4 border-red-500">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+                  <span className="text-3xl">⚠️</span> Why the World Needs This Tool
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
+                  In a world filled with confusion, false doctrines, and spiritual apathy, <strong>sound Bible study tools are more needed than ever</strong>. Many believers struggle to find reliable, free resources that uphold the authority of the King James Version and historic Baptist faith.
+                </p>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                  <strong>BAPTISTRY was created to fill this gap</strong> — providing a trusted, accessible, and doctrinally sound platform for personal study, sermon preparation, and daily devotion. <strong>Don't let another day pass without digging deeper into God's Word.</strong>
+                </p>
               </div>
 
               {/* Greeting */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 mb-8 text-center">
-                <p className="text-gray-800 dark:text-gray-200 text-lg italic">
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 mb-8 text-center border border-blue-200 dark:border-blue-800">
+                <p className="text-gray-800 dark:text-gray-200 text-xl italic font-serif">
                   "Grace and peace be unto you from God our Father, and from the Lord Jesus Christ."
                 </p>
                 <p className="text-gray-600 dark:text-gray-400 mt-2">— Philippians 1:2 (KJV)</p>
@@ -98,48 +123,59 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
               </div>
 
               {/* Key Features */}
-              <div className="mb-6">
-                <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+              <div className="mb-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6">
+                <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
                   <span className="text-3xl">⚙️</span> Key Features
                 </h2>
-                <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-500">✓</span>
-                    <strong>Ask Anything</strong> — Submit questions on Scriptures, doctrines, or preachings for immediate study and references.
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-500">✓</span>
-                    <strong>KJV Bible Integration</strong> — Features the complete King James Version alongside a built-in dictionary.
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-500">✓</span>
-                    <strong>Free Flipbooks</strong> — Preview of written books and resources.
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-500">✓</span>
-                    <strong>Dark / Light Mode</strong> — Comfortable reading day or night.
-                  </li>
-                </ul>
-              </div>
-
-              {/* Launch Date */}
-              <div className="mb-6 text-center">
-                <p className="text-gray-500 dark:text-gray-400">
-                  🚀 Launched on <strong>June 8, 2026</strong>
-                </p>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-500 text-xl">✓</span>
+                    <div>
+                      <strong className="text-gray-800 dark:text-white">Ask Anything</strong>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">Submit questions on Scriptures, doctrines, or preachings for immediate study.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-500 text-xl">✓</span>
+                    <div>
+                      <strong className="text-gray-800 dark:text-white">KJV Bible Integration</strong>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">Complete King James Version with built-in dictionary.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-500 text-xl">✓</span>
+                    <div>
+                      <strong className="text-gray-800 dark:text-white">Free Flipbooks</strong>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">Preview of written books and resources.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-500 text-xl">✓</span>
+                    <div>
+                      <strong className="text-gray-800 dark:text-white">Dark / Light Mode</strong>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">Comfortable reading day or night.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Invitation */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl p-6 mb-6 text-center">
-                <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-8 mb-6 text-center text-white shadow-xl">
+                <h3 className="text-2xl font-bold mb-3">
                   Looking for the best Bible study tool?
                 </h3>
-                <p className="text-gray-700 dark:text-gray-300 text-lg">
+                <p className="text-xl mb-4">
                   <strong>BAPTISTRY is created for you.</strong>
                 </p>
-                <p className="text-gray-600 dark:text-gray-400 mt-2">
+                <p className="text-blue-100 mb-6">
                   Use it freely. Share it freely. Grow in grace and in the knowledge of our Lord Jesus Christ.
                 </p>
+                <button
+                  onClick={onClose}
+                  className="px-6 py-2 bg-white text-blue-600 rounded-full font-semibold hover:bg-gray-100 transition-colors shadow-lg"
+                >
+                  Start Studying Now →
+                </button>
               </div>
 
               {/* Glory to God */}
@@ -147,16 +183,16 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                 <p className="text-gray-600 dark:text-gray-400 italic">
                   "I am just a pen here. Any glory in BAPTISTRY does not belong to me but to our Lord Saviour Jesus Christ alone."
                 </p>
-                <p className="text-gray-500 dark:text-gray-500 mt-2">— Soli Deo Gloria</p>
+                <p className="text-gray-500 dark:text-gray-500 mt-2 text-sm">— Soli Deo Gloria</p>
               </div>
 
               {/* Contact Info */}
               <div className="mb-6 text-center">
                 <p className="text-gray-700 dark:text-gray-300">
-                  📧 For inquiries: <a href="mailto:always.begin.with.god@gmail.com" className="text-blue-600 dark:text-blue-400 hover:underline">always.begin.with.god@gmail.com</a>
+                  📧 <a href="mailto:always.begin.with.god@gmail.com" className="text-blue-600 dark:text-blue-400 hover:underline">always.begin.with.god@gmail.com</a>
                 </p>
                 <p className="text-gray-700 dark:text-gray-300 mt-1">
-                  🏛️ My Church: <a href="https://www.bordergatebaptistchurch.net" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">bordergatebaptistchurch.net</a>
+                  🏛️ <a href="https://www.bordergatebaptistchurch.net" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">bordergatebaptistchurch.net</a>
                 </p>
               </div>
 

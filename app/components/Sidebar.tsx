@@ -2,11 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { getDailyVerse } from '../lib/biblePromises';
-import LibraryModal from './LibraryModal';
 import BooksModal from './BooksModal';
 import SupportModal from './SupportModal';
 import AboutModal from './AboutModal';
-
 
 interface SidebarProps {
   isOpen: boolean;
@@ -34,9 +32,9 @@ export default function Sidebar({
   currentConversationId 
 }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isBooksOpen, setIsBooksOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
@@ -168,7 +166,7 @@ export default function Sidebar({
               <span className="text-sm font-medium">Bible</span>
             </button>
 
-            {/* Library Button - Reference Library */}
+            {/* About Button - NEW */}
             <button
               onClick={() => setIsAboutOpen(true)}
               className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
@@ -179,7 +177,7 @@ export default function Sidebar({
               <span className="text-sm font-medium">About</span>
             </button>
 
-            {/* My Books Button - Your Books Showroom */}
+            {/* My Books Button */}
             <button
               onClick={() => setIsBooksOpen(true)}
               className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
@@ -227,15 +225,13 @@ export default function Sidebar({
           ) : (
             <div className="space-y-1">
               {filteredConversations.map((conv) => {
-                // Check if this conversation is pinned
                 const isPinned = conv.pinned === true;
                 return (
                   <div key={conv.id} className={`group relative rounded-lg transition-colors ${currentConversationId === conv.id ? 'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                    {/* PINNED Icon - small pin icon instead of triangle */}
                     {isPinned && (
                       <div className="absolute -top-1 -right-1 z-10">
                         <div className="bg-yellow-500 rounded-full p-0.5 shadow-sm">
-                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
                           </svg>
                         </div>
@@ -288,7 +284,6 @@ export default function Sidebar({
 
         {/* Footer */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          {/* Daily Bible Verse */}
           {bibleVerse.text && (
             <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
               <p className="text-xs text-blue-600 dark:text-blue-400 text-center font-medium">
@@ -306,10 +301,9 @@ export default function Sidebar({
       </aside>
 
       {/* Modals */}
-      <LibraryModal isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} />
+      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
       <BooksModal isOpen={isBooksOpen} onClose={() => setIsBooksOpen(false)} />
       <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
-      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
     </>
   );
 }
