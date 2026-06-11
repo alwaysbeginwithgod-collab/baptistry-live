@@ -46,13 +46,24 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
 
   const cleanedContent = cleanContent(message.content);
 
-  const handleFeedback = (type: 'helpful' | 'unhelpful') => {
-    let newFeedback: 'helpful' | 'unhelpful' | null = type;
-    
-    // If clicking the same button, unselect it
-    if (feedbackGiven === type) {
-      newFeedback = null;
-    }
+const handleFeedback = (type: 'helpful' | 'unhelpful') => {
+  console.log('Feedback clicked:', type, 'current feedback:', feedbackGiven);
+  
+  let newFeedback: 'helpful' | 'unhelpful' | null = type;
+  
+  // If clicking the same button, unselect it
+  if (feedbackGiven === type) {
+    newFeedback = null;
+    console.log('Unselecting');
+  }
+  
+  console.log('Setting new feedback to:', newFeedback);
+  setFeedbackGiven(newFeedback);
+  
+  if (onFeedback) {
+    onFeedback(message.id, newFeedback);
+  }
+};
     
     setFeedbackGiven(newFeedback);
     
@@ -246,7 +257,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
           )}
 
           {/* Timestamp */}
-          <div className={`text-xs mt-1 text-right ${isUser ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
+          <div className={`text-xs mt-1 text-left ${isUser ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
             {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
         </div>
