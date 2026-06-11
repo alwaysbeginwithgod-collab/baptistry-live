@@ -176,8 +176,8 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       onClick={() => handleFeedback('helpful')}
                       className={`p-1 rounded transition-all ${
                         isHelpfulSelected 
-                          ? 'bg-yellow-400 dark:bg-yellow-300 text-white' 
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-500 hover:bg-yellow-400 hover:text-white'
+                          ? 'ring-2 ring-yellow-500 bg-yellow-500/20 text-yellow-500' 
+                          : 'text-gray-400 hover:ring-2 hover:ring-yellow-500 hover:bg-yellow-500/10'
                       }`}
                       title="Helpful"
                     >
@@ -191,8 +191,8 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       onClick={() => handleFeedback('unhelpful')}
                       className={`p-1 rounded transition-all ${
                         isUnhelpfulSelected 
-                          ? 'bg-yellow-400 dark:bg-yellow-300 text-white'  
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-500 hover:bg-yellow-400 hover:text-white'
+                          ? 'ring-2 ring-yellow-500 bg-yellow-500/20 text-yellow-500'  
+                          : 'text-gray-400 hover:ring-2 hover:ring-yellow-500 hover:bg-yellow-500/10'
                       }`}
                       title="Not helpful"
                     >
