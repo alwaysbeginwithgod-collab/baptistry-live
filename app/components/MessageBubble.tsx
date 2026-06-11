@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 type Message = {
@@ -25,29 +25,27 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const [copySuccess, setCopySuccess] = useState(false);
   const [showCopyTooltip, setShowCopyTooltip] = useState(false);
 
+  // Debug: log when feedbackStatus changes
+  useEffect(() => {
+    console.log('MessageBubble received feedbackStatus:', feedbackStatus, 'for message:', message.id);
+  }, [feedbackStatus, message.id]);
+
   const cleanContent = (content: string) => {
     return content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
   };
 
   const cleanedContent = cleanContent(message.content);
 
-const handleFeedback = (type: 'helpful' | 'unhelpful') => {
-  console.log('=== THUMBS CLICKED ===');
-  console.log('Type clicked:', type);
-  console.log('Current feedbackStatus from parent:', feedbackStatus);
-  console.log('onFeedback exists?', !!onFeedback);
-  
-  if (!onFeedback) return;
-  
-  let newFeedback: 'helpful' | 'unhelpful' | null = type;
-  if (feedbackStatus === type) {
-    newFeedback = null;
-    console.log('Unselecting - newFeedback will be null');
-  }
-  
-  console.log('Calling onFeedback with:', message.id, newFeedback);
-  onFeedback(message.id, newFeedback);
-};
+  const handleFeedback = (type: 'helpful' | 'unhelpful') => {
+    console.log('Thumb clicked:', type, 'current status:', feedbackStatus);
+    if (!onFeedback) return;
+    
+    let newFeedback: 'helpful' | 'unhelpful' | null = type;
+    if (feedbackStatus === type) {
+      newFeedback = null;
+    }
+    onFeedback(message.id, newFeedback);
+  };
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -179,10 +177,11 @@ const handleFeedback = (type: 'helpful' | 'unhelpful') => {
                       </svg>
                     </button>
 
-                    {/* Thumbs Up */}
+                    {/* Thumbs Up - Using inline style */}
                     <button
                       onClick={() => handleFeedback('helpful')}
-                      className={`p-1 rounded transition-colors ${isHelpfulSelected ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
+                      style={{ color: isHelpfulSelected ? '#eab308' : '#9ca3af' }}
+                      className="p-1 rounded hover:opacity-80 transition-all"
                       title="Helpful"
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -190,10 +189,11 @@ const handleFeedback = (type: 'helpful' | 'unhelpful') => {
                       </svg>
                     </button>
 
-                    {/* Thumbs Down */}
+                    {/* Thumbs Down - Using inline style */}
                     <button
                       onClick={() => handleFeedback('unhelpful')}
-                      className={`p-1 rounded transition-colors ${isUnhelpfulSelected ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
+                      style={{ color: isUnhelpfulSelected ? '#eab308' : '#9ca3af' }}
+                      className="p-1 rounded hover:opacity-80 transition-all"
                       title="Not helpful"
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">

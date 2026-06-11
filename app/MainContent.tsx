@@ -301,35 +301,86 @@ const handleFeedback = (messageId: string, feedback: 'helpful' | 'unhelpful' | n
     }, 50);
   };
 
-  const regenerateMessage = async (assistantMessageId: string) => {
-    // Find the assistant message
-    const assistantIndex = messages.findIndex(m => m.id === assistantMessageId);
-    if (assistantIndex === -1) return;
-    if (messages[assistantIndex].role !== 'assistant') return;
+const regenerateMessage = async (assistantMessageId: string) => {
+  console.log('=== REGENERATE CALLED ===');
+  console.log('Assistant message ID:', assistantMessageId);
+  
+  // Find the assistant message
+  const assistantIndex = messages.findIndex(m => m.id === assistantMessageId);
+  if (assistantIndex === -1) return;
+  if (messages[assistantIndex].role !== 'assistant') return;
+  
+  // Find the user message before this assistant message
+  let userMessageIndex = assistantIndex - 1;
+  while (userMessageIndex >= 0 && messages[userMessageIndex].role !== 'user') {
+    userMessageIndex--;
+  }
+  if (userMessageIndex < 0) return;
+  
+  const userMessageContent = messages[userMessageIndex].content;
+  console.log('User message content:', userMessageContent);
+  
+  // Remove the assistant message (the one being regenerated)
+  const newMessages = messages.slice(0, assistantIndex);
+  setMessages(newMessages);
+  
+  // Now call the API to get a new response
+  setIsGenerating(true);
+  setStreamingText('');
+  stopRequested.current = false;
+  
+  try {
+    console.log('Calling API for regeneration...');
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: userMessageContent, history: newMessages }),
+    });
+
+    const data = await response.json();
+    let fullResponse = data.response || 'I apologize, but I encountered an error. Please try again.';
     
-    // Find the user message before this assistant message
-    let userMessageIndex = assistantIndex - 1;
-    while (userMessageIndex >= 0 && messages[userMessageIndex].role !== 'user') {
-      userMessageIndex--;
+    fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '');
+    fullResponse = fullResponse.replace(/^We need to.*?\.\s*/i, '');
+    fullResponse = fullResponse.replace(/^I need to.*?\.\s*/i, '');
+    fullResponse = fullResponse.trim();
+
+    // Type the response
+    const chunkSize = 4;
+    for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+      if (stopRequested.current) {
+        setIsGenerating(false);
+        setStreamingText('');
+        return;
+      }
+      setStreamingText(fullResponse.substring(0, i));
+      await new Promise(resolve => setTimeout(resolve, 5));
     }
-    if (userMessageIndex < 0) return;
-    
-    const userMessageContent = messages[userMessageIndex].content;
-    
-    // Remove the assistant message and all messages after it
-    const newMessages = messages.slice(0, assistantIndex);
-    setMessages(newMessages);
-    
-    // Set the input to the user's original message and send it
-    setInput(userMessageContent);
-    setTimeout(() => {
-      autoResizeTextarea();
-      textareaRef.current?.focus();
-      setTimeout(() => {
-        sendMessage();
-      }, 100);
-    }, 50);
-  };
+
+    const newAssistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: fullResponse,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, newAssistantMessage]);
+    setStreamingText('');
+    setIsGenerating(false);
+    console.log('Regeneration complete');
+
+  } catch (error) {
+    console.error('Regeneration error:', error);
+    const errorMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: 'I apologize, but I am unable to respond at this moment. Please try again later.',
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, errorMessage]);
+    setIsGenerating(false);
+    setStreamingText('');
+  }
+};
 
   const sendMessage = async () => {
     if (!input.trim()) return;
