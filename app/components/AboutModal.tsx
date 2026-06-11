@@ -216,7 +216,12 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
             <p className="text-gray-600 dark:text-gray-400 italic text-sm">
               "I am just a pen here. Any glory in BAPTISTRY does not belong to me but to our Lord and Saviour Jesus Christ alone."
             </p>
-            <p className="text-gray-500 dark:text-gray-500 mt-1 text-xs">— Soli Deo Gloria</p>
+            <p className="text-blue-600 dark:text-blue-400 font-medium mt-2 text-sm">
+             "A dose of God's Word a day, will keep you going all day."
+           </p>
+           <p className="text-gray-500 dark:text-gray-500 mt-1 text-xs">
+            — ALWAYS BEGIN WITH GOD —
+            </p>
           </div>
 
           {/* Contact Info - Larger text */}
