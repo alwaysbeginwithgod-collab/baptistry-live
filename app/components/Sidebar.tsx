@@ -5,6 +5,8 @@ import { getDailyVerse } from '../lib/biblePromises';
 import LibraryModal from './LibraryModal';
 import BooksModal from './BooksModal';
 import SupportModal from './SupportModal';
+import AboutModal from './AboutModal';
+
 
 interface SidebarProps {
   isOpen: boolean;
@@ -32,7 +34,7 @@ export default function Sidebar({
   currentConversationId 
 }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isBooksOpen, setIsBooksOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
@@ -168,13 +170,13 @@ export default function Sidebar({
 
             {/* Library Button - Reference Library */}
             <button
-              onClick={() => setIsLibraryOpen(true)}
+              onClick={() => setIsAboutOpen(true)}
               className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7M16 18.5L19.5 15 17 12.5 13.5 16 16 19.5z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-sm font-medium">Library</span>
+              <span className="text-sm font-medium">About</span>
             </button>
 
             {/* My Books Button - Your Books Showroom */}
@@ -307,6 +309,7 @@ export default function Sidebar({
       <LibraryModal isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} />
       <BooksModal isOpen={isBooksOpen} onClose={() => setIsBooksOpen(false)} />
       <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
+      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
     </>
   );
 }
