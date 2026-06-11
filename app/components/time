@@ -257,7 +257,7 @@ const handleFeedback = (type: 'helpful' | 'unhelpful') => {
           )}
 
           {/* Timestamp */}
-          <div className={`text-xs mt-1 text-left ${isUser ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
+          <div className={`text-xs mt-1 text-right ${isUser ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
             {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
         </div>
