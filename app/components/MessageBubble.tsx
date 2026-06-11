@@ -23,6 +23,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(message.content);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [showCopyTooltip, setShowCopyTooltip] = useState(false);
 
   // Load saved feedback from localStorage
   useEffect(() => {
@@ -47,13 +48,17 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const cleanedContent = cleanContent(message.content);
 
   const handleFeedback = (type: 'helpful' | 'unhelpful') => {
+    console.log('Feedback clicked:', type, 'current:', feedbackGiven);
+    
     let newFeedback: 'helpful' | 'unhelpful' | null = type;
     
     if (feedbackGiven === type) {
       newFeedback = null;
+      console.log('Unselecting');
     }
     
     setFeedbackGiven(newFeedback);
+    console.log('Setting feedback to:', newFeedback);
     
     if (onFeedback) {
       onFeedback(message.id, newFeedback);
@@ -80,7 +85,11 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
     try {
       await navigator.clipboard.writeText(cleanedContent);
       setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
+      setShowCopyTooltip(true);
+      setTimeout(() => {
+        setCopySuccess(false);
+        setShowCopyTooltip(false);
+      }, 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
     }
@@ -153,23 +162,62 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                     </p>
                   </div>
 
+                  {/* 4 Icons */}
                   <div className="mt-2 flex justify-end gap-3">
-                    <button onClick={handleCopy} className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 p-1 rounded" title="Copy">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                      </svg>
-                    </button>
-                    <button onClick={handleRegenerate} className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 p-1 rounded" title="Regenerate">
+                    {/* Copy Button with Tooltip */}
+                    <div className="relative">
+                      <button
+                        onClick={handleCopy}
+                        className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 p-1 rounded transition-colors"
+                        title="Copy"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                      </button>
+                      {showCopyTooltip && (
+                        <span className="absolute bottom-full right-0 mb-1 px-2 py-1 text-xs bg-gray-800 text-white rounded whitespace-nowrap">
+                          Copied!
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Regenerate Button */}
+                    <button
+                      onClick={handleRegenerate}
+                      className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 p-1 rounded transition-colors"
+                      title="Regenerate"
+                    >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
                     </button>
-                    <button onClick={() => handleFeedback('helpful')} className={`p-1 rounded ${feedbackGiven === 'helpful' ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`} title="Helpful">
+
+                    {/* Thumbs Up - Yellow when selected */}
+                    <button
+                      onClick={() => handleFeedback('helpful')}
+                      className={`p-1 rounded transition-colors ${
+                        feedbackGiven === 'helpful'
+                          ? 'text-yellow-500 dark:text-yellow-400'
+                          : 'text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400'
+                      }`}
+                      title="Helpful"
+                    >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
                       </svg>
                     </button>
-                    <button onClick={() => handleFeedback('unhelpful')} className={`p-1 rounded ${feedbackGiven === 'unhelpful' ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`} title="Not helpful">
+
+                    {/* Thumbs Down - Yellow when selected */}
+                    <button
+                      onClick={() => handleFeedback('unhelpful')}
+                      className={`p-1 rounded transition-colors ${
+                        feedbackGiven === 'unhelpful'
+                          ? 'text-yellow-500 dark:text-yellow-400'
+                          : 'text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400'
+                      }`}
+                      title="Not helpful"
+                    >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v5a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13v-9m-7 10h2M17 4h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
                       </svg>
