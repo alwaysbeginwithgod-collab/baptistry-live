@@ -19,32 +19,34 @@ interface MessageBubbleProps {
 
 export default function MessageBubble({ message, onFeedback, onEdit, onRegenerate }: MessageBubbleProps) {
   const isUser = message.role === 'user';
-  const [feedbackGiven, setFeedbackGiven] = useState<'helpful' | 'unhelpful' | null>(null);
+  
+  // Initialize state directly from localStorage
+  const getInitialFeedback = () => {
+    try {
+      const savedFeedback = localStorage.getItem('baptistry_feedback');
+      if (savedFeedback) {
+        const feedbackLog = JSON.parse(savedFeedback);
+        const existing = feedbackLog.find((item: any) => item.messageId === message.id);
+        if (existing && existing.feedback) {
+          return existing.feedback;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load feedback', e);
+    }
+    return null;
+  };
+
+  const [feedbackGiven, setFeedbackGiven] = useState<'helpful' | 'unhelpful' | null>(getInitialFeedback);
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(message.content);
   const [copySuccess, setCopySuccess] = useState(false);
   const [showCopyTooltip, setShowCopyTooltip] = useState(false);
 
-  // Load saved feedback from localStorage on component mount
-  useEffect(() => {
-    const savedFeedback = localStorage.getItem('baptistry_feedback');
-    if (savedFeedback) {
-      try {
-        const feedbackLog = JSON.parse(savedFeedback);
-        const existing = feedbackLog.find((item: any) => item.messageId === message.id);
-        if (existing && existing.feedback) {
-          setFeedbackGiven(existing.feedback);
-        }
-      } catch (e) {
-        console.error('Failed to load feedback', e);
-      }
-    }
-  }, [message.id]);
-
   // Save feedback to localStorage whenever it changes
   useEffect(() => {
-    // This ensures the UI updates when feedbackGiven changes
-    console.log('feedbackGiven state changed to:', feedbackGiven);
+    // This effect runs when feedbackGiven changes
+    console.log('feedbackGiven changed to:', feedbackGiven);
   }, [feedbackGiven]);
 
   const cleanContent = (content: string) => {
@@ -60,10 +62,9 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
     
     if (feedbackGiven === type) {
       newFeedback = null;
-      console.log('Unselecting');
     }
     
-    // Update state immediately
+    // Update state
     setFeedbackGiven(newFeedback);
     console.log('Setting feedback to:', newFeedback);
     
@@ -109,7 +110,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
     }
   };
 
-  // Determine if thumbs up should be yellow
+  // Force re-evaluation of selected state
   const isHelpfulSelected = feedbackGiven === 'helpful';
   const isUnhelpfulSelected = feedbackGiven === 'unhelpful';
 
@@ -208,11 +209,8 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                     {/* Thumbs Up */}
                     <button
                       onClick={() => handleFeedback('helpful')}
-                      className={`p-1 rounded transition-colors ${
-                        isHelpfulSelected
-                          ? 'text-yellow-500 dark:text-yellow-400'
-                          : 'text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400'
-                      }`}
+                      style={{ color: isHelpfulSelected ? '#eab308' : undefined }}
+                      className="p-1 rounded transition-colors hover:text-yellow-500"
                       title="Helpful"
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -223,11 +221,8 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                     {/* Thumbs Down */}
                     <button
                       onClick={() => handleFeedback('unhelpful')}
-                      className={`p-1 rounded transition-colors ${
-                        isUnhelpfulSelected
-                          ? 'text-yellow-500 dark:text-yellow-400'
-                          : 'text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400'
-                      }`}
+                      style={{ color: isUnhelpfulSelected ? '#eab308' : undefined }}
+                      className="p-1 rounded transition-colors hover:text-yellow-500"
                       title="Not helpful"
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
