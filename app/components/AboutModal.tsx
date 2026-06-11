@@ -25,113 +25,215 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black bg-opacity-70"
+        className="absolute inset-0 bg-black bg-opacity-70 backdrop-blur-sm"
         onClick={onClose}
       />
       
-      {/* Modal - with watermark background */}
-      <div 
-        className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto z-10 bg-cover bg-center bg-no-repeat"
-        style={{ 
-          backgroundImage: 'url("/wallpaper.png")',
-          backgroundSize: '40%',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundBlendMode: 'overlay',
-        }}
-      >
+      {/* Modal */}
+      <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto z-10">
+        
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 z-20 bg-white/80 dark:bg-gray-800/80 rounded-full p-1.5"
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 z-20 bg-white/80 dark:bg-gray-800/80 rounded-full p-2 backdrop-blur-sm transition-all"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
-        {/* Content - with semi-transparent background for readability */}
-        <div className="relative z-10 p-6 bg-white/90 dark:bg-gray-900/90 rounded-2xl m-4">
-          {/* Header */}
-          <div className="text-center mb-6">
+        {/* Hero Section */}
+        <div className="relative bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-blue-950 dark:to-indigo-950 rounded-t-2xl p-8 text-center">
+          <div className="relative z-10">
             <img 
               src="/baptistry-logo.png" 
               alt="BAPTISTRY" 
-              className="w-20 h-20 mx-auto rounded-full object-cover mb-3"
+              className="w-24 h-24 mx-auto rounded-full object-cover border-4 border-white/20 shadow-xl mb-4"
             />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">BAPTISTRY</h1>
-            <p className="text-gray-600 dark:text-gray-400">A Free KJV Bible Study Tool</p>
-            <div className="inline-block mt-2 px-3 py-1 bg-yellow-500 text-white rounded-full text-xs">
-              🚀 Launched June 8, 2026
+            <h1 className="text-4xl font-bold text-white mb-2">BAPTISTRY</h1>
+            <p className="text-blue-100 text-lg">A Free KJV Bible Study Tool</p>
+            <div className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 bg-yellow-500 text-white rounded-full text-sm font-semibold shadow-lg">
+              <span>🚀</span> Launched June 8, 2026
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-8 space-y-6">
+          
+          {/* FOMO / Hook Section */}
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl p-6 border-l-4 border-amber-500">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl">⚠️</span>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Why Every Believer Needs BAPTISTRY Today</h2>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                  In a digital age flooded with misinformation, shallow teaching, and compromised doctrine, finding a <strong>trustworthy, free, and biblically sound</strong> study tool has never been harder — or more urgent.
+                </p>
+                <p className="text-gray-700 dark:text-gray-300 mt-2 leading-relaxed">
+                  <strong>BAPTISTRY is not just another chatbot.</strong> It's a labor of love born from prayer, countless hours of development, and a burning desire to put <strong>solid, KJV-based resources</strong> into the hands of every believer — regardless of their ability to pay.
+                </p>
+                <p className="text-amber-700 dark:text-amber-300 mt-3 font-semibold text-sm">
+                  🕊️ <em>"My people are destroyed for lack of knowledge..." — Hosea 4:6 (KJV)</em>
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Greeting */}
-          <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 mb-5 text-center">
-            <p className="text-gray-800 dark:text-gray-200 italic text-sm">
-              "Grace and peace be unto you from God our Father, and from the Lord Jesus Christ."
+          {/* How It Started */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl">📖</span>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">How It Started</h2>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                  BAPTISTRY was born from the burden of a preacher who saw countless believers struggling to find <strong>reliable, free, and doctrinally sound Bible study tools</strong>. Many resources are either too expensive, theologically compromised, or buried under confusing interfaces.
+                </p>
+                <p className="text-gray-700 dark:text-gray-300 mt-2 leading-relaxed">
+                  With much prayer and reliance on God's grace, BAPTISTRY was developed to fill this gap. <strong>What started as a personal project has now become a free gift to the body of Christ worldwide.</strong>
+                </p>
+                <p className="text-blue-600 dark:text-blue-400 mt-2 font-semibold text-sm">
+                  🙏 <em>"Not by might, nor by power, but by my spirit, saith the LORD." — Zechariah 4:6 (KJV)</em>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* What Is BAPTISTRY */}
+          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl">✝️</span>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">What Is BAPTISTRY?</h2>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                  BAPTISTRY is a <strong>completely free, online King James Version (KJV) Bible study tool</strong> designed to help you:
+                </p>
+                <ul className="list-disc list-inside mt-2 space-y-1 text-gray-700 dark:text-gray-300 ml-2">
+                  <li>🔍 Look up Scriptures instantly</li>
+                  <li>📚 Access a built-in dictionary and reference library</li>
+                  <li>💡 Explore doctrines, preachings, and daily devotions</li>
+                  <li>💬 Ask any Bible-related question and get immediate, Scripture-based answers</li>
+                  <li>📖 Preview free flipbooks of written resources</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Purpose */}
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-6">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl">🎯</span>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Our Purpose</h2>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                  To <strong>equip believers worldwide</strong> with a reliable, easy-to-use digital tool for:
+                </p>
+                <ul className="list-disc list-inside mt-2 space-y-1 text-gray-700 dark:text-gray-300 ml-2">
+                  <li>Personal Bible study and spiritual growth</li>
+                  <li>Sermon and lesson preparation</li>
+                  <li>Daily devotion and prayer time</li>
+                  <li>Sharing the gospel with others</li>
+                </ul>
+                <p className="text-green-600 dark:text-green-400 mt-2 font-semibold text-sm">
+                  📖 <em>"Study to shew thyself approved unto God..." — 2 Timothy 2:15 (KJV)</em>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Key Features */}
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-6">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl">⚙️</span>
+              <div className="w-full">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Key Features</h2>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
+                    <div className="font-bold text-gray-900 dark:text-white">📝 Ask Anything</div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Submit questions on Scriptures, doctrines, or preachings for immediate study.</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
+                    <div className="font-bold text-gray-900 dark:text-white">📖 KJV Bible Integration</div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Complete King James Version with built-in dictionary.</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
+                    <div className="font-bold text-gray-900 dark:text-white">📚 Reference Library</div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Access to historic Baptist resources and study materials.</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
+                    <div className="font-bold text-gray-900 dark:text-white">🌓 Dark / Light Mode</div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Comfortable reading day or night.</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
+                    <div className="font-bold text-gray-900 dark:text-white">📘 Free Flipbooks</div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Preview of written books and resources.</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
+                    <div className="font-bold text-gray-900 dark:text-white">💬 Chat History</div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Save and organize your Bible study conversations.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Why This Tool */}
+          <div className="bg-red-50 dark:bg-red-950/30 rounded-xl p-6 border-l-4 border-red-500">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl">🔥</span>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Why BAPTISTRY Exists</h2>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                  <strong>The average Christian today spends more time scrolling social media than studying God's Word.</strong> We've traded depth for distraction. BAPTISTRY is here to change that.
+                </p>
+                <p className="text-gray-700 dark:text-gray-300 mt-2 leading-relaxed">
+                  Every feature, every response, every resource is designed to <strong>point you back to Scripture</strong> — not to entertain, but to equip. Not to replace your Bible, but to help you love it more.
+                </p>
+                <p className="text-red-600 dark:text-red-400 mt-2 font-semibold text-sm">
+                  ⏳ <em>Don't let another day pass without digging deeper into God's Word.</em>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Invitation / Call to Action */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-8 text-center text-white shadow-xl">
+            <h3 className="text-2xl font-bold mb-3">Looking for the best Bible study tool?</h3>
+            <p className="text-xl mb-2"><strong>BAPTISTRY is created for you.</strong></p>
+            <p className="text-blue-100 mb-6 max-w-md mx-auto">
+              Use it freely. Share it freely. Grow in grace and in the knowledge of our Lord Jesus Christ.
             </p>
-            <p className="text-gray-600 dark:text-gray-400 mt-1 text-xs">— Philippians 1:2 (KJV)</p>
-          </div>
-
-          {/* Content sections */}
-          <div className="space-y-4 text-sm">
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">📖 How It Started</h2>
-              <p className="text-gray-700 dark:text-gray-300 mt-1">Created by a preacher for free, doctrinally sound Bible study.</p>
-            </div>
-
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">✝️ What Is BAPTISTRY?</h2>
-              <p className="text-gray-700 dark:text-gray-300 mt-1">A free online KJV Bible study tool with Scripture lookups, dictionary, reference library, doctrines, preachings, and devotions.</p>
-            </div>
-
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">🎯 Purpose</h2>
-              <p className="text-gray-700 dark:text-gray-300 mt-1">Equipping believers for personal study, sermon prep, and daily devotion.</p>
-            </div>
-
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">⚙️ Key Features</h2>
-              <ul className="space-y-1 text-gray-700 dark:text-gray-300">
-                <li>✓ Ask Anything — Questions on Scriptures, doctrines, preachings</li>
-                <li>✓ KJV Bible Integration — Complete KJV with dictionary</li>
-                <li>✓ Free Flipbooks — Preview of written books</li>
-                <li>✓ Dark / Light Mode — Comfortable reading</li>
-              </ul>
-            </div>
-
-            <div className="bg-red-50 dark:bg-red-950/30 rounded-lg p-3 border-l-4 border-red-500">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">⚠️ Why This Tool?</h2>
-              <p className="text-gray-700 dark:text-gray-300 mt-1">In a world of confusion, BAPTISTRY provides trusted, accessible Bible study.</p>
-            </div>
-          </div>
-
-          {/* Invitation */}
-          <div className="mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-4 text-center text-white">
-            <h3 className="text-lg font-bold">Looking for the best Bible study tool?</h3>
-            <p className="text-md mt-1"><strong>BAPTISTRY is created for you.</strong></p>
-            <button onClick={onClose} className="mt-3 px-4 py-1.5 bg-white text-blue-600 rounded-full text-sm font-semibold hover:bg-gray-100">
+            <button
+              onClick={onClose}
+              className="px-6 py-2.5 bg-white text-blue-600 rounded-full font-semibold hover:bg-gray-100 transition-all shadow-lg transform hover:scale-105"
+            >
               Start Studying Now →
             </button>
           </div>
 
           {/* Glory to God */}
-          <div className="text-center mt-5 pt-3 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-gray-600 dark:text-gray-400 italic text-xs">
-              "Any glory in BAPTISTRY belongs to our Lord Saviour Jesus Christ alone."
+          <div className="text-center py-4 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-gray-600 dark:text-gray-400 italic text-sm">
+              "I am just a pen here. Any glory in BAPTISTRY does not belong to me but to our Lord Saviour Jesus Christ alone."
+            </p>
+            <p className="text-gray-500 dark:text-gray-500 mt-1 text-xs">— Soli Deo Gloria</p>
+          </div>
+
+          {/* Contact Info - Larger text */}
+          <div className="text-center space-y-2 py-2">
+            <p className="text-gray-800 dark:text-gray-200 text-base">
+              📧 <a href="mailto:always.begin.with.god@gmail.com" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">always.begin.with.god@gmail.com</a>
+            </p>
+            <p className="text-gray-800 dark:text-gray-200 text-base">
+              🏛️ <a href="https://www.bordergatebaptistchurch.net" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">bordergatebaptistchurch.net</a>
             </p>
           </div>
 
-          {/* Contact */}
-          <div className="text-center mt-3 text-xs text-gray-600 dark:text-gray-400">
-            <p>📧 always.begin.with.god@gmail.com</p>
-            <p>🏛️ bordergatebaptistchurch.net</p>
-          </div>
-
-          {/* Footer */}
-          <div className="text-center mt-3 text-xs text-gray-400 dark:text-gray-500 italic">
-            *Not a replacement for God's Word. The Bible is final authority.
+          {/* Footer Note */}
+          <div className="text-center pt-3 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+              *This is not a replacement for the infallible Word of God. The Bible is still the final Authority in all matters of our faith and practice.
+            </p>
           </div>
         </div>
       </div>
