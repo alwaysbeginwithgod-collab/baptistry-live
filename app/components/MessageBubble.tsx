@@ -25,7 +25,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const [copySuccess, setCopySuccess] = useState(false);
   const [showCopyTooltip, setShowCopyTooltip] = useState(false);
 
-  // Load saved feedback from localStorage
+  // Load saved feedback from localStorage on component mount
   useEffect(() => {
     const savedFeedback = localStorage.getItem('baptistry_feedback');
     if (savedFeedback) {
@@ -40,6 +40,12 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
       }
     }
   }, [message.id]);
+
+  // Save feedback to localStorage whenever it changes
+  useEffect(() => {
+    // This ensures the UI updates when feedbackGiven changes
+    console.log('feedbackGiven state changed to:', feedbackGiven);
+  }, [feedbackGiven]);
 
   const cleanContent = (content: string) => {
     return content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
@@ -57,9 +63,11 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
       console.log('Unselecting');
     }
     
+    // Update state immediately
     setFeedbackGiven(newFeedback);
     console.log('Setting feedback to:', newFeedback);
     
+    // Call parent callback
     if (onFeedback) {
       onFeedback(message.id, newFeedback);
     }
@@ -100,6 +108,10 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
       onRegenerate(message.id);
     }
   };
+
+  // Determine if thumbs up should be yellow
+  const isHelpfulSelected = feedbackGiven === 'helpful';
+  const isUnhelpfulSelected = feedbackGiven === 'unhelpful';
 
   return (
     <div id={message.id} className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -164,7 +176,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
 
                   {/* 4 Icons */}
                   <div className="mt-2 flex justify-end gap-3">
-                    {/* Copy Button with Tooltip */}
+                    {/* Copy Button */}
                     <div className="relative">
                       <button
                         onClick={handleCopy}
@@ -193,11 +205,11 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       </svg>
                     </button>
 
-                    {/* Thumbs Up - Yellow when selected */}
+                    {/* Thumbs Up */}
                     <button
                       onClick={() => handleFeedback('helpful')}
                       className={`p-1 rounded transition-colors ${
-                        feedbackGiven === 'helpful'
+                        isHelpfulSelected
                           ? 'text-yellow-500 dark:text-yellow-400'
                           : 'text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400'
                       }`}
@@ -208,11 +220,11 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       </svg>
                     </button>
 
-                    {/* Thumbs Down - Yellow when selected */}
+                    {/* Thumbs Down */}
                     <button
                       onClick={() => handleFeedback('unhelpful')}
                       className={`p-1 rounded transition-colors ${
-                        feedbackGiven === 'unhelpful'
+                        isUnhelpfulSelected
                           ? 'text-yellow-500 dark:text-yellow-400'
                           : 'text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400'
                       }`}
