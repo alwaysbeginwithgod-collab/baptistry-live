@@ -106,7 +106,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">What Is BAPTISTRY?</h2>
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  BAPTISTRY is a <strong>completely free, online King James Version (KJV) Bible study tool</strong> designed to help you:
+                Just as a baptistry (the pool where baptism is performed) is a place of public declaration and obedience, BAPTISTRY (the tool) is a <strong>completely free, online King James Version (KJV) Bible study tool</strong> designed to help every believers can:
                 </p>
                 <ul className="list-disc list-inside mt-2 space-y-1 text-gray-700 dark:text-gray-300 ml-2">
                   <li>🔍 Look up Scriptures instantly</li>
