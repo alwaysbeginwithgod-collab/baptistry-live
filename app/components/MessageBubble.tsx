@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 type Message = {
@@ -20,10 +20,25 @@ interface MessageBubbleProps {
 export default function MessageBubble({ message, onFeedback, onEdit, onRegenerate }: MessageBubbleProps) {
   const isUser = message.role === 'user';
   const [feedbackGiven, setFeedbackGiven] = useState<'helpful' | 'unhelpful' | null>(null);
-  const [showMenu, setShowMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(message.content);
   const [copySuccess, setCopySuccess] = useState(false);
+
+  // Load saved feedback from localStorage when component mounts
+  useEffect(() => {
+    const savedFeedback = localStorage.getItem('baptistry_feedback');
+    if (savedFeedback) {
+      try {
+        const feedbackLog = JSON.parse(savedFeedback);
+        const existing = feedbackLog.find((item: any) => item.messageId === message.id);
+        if (existing && existing.feedback) {
+          setFeedbackGiven(existing.feedback);
+        }
+      } catch (e) {
+        console.error('Failed to load feedback', e);
+      }
+    }
+  }, [message.id]);
 
   const cleanContent = (content: string) => {
     return content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
@@ -32,24 +47,22 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const cleanedContent = cleanContent(message.content);
 
   const handleFeedback = (type: 'helpful' | 'unhelpful') => {
+    let newFeedback: 'helpful' | 'unhelpful' | null = type;
+    
     // If clicking the same button, unselect it
     if (feedbackGiven === type) {
-      setFeedbackGiven(null);
-      if (onFeedback) {
-        onFeedback(message.id, null);
-      }
-    } else {
-      // Otherwise set the new feedback
-      setFeedbackGiven(type);
-      if (onFeedback) {
-        onFeedback(message.id, type);
-      }
+      newFeedback = null;
+    }
+    
+    setFeedbackGiven(newFeedback);
+    
+    if (onFeedback) {
+      onFeedback(message.id, newFeedback);
     }
   };
 
   const handleEdit = () => {
     setIsEditing(true);
-    setShowMenu(false);
   };
 
   const handleSave = () => {
@@ -72,7 +85,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
     } catch (err) {
       console.error('Failed to copy:', err);
     }
-    setShowMenu(false);
   };
 
   const handleRegenerate = () => {
@@ -167,7 +179,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                     </p>
                   </div>
 
-                  {/* 4 Icons for Assistant Messages: Copy, Regenerate, Helpful, Not Helpful */}
+                  {/* 4 Icons for Assistant Messages - RIGHT ALIGNED */}
                   <div className="mt-2 flex justify-end gap-3">
                     {/* Copy Button */}
                     <div className="relative">
@@ -201,7 +213,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                     {/* Helpful Button (Thumbs Up) - Yellow when selected */}
                     <button
                       onClick={() => handleFeedback('helpful')}
-                      className={`transition-colors p-1 rounded ${
+                      className={`p-1 rounded transition-colors ${
                         feedbackGiven === 'helpful'
                           ? 'text-yellow-500 dark:text-yellow-400'
                           : 'text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400'
@@ -216,7 +228,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                     {/* Not Helpful Button (Thumbs Down) - Yellow when selected */}
                     <button
                       onClick={() => handleFeedback('unhelpful')}
-                      className={`transition-colors p-1 rounded ${
+                      className={`p-1 rounded transition-colors ${
                         feedbackGiven === 'unhelpful'
                           ? 'text-yellow-500 dark:text-yellow-400'
                           : 'text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400'
@@ -233,47 +245,9 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
             </>
           )}
 
-          {/* Timestamp and action buttons for user messages */}
-          <div className={`text-xs mt-1 flex justify-between items-center ${isUser ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
-            <span>
-              {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
-
-            {/* Action buttons for user messages (only when not editing) */}
-            {isUser && onEdit && !isEditing && (
-              <div className="flex gap-1 items-center">
-                {/* Copy button */}
-                <div className="relative">
-                  <button
-                    onClick={handleCopy}
-                    className="text-blue-200 hover:text-white dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded transition-colors"
-                    title="Copy message"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                    </svg>
-                  </button>
-                  {copySuccess && (
-                    <span className="absolute bottom-full right-0 mb-1 px-2 py-1 text-xs bg-gray-800 text-white rounded whitespace-nowrap">
-                      Copied!
-                    </span>
-                  )}
-                </div>
-
-                {/* Edit button */}
-                <div className="relative">
-                  <button
-                    onClick={handleEdit}
-                    className="text-blue-200 hover:text-white dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded transition-colors"
-                    title="Edit message"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            )}
+          {/* Timestamp */}
+          <div className={`text-xs mt-1 text-right ${isUser ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
+            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
         </div>
       </div>
