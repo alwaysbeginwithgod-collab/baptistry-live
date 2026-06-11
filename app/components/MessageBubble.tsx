@@ -148,7 +148,7 @@ export default function MessageBubble({ message, onFeedback, onEdit }: MessageBu
                   {/* Footer Note */}
                   <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
                     <p className="text-xs text-gray-400 dark:text-gray-500 italic">
-                      *AI-generated for educational purposes only. The Bible is the final authority in all our knowledge.
+                      *AI-generated for educational purposes only. The Bible is the final authority in all matters of faith and practice.
                     </p>
                   </div>
 
