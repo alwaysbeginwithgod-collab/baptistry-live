@@ -25,11 +25,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const [copySuccess, setCopySuccess] = useState(false);
   const [showCopyTooltip, setShowCopyTooltip] = useState(false);
 
-  // Debug: log when feedbackStatus changes
-  useEffect(() => {
-    console.log('MessageBubble received feedbackStatus:', feedbackStatus, 'for message:', message.id);
-  }, [feedbackStatus, message.id]);
-
   const cleanContent = (content: string) => {
     return content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
   };
@@ -37,7 +32,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const cleanedContent = cleanContent(message.content);
 
   const handleFeedback = (type: 'helpful' | 'unhelpful') => {
-    console.log('Thumb clicked:', type, 'current status:', feedbackStatus);
     if (!onFeedback) return;
     
     let newFeedback: 'helpful' | 'unhelpful' | null = type;
@@ -177,11 +171,14 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       </svg>
                     </button>
 
-                    {/* Thumbs Up - Using inline style */}
+                    {/* Thumbs Up */}
                     <button
                       onClick={() => handleFeedback('helpful')}
-                      style={{ color: isHelpfulSelected ? '#eab308' : '#9ca3af' }}
-                      className="p-1 rounded hover:opacity-80 transition-all"
+                      className={`p-1 rounded transition-all ${
+                        isHelpfulSelected 
+                          ? 'text-yellow-500 dark:text-yellow-400' 
+                          : 'text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400'
+                      }`}
                       title="Helpful"
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -189,11 +186,14 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       </svg>
                     </button>
 
-                    {/* Thumbs Down - Using inline style */}
+                    {/* Thumbs Down */}
                     <button
                       onClick={() => handleFeedback('unhelpful')}
-                      style={{ color: isUnhelpfulSelected ? '#eab308' : '#9ca3af' }}
-                      className="p-1 rounded hover:opacity-80 transition-all"
+                      className={`p-1 rounded transition-all ${
+                        isUnhelpfulSelected 
+                          ? 'text-yellow-500 dark:text-yellow-400' 
+                          : 'text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400'
+                      }`}
                       title="Not helpful"
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
