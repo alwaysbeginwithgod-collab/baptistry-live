@@ -243,9 +243,17 @@ export default function MainContent() {
     }, 100);
   };
 
-  const handleFeedback = (messageId: string, feedback: 'helpful' | 'unhelpful' | null) => {
-    // Update local state
-    setMessageFeedback(prev => ({ ...prev, [messageId]: feedback }));
+const handleFeedback = (messageId: string, feedback: 'helpful' | 'unhelpful' | null) => {
+  console.log('=== MAINCONTENT HANDLEFEEDBACK ===');
+  console.log('Message ID:', messageId);
+  console.log('Feedback received:', feedback);
+  
+  // Update local state
+  setMessageFeedback(prev => {
+    const newState = { ...prev, [messageId]: feedback };
+    console.log('New messageFeedback state:', newState);
+    return newState;
+  });
     
     // Save to localStorage
     const savedFeedback = localStorage.getItem('baptistry_feedback');

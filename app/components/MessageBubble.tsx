@@ -31,15 +31,23 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
 
   const cleanedContent = cleanContent(message.content);
 
-  const handleFeedback = (type: 'helpful' | 'unhelpful') => {
-    if (!onFeedback) return;
-    
-    let newFeedback: 'helpful' | 'unhelpful' | null = type;
-    if (feedbackStatus === type) {
-      newFeedback = null;
-    }
-    onFeedback(message.id, newFeedback);
-  };
+const handleFeedback = (type: 'helpful' | 'unhelpful') => {
+  console.log('=== THUMBS CLICKED ===');
+  console.log('Type clicked:', type);
+  console.log('Current feedbackStatus from parent:', feedbackStatus);
+  console.log('onFeedback exists?', !!onFeedback);
+  
+  if (!onFeedback) return;
+  
+  let newFeedback: 'helpful' | 'unhelpful' | null = type;
+  if (feedbackStatus === type) {
+    newFeedback = null;
+    console.log('Unselecting - newFeedback will be null');
+  }
+  
+  console.log('Calling onFeedback with:', message.id, newFeedback);
+  onFeedback(message.id, newFeedback);
+};
 
   const handleEdit = () => {
     setIsEditing(true);
