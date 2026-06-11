@@ -12,7 +12,7 @@ type Message = {
 
 interface MessageBubbleProps {
   message: Message;
-  onFeedback?: (messageId: string, feedback: 'helpful' | 'unhelpful') => void;
+  onFeedback?: (messageId: string, feedback: 'helpful' | 'unhelpful' | null) => void;
   onEdit?: (messageId: string, newContent: string) => void;
   onRegenerate?: (messageId: string) => void;
 }
@@ -32,12 +32,20 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const cleanedContent = cleanContent(message.content);
 
   const handleFeedback = (type: 'helpful' | 'unhelpful') => {
-    if (feedbackGiven) return;
+  // If clicking the same button, unselect it
+  if (feedbackGiven === type) {
+    setFeedbackGiven(null);
+    if (onFeedback) {
+      onFeedback(message.id, null as any);
+    }
+  } else {
+    // Otherwise set the new feedback
     setFeedbackGiven(type);
     if (onFeedback) {
       onFeedback(message.id, type);
     }
-  };
+  }
+};
 
   const handleEdit = () => {
     setIsEditing(true);

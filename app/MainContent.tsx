@@ -242,20 +242,37 @@ export default function MainContent() {
     }, 100);
   };
 
-  const handleFeedback = (messageId: string, feedback: 'helpful' | 'unhelpful') => {
-    const savedFeedback = localStorage.getItem('baptistry_feedback');
-    const feedbackLog = savedFeedback ? JSON.parse(savedFeedback) : [];
-    
-    feedbackLog.push({
-      messageId,
-      feedback,
-      timestamp: new Date().toISOString(),
-      conversationId: currentConversationId,
-    });
-    
+const handleFeedback = (messageId: string, feedback: 'helpful' | 'unhelpful' | null) => {
+  const savedFeedback = localStorage.getItem('baptistry_feedback');
+  const feedbackLog = savedFeedback ? JSON.parse(savedFeedback) : [];
+  
+  if (feedback === null) {
+    // Remove existing feedback for this message
+    const filtered = feedbackLog.filter((item: any) => item.messageId !== messageId);
+    localStorage.setItem('baptistry_feedback', JSON.stringify(filtered));
+    console.log('Feedback removed for:', messageId);
+  } else {
+    // Add or update feedback
+    const existingIndex = feedbackLog.findIndex((item: any) => item.messageId === messageId);
+    if (existingIndex !== -1) {
+      feedbackLog[existingIndex] = {
+        messageId,
+        feedback,
+        timestamp: new Date().toISOString(),
+        conversationId: currentConversationId,
+      };
+    } else {
+      feedbackLog.push({
+        messageId,
+        feedback,
+        timestamp: new Date().toISOString(),
+        conversationId: currentConversationId,
+      });
+    }
     localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
     console.log('Feedback recorded:', { messageId, feedback });
-  };
+  }
+};
 
   const editMessage = (messageId: string, newContent: string) => {
     const messageIndex = messages.findIndex(m => m.id === messageId);
@@ -275,6 +292,14 @@ export default function MainContent() {
   };
 
 const regenerateMessage = async (assistantMessageId: string) => {
+  // Stop any ongoing generation
+  if (stopRequested.current) {
+    stopRequested.current = false;
+  }
+  if (isGenerating) {
+    setIsGenerating(false);
+  }
+  
   // Find the assistant message
   const assistantIndex = messages.findIndex(m => m.id === assistantMessageId);
   if (assistantIndex === -1) return;
@@ -288,22 +313,69 @@ const regenerateMessage = async (assistantMessageId: string) => {
   if (userMessageIndex < 0) return;
   
   const userMessageContent = messages[userMessageIndex].content;
+  const userMessageId = messages[userMessageIndex].id;
   
-  // Remove the assistant message and all messages after it (if any)
+  // Remove the assistant message only (keep the user message)
   const newMessages = messages.slice(0, assistantIndex);
   setMessages(newMessages);
-  setCurrentConversationId(currentConversationId);
   
-  // Set the input to the user's original message and send it
-  setInput(userMessageContent);
-  setTimeout(() => {
-    autoResizeTextarea();
-    textareaRef.current?.focus();
-    // Send the message after a short delay
-    setTimeout(() => {
-      sendMessage();
-    }, 100);
-  }, 50);
+  // Now send the user message again to get a new response
+  setIsGenerating(true);
+  setStreamingText('');
+  stopRequested.current = false;
+  
+  try {
+    // Get conversation history up to the user message
+    const history = newMessages;
+    
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: userMessageContent, history: history }),
+    });
+
+    const data = await response.json();
+    let fullResponse = data.response || 'I apologize, but I encountered an error. Please try again.';
+    
+    fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '');
+    fullResponse = fullResponse.replace(/^We need to.*?\.\s*/i, '');
+    fullResponse = fullResponse.replace(/^I need to.*?\.\s*/i, '');
+    fullResponse = fullResponse.trim();
+
+    // Type the response with chunking for speed
+    const chunkSize = 4;
+    for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+      if (stopRequested.current) {
+        setIsGenerating(false);
+        setStreamingText('');
+        return;
+      }
+      setStreamingText(fullResponse.substring(0, i));
+      await new Promise(resolve => setTimeout(resolve, 5));
+    }
+
+    const newAssistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: fullResponse,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, newAssistantMessage]);
+    setStreamingText('');
+    setIsGenerating(false);
+
+  } catch (error) {
+    console.error('Error:', error);
+    const errorMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: 'I apologize, but I am unable to respond at this moment. Please try again later.',
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, errorMessage]);
+    setIsGenerating(false);
+    setStreamingText('');
+  }
 };
 
   const stopResponse = () => {
