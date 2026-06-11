@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 type Message = {
@@ -15,39 +15,15 @@ interface MessageBubbleProps {
   onFeedback?: (messageId: string, feedback: 'helpful' | 'unhelpful' | null) => void;
   onEdit?: (messageId: string, newContent: string) => void;
   onRegenerate?: (messageId: string) => void;
+  feedbackStatus?: 'helpful' | 'unhelpful' | null;
 }
 
-export default function MessageBubble({ message, onFeedback, onEdit, onRegenerate }: MessageBubbleProps) {
+export default function MessageBubble({ message, onFeedback, onEdit, onRegenerate, feedbackStatus }: MessageBubbleProps) {
   const isUser = message.role === 'user';
-  
-  // Initialize state directly from localStorage
-  const getInitialFeedback = () => {
-    try {
-      const savedFeedback = localStorage.getItem('baptistry_feedback');
-      if (savedFeedback) {
-        const feedbackLog = JSON.parse(savedFeedback);
-        const existing = feedbackLog.find((item: any) => item.messageId === message.id);
-        if (existing && existing.feedback) {
-          return existing.feedback;
-        }
-      }
-    } catch (e) {
-      console.error('Failed to load feedback', e);
-    }
-    return null;
-  };
-
-  const [feedbackGiven, setFeedbackGiven] = useState<'helpful' | 'unhelpful' | null>(getInitialFeedback);
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(message.content);
   const [copySuccess, setCopySuccess] = useState(false);
   const [showCopyTooltip, setShowCopyTooltip] = useState(false);
-
-  // Save feedback to localStorage whenever it changes
-  useEffect(() => {
-    // This effect runs when feedbackGiven changes
-    console.log('feedbackGiven changed to:', feedbackGiven);
-  }, [feedbackGiven]);
 
   const cleanContent = (content: string) => {
     return content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
@@ -56,22 +32,13 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const cleanedContent = cleanContent(message.content);
 
   const handleFeedback = (type: 'helpful' | 'unhelpful') => {
-    console.log('Feedback clicked:', type, 'current:', feedbackGiven);
+    if (!onFeedback) return;
     
     let newFeedback: 'helpful' | 'unhelpful' | null = type;
-    
-    if (feedbackGiven === type) {
+    if (feedbackStatus === type) {
       newFeedback = null;
     }
-    
-    // Update state
-    setFeedbackGiven(newFeedback);
-    console.log('Setting feedback to:', newFeedback);
-    
-    // Call parent callback
-    if (onFeedback) {
-      onFeedback(message.id, newFeedback);
-    }
+    onFeedback(message.id, newFeedback);
   };
 
   const handleEdit = () => {
@@ -110,9 +77,8 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
     }
   };
 
-  // Force re-evaluation of selected state
-  const isHelpfulSelected = feedbackGiven === 'helpful';
-  const isUnhelpfulSelected = feedbackGiven === 'unhelpful';
+  const isHelpfulSelected = feedbackStatus === 'helpful';
+  const isUnhelpfulSelected = feedbackStatus === 'unhelpful';
 
   return (
     <div id={message.id} className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -175,7 +141,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                     </p>
                   </div>
 
-                  {/* 4 Icons */}
                   <div className="mt-2 flex justify-end gap-3">
                     {/* Copy Button */}
                     <div className="relative">
@@ -209,8 +174,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                     {/* Thumbs Up */}
                     <button
                       onClick={() => handleFeedback('helpful')}
-                      style={{ color: isHelpfulSelected ? '#eab308' : undefined }}
-                      className="p-1 rounded transition-colors hover:text-yellow-500"
+                      className={`p-1 rounded transition-colors ${isHelpfulSelected ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
                       title="Helpful"
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -221,8 +185,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                     {/* Thumbs Down */}
                     <button
                       onClick={() => handleFeedback('unhelpful')}
-                      style={{ color: isUnhelpfulSelected ? '#eab308' : undefined }}
-                      className="p-1 rounded transition-colors hover:text-yellow-500"
+                      className={`p-1 rounded transition-colors ${isUnhelpfulSelected ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
                       title="Not helpful"
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
