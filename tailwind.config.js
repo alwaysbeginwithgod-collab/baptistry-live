@@ -11,10 +11,14 @@ module.exports = {
         'baptistry-primary': '#1e3a5f',
         'baptistry-secondary': '#8b4513',
         'baptistry-gold': '#c5a059',
+        'thumbs-yellow': {
+          light: '#eab308',  // Visible in light mode
+          dark: '#facc15',   // Brighter for dark mode
+        },
       },
     },
   },
   plugins: [
-    require('@tailwindcss/typography'),  // ← This line is critical
+    require('@tailwindcss/typography'),
   ],
 }

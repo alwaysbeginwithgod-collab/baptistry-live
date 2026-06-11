@@ -176,7 +176,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       onClick={() => handleFeedback('helpful')}
                       className={`p-1 rounded transition-all ${
                         isHelpfulSelected 
-                          ? 'text-yellow-500 dark:text-yellow-400' 
+                          ? 'text-yellow-500 dark:text-yellow-300' 
                           : 'text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400'
                       }`}
                       title="Helpful"
@@ -191,8 +191,8 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       onClick={() => handleFeedback('unhelpful')}
                       className={`p-1 rounded transition-all ${
                         isUnhelpfulSelected 
-                          ? 'text-yellow-500 dark:text-yellow-400' 
-                          : 'text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400'
+                          ? 'text-thumbs-yellow-light dark:text-thumbs-yellow-dark' 
+                          : 'text-gray-400 hover:text-thumbs-yellow-light dark:hover:text-thumbs-yellow-dark'
                       }`}
                       title="Not helpful"
                     >
