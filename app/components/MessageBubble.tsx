@@ -171,7 +171,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       </svg>
                     </button>
 
-                    {/* Thumbs Up - Now with background color like the pin ribbon */}
+                    {/* Thumbs Up */}
                     <button
                       onClick={() => handleFeedback('helpful')}
                       className={`p-1 rounded transition-all ${
@@ -186,7 +186,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       </svg>
                     </button>
 
-                    {/* Thumbs Down - Now with background color like the pin ribbon */}
+                    {/* Thumbs Down */}
                     <button
                       onClick={() => handleFeedback('unhelpful')}
                       className={`p-1 rounded transition-all ${
@@ -206,8 +206,53 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
             </>
           )}
 
-          <div className={`text-xs mt-1 text-right ${isUser ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
-            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {/* Timestamp and action buttons for user messages */}
+          <div className={`text-xs mt-1 flex justify-between items-center ${isUser ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
+            <span>
+              {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+
+            {/* Action buttons for user messages (only when not editing) */}
+            {isUser && onEdit && !isEditing && (
+              <div className="flex gap-2 items-center">
+                {/* Copy button with tooltip */}
+                <div className="relative group">
+                  <button
+                    onClick={handleCopy}
+                    className="text-blue-200 hover:text-white dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                  </button>
+                  {/* Tooltip */}
+                  <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-0.5 text-xs bg-gray-800 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                    Copy
+                  </span>
+                  {copySuccess && (
+                    <span className="absolute bottom-full right-0 mb-1 px-2 py-1 text-xs bg-gray-800 text-white rounded whitespace-nowrap">
+                      Copied!
+                    </span>
+                  )}
+                </div>
+
+                {/* Edit button with tooltip */}
+                <div className="relative group">
+                  <button
+                    onClick={handleEdit}
+                    className="text-blue-200 hover:text-white dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  {/* Tooltip */}
+                  <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-0.5 text-xs bg-gray-800 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                    Edit
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
