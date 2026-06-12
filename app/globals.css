@@ -444,3 +444,23 @@ body {
 .prose li {
   margin-bottom: 0.25rem;
 }
+
+/* Unified link styling for both light and dark mode */
+.link-unified {
+  @apply text-blue-600 dark:text-blue-400 hover:underline cursor-pointer transition-colors;
+}
+
+/* Unified text color */
+.text-unified {
+  @apply text-gray-800 dark:text-gray-200;
+}
+
+/* Unified muted text */
+.text-muted {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+/* Unified link styling for both light and dark mode */
+.link-unified {
+  @apply text-blue-600 dark:text-blue-400 hover:underline cursor-pointer transition-colors;
+}

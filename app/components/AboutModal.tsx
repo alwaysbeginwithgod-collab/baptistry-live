@@ -203,13 +203,13 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
               <p className="text-gray-800 dark:text-gray-200 text-base">
                 📧 <button 
                   onClick={() => setShowEmailModal(true)}
-                  className="text-blue-600 dark:text-blue-400 hover:underline font-medium cursor-pointer"
+                  className="link-unified font-medium"
                 >
                   always.begin.with.god@gmail.com
                 </button>
               </p>
               <p className="text-gray-800 dark:text-gray-200 text-base">
-                🏛️ <a href="https://www.bordergatebaptist.net" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">bordergatebaptist.net</a>
+                🏛️ <a href="https://www.bordergatebaptist.net" target="_blank" rel="noopener noreferrer" className="link-unified font-medium">bordergatebaptist.net</a>
               </p>
             </div>
 
