@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import BookDetailModal from './BookDetailModal';
-import EmailModal from './EmailModal';
+import EmailContactModal from './EmailContactModal';
 
 interface BooksModalProps {
   isOpen: boolean;
@@ -280,7 +280,7 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
                 <span className="text-gray-400">•</span>
                 <button 
                   onClick={() => setShowEmailModal(true)}
-                  className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                  className="text-blue-600 hover:underline"
                 >
                   Email us
                 </button>
@@ -300,8 +300,8 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
         book={selectedBook}
       />
 
-      {/* Email Modal */}
-      <EmailModal 
+      {/* Email Contact Modal */}
+      <EmailContactModal 
         isOpen={showEmailModal} 
         onClose={() => setShowEmailModal(false)} 
         email="always.begin.with.god@gmail.com"
