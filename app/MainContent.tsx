@@ -86,8 +86,13 @@ export default function MainContent() {
     
     if (loadConversationsFromCloud === undefined) return;
     
-    if (loadConversationsFromCloud && loadConversationsFromCloud !== "skip") {
-      const cloudConversations = loadConversationsFromCloud as Conversation[];
+    // Helper function to check if we have valid conversation data
+    const isValidConversationData = (data: any): data is Conversation[] => {
+      return data !== null && data !== "skip" && Array.isArray(data);
+    };
+    
+    if (isValidConversationData(loadConversationsFromCloud)) {
+      const cloudConversations = loadConversationsFromCloud;
       if (cloudConversations.length > 0) {
         setConversations(cloudConversations);
         localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(cloudConversations));
@@ -116,7 +121,7 @@ export default function MainContent() {
     } else {
       setConversations([]);
     }
-  }, [userId, loadConversationsFromCloud]);
+  }, [userId, loadConversationsFromCloud, saveConversationsToCloud]);
 
   // Save conversations to Convex cloud AND localStorage
   useEffect(() => {
@@ -124,7 +129,7 @@ export default function MainContent() {
       localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
       saveConversationsToCloud({ userId, conversations });
     }
-  }, [conversations, userId]);
+  }, [conversations, userId, saveConversationsToCloud]);
 
   // Save current conversation when messages change
   useEffect(() => {

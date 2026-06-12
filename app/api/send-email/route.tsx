@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
   try {
@@ -11,8 +11,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    const result = await resend.emails.send({
-      from: 'onboarding@resend.dev', // Resend's testing sender (will change after domain verification)
+    // Only initialize Resend at runtime
+    const { Resend } = await import('resend');
+    const apiKey = process.env.RESEND_API_KEY;
+    
+    if (!apiKey) {
+      return NextResponse.json({ error: 'Email service not configured' }, { status: 500 });
+    }
+    
+    const resend = new Resend(apiKey);
+
+    await resend.emails.send({
+      from: 'onboarding@resend.dev',
       to: 'always.begin.with.god@gmail.com',
       subject: `BAPTISTRY Message from ${name || 'Visitor'}`,
       html: `
@@ -21,16 +31,11 @@ export async function POST(request: Request) {
         <p><strong>Reply to:</strong> ${email || 'Not provided'}</p>
         <hr/>
         <p><strong>Message:</strong></p>
-        <p style="white-space: pre-wrap;">${message}</p>
+        <p>${message.replace(/\n/g, '<br/>')}</p>
         <hr/>
         <p><small>Sent from BAPTISTRY Bible Study Tool</small></p>
       `,
     });
-
-    if (result.error) {
-      console.error('Resend error:', result.error);
-      return NextResponse.json({ error: result.error.message }, { status: 500 });
-    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
