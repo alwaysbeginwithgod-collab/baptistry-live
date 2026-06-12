@@ -6,8 +6,6 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MessageBubble from './components/MessageBubble';
 import { useUser } from '@clerk/nextjs';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '../convex/_generated/api';
 
 type Message = {
   id: string;
@@ -28,13 +26,6 @@ type Conversation = {
 export default function MainContent() {
   const { user } = useUser();
   const userId = user?.id;
-
-  // Convex mutations and queries
-  const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
-  const loadConversationsFromCloud = useQuery(
-    api.conversations.loadConversations,
-    userId ? { userId } : "skip"
-  );
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -77,29 +68,12 @@ export default function MainContent() {
     autoResizeTextarea();
   };
 
-  // Load conversations from Convex cloud and fallback to localStorage
+  // Load conversations from localStorage
   useEffect(() => {
     if (!userId) {
       setConversations([]);
       return;
     }
-    
-    if (loadConversationsFromCloud === undefined) return;
-    
-    // Helper function to check if we have valid conversation data
-    const isValidConversationData = (data: any): data is Conversation[] => {
-      return data !== null && data !== "skip" && Array.isArray(data);
-    };
-    
-    if (isValidConversationData(loadConversationsFromCloud)) {
-      const cloudConversations = loadConversationsFromCloud;
-      if (cloudConversations.length > 0) {
-        setConversations(cloudConversations);
-        localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(cloudConversations));
-        return;
-      }
-    }
-    
     const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
     if (savedConversations) {
       try {
@@ -114,22 +88,18 @@ export default function MainContent() {
           })),
         }));
         setConversations(withDates);
-        saveConversationsToCloud({ userId, conversations: withDates });
       } catch (e) {
         console.error('Failed to load conversations', e);
       }
-    } else {
-      setConversations([]);
     }
-  }, [userId, loadConversationsFromCloud, saveConversationsToCloud]);
+  }, [userId]);
 
-  // Save conversations to Convex cloud AND localStorage
+  // Save conversations to localStorage
   useEffect(() => {
     if (conversations.length > 0 && userId) {
       localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
-      saveConversationsToCloud({ userId, conversations });
     }
-  }, [conversations, userId, saveConversationsToCloud]);
+  }, [conversations, userId]);
 
   // Save current conversation when messages change
   useEffect(() => {
@@ -323,81 +293,10 @@ export default function MainContent() {
     
     setTimeout(() => {
       autoResizeTextarea();
-      const sendEditedMessage = async () => {
-        if (!newContent.trim()) return;
-        
-        if (!currentConversationId) {
-          const newConversation: Conversation = {
-            id: Date.now().toString(),
-            title: newContent.substring(0, 40),
-            messages: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            pinned: false,
-          };
-          setConversations(prev => [newConversation, ...prev]);
-          setCurrentConversationId(newConversation.id);
-        }
-        
-        const userMessage: Message = {
-          id: Date.now().toString(),
-          role: 'user',
-          content: newContent,
-          timestamp: new Date(),
-        };
-        
-        setMessages(prev => [...prev, userMessage]);
-        setIsGenerating(true);
-        setStreamingText('');
-        stopRequested.current = false;
-        
-        try {
-          const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: newContent, history: newMessages }),
-          });
-          
-          const data = await response.json();
-          let fullResponse = data.response || 'I apologize, but I encountered an error.';
-          fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-          
-          const chunkSize = 4;
-          for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-            if (stopRequested.current) {
-              setIsGenerating(false);
-              setStreamingText('');
-              return;
-            }
-            setStreamingText(fullResponse.substring(0, i));
-            await new Promise(resolve => setTimeout(resolve, 5));
-          }
-          
-          const assistantMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: fullResponse,
-            timestamp: new Date(),
-          };
-          setMessages(prev => [...prev, assistantMessage]);
-          setStreamingText('');
-          setIsGenerating(false);
-        } catch (error) {
-          console.error('Error:', error);
-          const errorMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: 'I apologize, but I am unable to respond at this moment.',
-            timestamp: new Date(),
-          };
-          setMessages(prev => [...prev, errorMessage]);
-          setIsGenerating(false);
-          setStreamingText('');
-        }
-      };
-      
-      sendEditedMessage();
-    }, 100);
+      setTimeout(() => {
+        sendMessage();
+      }, 100);
+    }, 50);
   };
 
   const regenerateMessage = async (assistantMessageId: string) => {
@@ -427,12 +326,8 @@ export default function MainContent() {
       });
 
       const data = await response.json();
-      let fullResponse = data.response || 'I apologize, but I encountered an error. Please try again.';
-      
-      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '');
-      fullResponse = fullResponse.replace(/^We need to.*?\.\s*/i, '');
-      fullResponse = fullResponse.replace(/^I need to.*?\.\s*/i, '');
-      fullResponse = fullResponse.trim();
+      let fullResponse = data.response || 'I apologize, but I encountered an error.';
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
       const chunkSize = 4;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
@@ -517,12 +412,8 @@ export default function MainContent() {
       });
 
       const data = await response.json();
-      let fullResponse = data.response || 'I apologize, but I encountered an error. Please try again.';
-      
-      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '');
-      fullResponse = fullResponse.replace(/^We need to.*?\.\s*/i, '');
-      fullResponse = fullResponse.replace(/^I need to.*?\.\s*/i, '');
-      fullResponse = fullResponse.trim();
+      let fullResponse = data.response || 'I apologize, but I encountered an error.';
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
       const chunkSize = 4;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
