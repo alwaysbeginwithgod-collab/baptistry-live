@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import BookDetailModal from './BookDetailModal';
+import EmailModal from './EmailModal';
 
 interface BooksModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface BooksModalProps {
 
 export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
   const [selectedBook, setSelectedBook] = useState<any>(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
 
   if (!isOpen) return null;
 
@@ -276,11 +278,12 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
                 <span className="text-gray-400">•</span>
                 <a href="https://payhip.com/AlwaysBeginWithGod" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Payhip</a>
                 <span className="text-gray-400">•</span>
-                <a href="mailto:always.begin.with.god@gmail.com?subject=BAPTISTRY%20Book%20Inquiry&body=Hello%20Preacher,%0D%0A%0D%0AI%20have%20a%20question%20about%20your%20books:%0D%0A%0D%0A" 
-  className="text-blue-600 dark:text-blue-400 hover:underline"
->
-  Email us
-</a>
+                <button 
+                  onClick={() => setShowEmailModal(true)}
+                  className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                >
+                  Email us
+                </button>
               </div>
               <p className="text-xs text-gray-400 mt-3 italic">
                 Thank you for supporting BAPTISTRY ministry.
@@ -295,6 +298,13 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
         isOpen={selectedBook !== null} 
         onClose={() => setSelectedBook(null)} 
         book={selectedBook}
+      />
+
+      {/* Email Modal */}
+      <EmailModal 
+        isOpen={showEmailModal} 
+        onClose={() => setShowEmailModal(false)} 
+        email="always.begin.with.god@gmail.com"
       />
     </>
   );
