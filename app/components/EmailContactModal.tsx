@@ -30,6 +30,8 @@ export default function EmailContactModal({ isOpen, onClose, email }: EmailConta
         body: JSON.stringify({ name, email: userEmail, message }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         setSent(true);
         setTimeout(() => {
@@ -40,10 +42,10 @@ export default function EmailContactModal({ isOpen, onClose, email }: EmailConta
           onClose();
         }, 3000);
       } else {
-        setError('Failed to send. Please try again or email us directly.');
+        setError(data.error || 'Failed to send. Please try again.');
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError('Network error. Please check your connection.');
     } finally {
       setIsSending(false);
     }

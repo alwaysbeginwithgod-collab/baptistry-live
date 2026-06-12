@@ -1,33 +1,36 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
   try {
-    const { name, message, email } = await request.json();
+    const { name, email, message } = await request.json();
 
-    // Create transporter (you'll need to add your email credentials)
-    const transporter = nodemailer.createTransporter({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: true,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    if (!message) {
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    }
 
-    await transporter.sendMail({
-      from: process.env.FROM_EMAIL,
+    const result = await resend.emails.send({
+      from: 'onboarding@resend.dev', // Resend's testing sender (will change after domain verification)
       to: 'always.begin.with.god@gmail.com',
       subject: `BAPTISTRY Message from ${name || 'Visitor'}`,
       html: `
-        <h2>New Message from BAPTISTRY</h2>
+        <h2>📧 New Message from BAPTISTRY</h2>
         <p><strong>From:</strong> ${name || 'Anonymous'}</p>
-        <p><strong>Email:</strong> ${email || 'Not provided'}</p>
+        <p><strong>Reply to:</strong> ${email || 'Not provided'}</p>
+        <hr/>
         <p><strong>Message:</strong></p>
-        <p>${message.replace(/\n/g, '<br/>')}</p>
+        <p style="white-space: pre-wrap;">${message}</p>
+        <hr/>
+        <p><small>Sent from BAPTISTRY Bible Study Tool</small></p>
       `,
     });
+
+    if (result.error) {
+      console.error('Resend error:', result.error);
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
