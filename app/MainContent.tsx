@@ -284,22 +284,32 @@ const handleFeedback = (messageId: string, feedback: 'helpful' | 'unhelpful' | n
     localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
   };
 
-  const editMessage = (messageId: string, newContent: string) => {
-    const messageIndex = messages.findIndex(m => m.id === messageId);
-    if (messageIndex === -1) return;
-    
-    const originalMessage = messages[messageIndex];
-    if (originalMessage.role !== 'user') return;
-    
-    const newMessages = messages.slice(0, messageIndex);
-    setMessages(newMessages);
-    setInput(newContent);
-    
+const editMessage = (messageId: string, newContent: string) => {
+  console.log('Edit message called:', messageId, newContent);
+  
+  const messageIndex = messages.findIndex(m => m.id === messageId);
+  if (messageIndex === -1) return;
+  
+  const originalMessage = messages[messageIndex];
+  if (originalMessage.role !== 'user') return;
+  
+  // Remove this message and all messages after it (including assistant's response)
+  const newMessages = messages.slice(0, messageIndex);
+  setMessages(newMessages);
+  
+  // Set the edited text as input
+  setInput(newContent);
+  
+  // Auto-resize textarea and send after a short delay
+  setTimeout(() => {
+    autoResizeTextarea();
+    textareaRef.current?.focus();
+    // Send the message automatically
     setTimeout(() => {
-      autoResizeTextarea();
-      textareaRef.current?.focus();
+      sendMessage();
     }, 50);
-  };
+  }, 50);
+};
 
 const regenerateMessage = async (assistantMessageId: string) => {
   console.log('=== REGENERATE CALLED ===');
