@@ -6,6 +6,8 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MessageBubble from './components/MessageBubble';
 import { useUser } from '@clerk/nextjs';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '../convex/_generated/api';
 
 type Message = {
   id: string;
@@ -26,6 +28,13 @@ type Conversation = {
 export default function MainContent() {
   const { user } = useUser();
   const userId = user?.id;
+
+  // Convex mutations and queries
+  const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
+  const loadConversationsFromCloud = useQuery(
+    api.conversations.loadConversations,
+    userId ? { userId } : "skip"
+  );
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -68,12 +77,24 @@ export default function MainContent() {
     autoResizeTextarea();
   };
 
-  // Load conversations from localStorage
+  // Load conversations from Convex cloud and fallback to localStorage
   useEffect(() => {
     if (!userId) {
       setConversations([]);
       return;
     }
+    
+    if (loadConversationsFromCloud === undefined) return;
+    
+    if (loadConversationsFromCloud && loadConversationsFromCloud !== "skip") {
+      const cloudConversations = loadConversationsFromCloud as Conversation[];
+      if (cloudConversations.length > 0) {
+        setConversations(cloudConversations);
+        localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(cloudConversations));
+        return;
+      }
+    }
+    
     const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
     if (savedConversations) {
       try {
@@ -88,16 +109,20 @@ export default function MainContent() {
           })),
         }));
         setConversations(withDates);
+        saveConversationsToCloud({ userId, conversations: withDates });
       } catch (e) {
         console.error('Failed to load conversations', e);
       }
+    } else {
+      setConversations([]);
     }
-  }, [userId]);
+  }, [userId, loadConversationsFromCloud]);
 
-  // Save conversations to localStorage
+  // Save conversations to Convex cloud AND localStorage
   useEffect(() => {
     if (conversations.length > 0 && userId) {
       localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
+      saveConversationsToCloud({ userId, conversations });
     }
   }, [conversations, userId]);
 
@@ -243,19 +268,9 @@ export default function MainContent() {
     }, 100);
   };
 
-const handleFeedback = (messageId: string, feedback: 'helpful' | 'unhelpful' | null) => {
-  console.log('=== MAINCONTENT HANDLEFEEDBACK ===');
-  console.log('Message ID:', messageId);
-  console.log('Feedback received:', feedback);
-  
-  // Update local state
-  setMessageFeedback(prev => {
-    const newState = { ...prev, [messageId]: feedback };
-    console.log('New messageFeedback state:', newState);
-    return newState;
-  });
+  const handleFeedback = (messageId: string, feedback: 'helpful' | 'unhelpful' | null) => {
+    setMessageFeedback(prev => ({ ...prev, [messageId]: feedback }));
     
-    // Save to localStorage
     const savedFeedback = localStorage.getItem('baptistry_feedback');
     const feedbackLog = savedFeedback ? JSON.parse(savedFeedback) : [];
     
@@ -284,189 +299,169 @@ const handleFeedback = (messageId: string, feedback: 'helpful' | 'unhelpful' | n
     localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
   };
 
-const editMessage = (messageId: string, newContent: string) => {
-  const messageIndex = messages.findIndex(m => m.id === messageId);
-  if (messageIndex === -1) return;
-  
-  const originalMessage = messages[messageIndex];
-  if (originalMessage.role !== 'user') return;
-  
-  // Force reset any ongoing generation
-  setIsGenerating(false);
-  setStreamingText('');
-  if (stopRequested.current) {
-    stopRequested.current = false;
-  }
-  
-  // Remove this message and all messages after it
-  const newMessages = messages.slice(0, messageIndex);
-  setMessages(newMessages);
-  
-  // Set the edited text as input
-  setInput(newContent);
-  
-  // Send automatically after a short delay
-  setTimeout(() => {
-    autoResizeTextarea();
-    // Use a direct fetch instead of sendMessage to bypass any state issues
-    const sendEditedMessage = async () => {
-      if (!newContent.trim()) return;
-      
-      // Create a new conversation if needed
-      if (!currentConversationId) {
-        const newConversation: Conversation = {
-          id: Date.now().toString(),
-          title: newContent.substring(0, 40),
-          messages: [],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          pinned: false,
-        };
-        setConversations(prev => [newConversation, ...prev]);
-        setCurrentConversationId(newConversation.id);
-      }
-      
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        role: 'user',
-        content: newContent,
-        timestamp: new Date(),
-      };
-      
-      setMessages(prev => [...prev, userMessage]);
-      setIsGenerating(true);
-      setStreamingText('');
+  const editMessage = (messageId: string, newContent: string) => {
+    const messageIndex = messages.findIndex(m => m.id === messageId);
+    if (messageIndex === -1) return;
+    
+    const originalMessage = messages[messageIndex];
+    if (originalMessage.role !== 'user') return;
+    
+    setIsGenerating(false);
+    setStreamingText('');
+    if (stopRequested.current) {
       stopRequested.current = false;
-      
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: newContent, history: newMessages }),
-        });
+    }
+    
+    const newMessages = messages.slice(0, messageIndex);
+    setMessages(newMessages);
+    setInput(newContent);
+    
+    setTimeout(() => {
+      autoResizeTextarea();
+      const sendEditedMessage = async () => {
+        if (!newContent.trim()) return;
         
-        const data = await response.json();
-        let fullResponse = data.response || 'I apologize, but I encountered an error.';
-        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-        
-        const chunkSize = 4;
-        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-          if (stopRequested.current) {
-            setIsGenerating(false);
-            setStreamingText('');
-            return;
-          }
-          setStreamingText(fullResponse.substring(0, i));
-          await new Promise(resolve => setTimeout(resolve, 5));
+        if (!currentConversationId) {
+          const newConversation: Conversation = {
+            id: Date.now().toString(),
+            title: newContent.substring(0, 40),
+            messages: [],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            pinned: false,
+          };
+          setConversations(prev => [newConversation, ...prev]);
+          setCurrentConversationId(newConversation.id);
         }
         
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: fullResponse,
+        const userMessage: Message = {
+          id: Date.now().toString(),
+          role: 'user',
+          content: newContent,
           timestamp: new Date(),
         };
-        setMessages(prev => [...prev, assistantMessage]);
+        
+        setMessages(prev => [...prev, userMessage]);
+        setIsGenerating(true);
         setStreamingText('');
-        setIsGenerating(false);
-      } catch (error) {
-        console.error('Error:', error);
-        const errorMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: 'I apologize, but I am unable to respond at this moment.',
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, errorMessage]);
-        setIsGenerating(false);
-        setStreamingText('');
-      }
-    };
+        stopRequested.current = false;
+        
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: newContent, history: newMessages }),
+          });
+          
+          const data = await response.json();
+          let fullResponse = data.response || 'I apologize, but I encountered an error.';
+          fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+          
+          const chunkSize = 4;
+          for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+            if (stopRequested.current) {
+              setIsGenerating(false);
+              setStreamingText('');
+              return;
+            }
+            setStreamingText(fullResponse.substring(0, i));
+            await new Promise(resolve => setTimeout(resolve, 5));
+          }
+          
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: fullResponse,
+            timestamp: new Date(),
+          };
+          setMessages(prev => [...prev, assistantMessage]);
+          setStreamingText('');
+          setIsGenerating(false);
+        } catch (error) {
+          console.error('Error:', error);
+          const errorMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: 'I apologize, but I am unable to respond at this moment.',
+            timestamp: new Date(),
+          };
+          setMessages(prev => [...prev, errorMessage]);
+          setIsGenerating(false);
+          setStreamingText('');
+        }
+      };
+      
+      sendEditedMessage();
+    }, 100);
+  };
+
+  const regenerateMessage = async (assistantMessageId: string) => {
+    const assistantIndex = messages.findIndex(m => m.id === assistantMessageId);
+    if (assistantIndex === -1) return;
+    if (messages[assistantIndex].role !== 'assistant') return;
     
-    sendEditedMessage();
-  }, 100);
-};
-
-const regenerateMessage = async (assistantMessageId: string) => {
-  console.log('=== REGENERATE CALLED ===');
-  console.log('Assistant message ID:', assistantMessageId);
-  
-  // Find the assistant message
-  const assistantIndex = messages.findIndex(m => m.id === assistantMessageId);
-  if (assistantIndex === -1) return;
-  if (messages[assistantIndex].role !== 'assistant') return;
-  
-  // Find the user message before this assistant message
-  let userMessageIndex = assistantIndex - 1;
-  while (userMessageIndex >= 0 && messages[userMessageIndex].role !== 'user') {
-    userMessageIndex--;
-  }
-  if (userMessageIndex < 0) return;
-  
-  const userMessageContent = messages[userMessageIndex].content;
-  console.log('User message content:', userMessageContent);
-  
-  // Remove the assistant message (the one being regenerated)
-  const newMessages = messages.slice(0, assistantIndex);
-  setMessages(newMessages);
-  
-  // Now call the API to get a new response
-  setIsGenerating(true);
-  setStreamingText('');
-  stopRequested.current = false;
-  
-  try {
-    console.log('Calling API for regeneration...');
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: userMessageContent, history: newMessages }),
-    });
-
-    const data = await response.json();
-    let fullResponse = data.response || 'I apologize, but I encountered an error. Please try again.';
-    
-    fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '');
-    fullResponse = fullResponse.replace(/^We need to.*?\.\s*/i, '');
-    fullResponse = fullResponse.replace(/^I need to.*?\.\s*/i, '');
-    fullResponse = fullResponse.trim();
-
-    // Type the response
-    const chunkSize = 4;
-    for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-      if (stopRequested.current) {
-        setIsGenerating(false);
-        setStreamingText('');
-        return;
-      }
-      setStreamingText(fullResponse.substring(0, i));
-      await new Promise(resolve => setTimeout(resolve, 5));
+    let userMessageIndex = assistantIndex - 1;
+    while (userMessageIndex >= 0 && messages[userMessageIndex].role !== 'user') {
+      userMessageIndex--;
     }
-
-    const newAssistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: fullResponse,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, newAssistantMessage]);
+    if (userMessageIndex < 0) return;
+    
+    const userMessageContent = messages[userMessageIndex].content;
+    const newMessages = messages.slice(0, assistantIndex);
+    setMessages(newMessages);
+    
+    setIsGenerating(true);
     setStreamingText('');
-    setIsGenerating(false);
-    console.log('Regeneration complete');
+    stopRequested.current = false;
+    
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessageContent, history: newMessages }),
+      });
 
-  } catch (error) {
-    console.error('Regeneration error:', error);
-    const errorMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: 'I apologize, but I am unable to respond at this moment. Please try again later.',
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, errorMessage]);
-    setIsGenerating(false);
-    setStreamingText('');
-  }
-};
+      const data = await response.json();
+      let fullResponse = data.response || 'I apologize, but I encountered an error. Please try again.';
+      
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '');
+      fullResponse = fullResponse.replace(/^We need to.*?\.\s*/i, '');
+      fullResponse = fullResponse.replace(/^I need to.*?\.\s*/i, '');
+      fullResponse = fullResponse.trim();
+
+      const chunkSize = 4;
+      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+        if (stopRequested.current) {
+          setIsGenerating(false);
+          setStreamingText('');
+          return;
+        }
+        setStreamingText(fullResponse.substring(0, i));
+        await new Promise(resolve => setTimeout(resolve, 5));
+      }
+
+      const newAssistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: fullResponse,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, newAssistantMessage]);
+      setStreamingText('');
+      setIsGenerating(false);
+    } catch (error) {
+      console.error('Regeneration error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I apologize, but I am unable to respond at this moment.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setIsGenerating(false);
+      setStreamingText('');
+    }
+  };
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -524,7 +519,6 @@ const regenerateMessage = async (assistantMessageId: string) => {
       fullResponse = fullResponse.replace(/^I need to.*?\.\s*/i, '');
       fullResponse = fullResponse.trim();
 
-      // Type the response with chunking for speed
       const chunkSize = 4;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
@@ -551,7 +545,7 @@ const regenerateMessage = async (assistantMessageId: string) => {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'I apologize, but I am unable to respond at this moment. Please try again later.',
+        content: 'I apologize, but I am unable to respond at this moment.',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);

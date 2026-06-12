@@ -18,7 +18,7 @@ export const saveConversations = mutation({
       await ctx.db.delete(conv._id);
     }
     
-    // Save new conversations - convert Dates to numbers
+    // Save new conversations - convert Dates to numbers (milliseconds)
     for (const conv of args.conversations) {
       await ctx.db.insert("conversations", {
         userId: args.userId,
@@ -28,8 +28,10 @@ export const saveConversations = mutation({
           id: m.id,
           role: m.role,
           content: m.content,
+          // Convert Date to number if it's a Date object
           timestamp: m.timestamp instanceof Date ? m.timestamp.getTime() : m.timestamp,
         })),
+        // Convert Dates to numbers
         createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
         updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
         pinned: conv.pinned || false,
@@ -52,8 +54,10 @@ export const loadConversations = query({
       title: conv.title,
       messages: conv.messages.map((m: any) => ({
         ...m,
+        // Convert number timestamp back to Date
         timestamp: new Date(m.timestamp),
       })),
+      // Convert numbers back to Dates
       createdAt: new Date(conv.createdAt),
       updatedAt: new Date(conv.updatedAt),
       pinned: conv.pinned,
