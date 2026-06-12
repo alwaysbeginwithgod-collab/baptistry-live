@@ -6,9 +6,8 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MessageBubble from './components/MessageBubble';
 import { useUser } from '@clerk/nextjs';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
-import { useQuery } from 'convex/react';
 
 type Message = {
   id: string;
@@ -29,7 +28,13 @@ type Conversation = {
 export default function MainContent() {
   const { user } = useUser();
   const userId = user?.id;
+
+  // Convex hooks - safe to use even if not configured
   const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
+  const loadConversationsFromCloud = useQuery(
+    api.conversations.loadConversations,
+    userId ? { userId } : "skip"
+  );
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -42,11 +47,6 @@ export default function MainContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const stopRequested = useRef(false);
- 
-  const loadConversationsFromCloud = useQuery(
-    api.conversations.loadConversations,
-    userId ? { userId } : "skip"
-  );
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -77,50 +77,52 @@ export default function MainContent() {
     autoResizeTextarea();
   };
 
-// Load conversations from localStorage (primary) or Convex (backup)
-useEffect(() => {
-  if (!userId) {
-    setConversations([]);
-    return;
-  }
-  
-  // First try localStorage
-  const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
-  if (savedConversations) {
-    try {
-      const parsed = JSON.parse(savedConversations);
-      const withDates = parsed.map((conv: any) => ({
-        ...conv,
-        createdAt: new Date(conv.createdAt),
-        updatedAt: new Date(conv.updatedAt),
-        messages: conv.messages.map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp),
-        })),
-      }));
-      setConversations(withDates);
+  // Load conversations from localStorage (primary) or Convex (backup)
+  useEffect(() => {
+    if (!userId) {
+      setConversations([]);
       return;
-    } catch (e) {
-      console.error('Failed to load conversations', e);
     }
-  }
-  
-  // If no localStorage, try Convex cloud
-  if (loadConversationsFromCloud && loadConversationsFromCloud !== "skip") {
-    const cloudConversations = loadConversationsFromCloud as Conversation[];
-    if (cloudConversations.length > 0) {
-      setConversations(cloudConversations);
+    
+    // First try localStorage
+    const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
+    if (savedConversations) {
+      try {
+        const parsed = JSON.parse(savedConversations);
+        const withDates = parsed.map((conv: any) => ({
+          ...conv,
+          createdAt: new Date(conv.createdAt),
+          updatedAt: new Date(conv.updatedAt),
+          messages: conv.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          })),
+        }));
+        setConversations(withDates);
+        return;
+      } catch (e) {
+        console.error('Failed to load conversations', e);
+      }
     }
-  }
-}, [userId, loadConversationsFromCloud]);
+    
+    // If no localStorage, try Convex cloud
+    if (loadConversationsFromCloud && loadConversationsFromCloud !== "skip") {
+      const cloudConversations = loadConversationsFromCloud as Conversation[];
+      if (cloudConversations.length > 0) {
+        setConversations(cloudConversations);
+      }
+    }
+  }, [userId, loadConversationsFromCloud]);
 
   // Save conversations to localStorage AND Convex cloud
   useEffect(() => {
     if (conversations.length > 0 && userId) {
-      // Save to localStorage
       localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
-    // Save to Convex cloud
-    saveConversationsToCloud({ userId, conversations });
+      try {
+        saveConversationsToCloud({ userId, conversations });
+      } catch (e) {
+        console.error('Failed to save to cloud:', e);
+      }
     }
   }, [conversations, userId, saveConversationsToCloud]);
 
