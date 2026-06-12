@@ -8,6 +8,7 @@ import MessageBubble from './components/MessageBubble';
 import { useUser } from '@clerk/nextjs';
 import { useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
+import { useQuery } from 'convex/react';
 
 type Message = {
   id: string;
@@ -41,6 +42,11 @@ export default function MainContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const stopRequested = useRef(false);
+ 
+  const loadConversationsFromCloud = useQuery(
+    api.conversations.loadConversations,
+    userId ? { userId } : "skip"
+  );
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -71,33 +77,44 @@ export default function MainContent() {
     autoResizeTextarea();
   };
 
-  // Load conversations from localStorage
-  useEffect(() => {
-    if (!userId) {
-      setConversations([]);
+// Load conversations from localStorage (primary) or Convex (backup)
+useEffect(() => {
+  if (!userId) {
+    setConversations([]);
+    return;
+  }
+  
+  // First try localStorage
+  const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
+  if (savedConversations) {
+    try {
+      const parsed = JSON.parse(savedConversations);
+      const withDates = parsed.map((conv: any) => ({
+        ...conv,
+        createdAt: new Date(conv.createdAt),
+        updatedAt: new Date(conv.updatedAt),
+        messages: conv.messages.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        })),
+      }));
+      setConversations(withDates);
       return;
+    } catch (e) {
+      console.error('Failed to load conversations', e);
     }
-    const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
-    if (savedConversations) {
-      try {
-        const parsed = JSON.parse(savedConversations);
-        const withDates = parsed.map((conv: any) => ({
-          ...conv,
-          createdAt: new Date(conv.createdAt),
-          updatedAt: new Date(conv.updatedAt),
-          messages: conv.messages.map((msg: any) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp),
-          })),
-        }));
-        setConversations(withDates);
-      } catch (e) {
-        console.error('Failed to load conversations', e);
-      }
+  }
+  
+  // If no localStorage, try Convex cloud
+  if (loadConversationsFromCloud && loadConversationsFromCloud !== "skip") {
+    const cloudConversations = loadConversationsFromCloud as Conversation[];
+    if (cloudConversations.length > 0) {
+      setConversations(cloudConversations);
     }
-  }, [userId]);
+  }
+}, [userId, loadConversationsFromCloud]);
 
-  // Save conversations to localStorage
+  // Save conversations to localStorage AND Convex cloud
   useEffect(() => {
     if (conversations.length > 0 && userId) {
       // Save to localStorage
