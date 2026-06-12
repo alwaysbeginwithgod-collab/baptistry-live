@@ -11,31 +11,42 @@ interface EmailContactModalProps {
 export default function EmailContactModal({ isOpen, onClose, email }: EmailContactModalProps) {
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
+  const [userEmail, setUserEmail] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSending(true);
-    
-    // Create mailto link with subject and body
-    const subject = `BAPTISTRY Message from ${name || 'Visitor'}`;
-    const body = `Name: ${name}\n\nMessage:\n${message}`;
-    
-    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
-    setSent(true);
-    setIsSending(false);
-    
-    // Close modal after 2 seconds
-    setTimeout(() => {
-      setSent(false);
-      setName('');
-      setMessage('');
-      onClose();
-    }, 2000);
+    setError('');
+
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email: userEmail, message }),
+      });
+
+      if (response.ok) {
+        setSent(true);
+        setTimeout(() => {
+          setSent(false);
+          setName('');
+          setMessage('');
+          setUserEmail('');
+          onClose();
+        }, 3000);
+      } else {
+        setError('Failed to send. Please try again or email us directly.');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -56,14 +67,14 @@ export default function EmailContactModal({ isOpen, onClose, email }: EmailConta
         {sent ? (
           <div className="text-center py-8">
             <div className="text-green-500 text-5xl mb-3">✓</div>
-            <p className="text-gray-700 dark:text-gray-300">Opening your email client...</p>
-            <p className="text-sm text-gray-500 mt-2">Please send the email to complete your message.</p>
+            <p className="text-gray-700 dark:text-gray-300">Message sent successfully!</p>
+            <p className="text-sm text-gray-500 mt-2">We'll respond as soon as possible.</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Your Name (Optional)
+                Your Name
               </label>
               <input
                 type="text"
@@ -71,6 +82,21 @@ export default function EmailContactModal({ isOpen, onClose, email }: EmailConta
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g., John"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Your Email (so I can reply)
+              </label>
+              <input
+                type="email"
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="your@email.com"
+                required
               />
             </div>
             
@@ -88,6 +114,10 @@ export default function EmailContactModal({ isOpen, onClose, email }: EmailConta
               />
             </div>
             
+            {error && (
+              <p className="text-red-500 text-sm text-center">{error}</p>
+            )}
+            
             <button
               type="submit"
               disabled={isSending || !message.trim()}
@@ -97,7 +127,7 @@ export default function EmailContactModal({ isOpen, onClose, email }: EmailConta
             </button>
             
             <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-              This will open your email app. Just click send to complete.
+              Your message will be sent directly to our inbox. We'll reply to your email.
             </p>
           </form>
         )}
