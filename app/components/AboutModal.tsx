@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import EmailModal from './EmailModal';
+import EmailContactModal from './EmailContactModal';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -193,12 +193,12 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
 
             {/* Glory to God */}
             <div className="text-center py-4 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-gray-600 dark:text-gray-400 italic text-sm">"I am just a pen here. Any glory in BAPTISTRY does not belong to me but to our Lord Saviour Jesus Christ alone."</p>
+              <p className="text-gray-600 dark:text-gray-400 italic text-sm">"I am just a pen here. Any glory in BAPTISTRY does not belong to me but to our Lord and Saviour Jesus Christ alone."</p>
               <p className="text-blue-600 dark:text-blue-400 font-medium mt-2 text-sm">"A dose of God's Word a day, will keep you going all day."</p>
               <p className="text-gray-500 dark:text-gray-500 mt-1 text-xs"><a href="https://www.facebook.com/BeginWithGod" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">— ALWAYS BEGIN WITH GOD —</a></p>
             </div>
 
-            {/* Contact Info - Email button now opens modal */}
+            {/* Contact Info - Email button opens modal */}
             <div className="text-center space-y-2 py-2">
               <p className="text-gray-800 dark:text-gray-200 text-base">
                 📧 <button 
@@ -221,8 +221,8 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
         </div>
       </div>
 
-      {/* Email Modal */}
-      <EmailModal 
+      {/* Email Contact Modal */}
+      <EmailContactModal 
         isOpen={showEmailModal} 
         onClose={() => setShowEmailModal(false)} 
         email="always.begin.with.god@gmail.com"

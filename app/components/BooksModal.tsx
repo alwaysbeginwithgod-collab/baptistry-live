@@ -280,7 +280,7 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
                 <span className="text-gray-400">•</span>
                 <button 
                   onClick={() => setShowEmailModal(true)}
-                  className="text-blue-600 hover:underline"
+                  className="text-blue-600 hover:underline cursor-pointer"
                 >
                   Email us
                 </button>
