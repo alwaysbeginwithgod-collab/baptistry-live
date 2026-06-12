@@ -6,6 +6,8 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MessageBubble from './components/MessageBubble';
 import { useUser } from '@clerk/nextjs';
+import { useMutation } from 'convex/react';
+import { api } from '../convex/_generated/api';
 
 type Message = {
   id: string;
@@ -26,6 +28,7 @@ type Conversation = {
 export default function MainContent() {
   const { user } = useUser();
   const userId = user?.id;
+  const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -97,9 +100,12 @@ export default function MainContent() {
   // Save conversations to localStorage
   useEffect(() => {
     if (conversations.length > 0 && userId) {
+      // Save to localStorage
       localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
+    // Save to Convex cloud
+    saveConversationsToCloud({ userId, conversations });
     }
-  }, [conversations, userId]);
+  }, [conversations, userId, saveConversationsToCloud]);
 
   // Save current conversation when messages change
   useEffect(() => {
