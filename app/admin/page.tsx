@@ -36,7 +36,16 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
       <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">🚀 Add BAPTISTRY Update</h1>
+        {/* Header with link to User Analytics */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">🚀 Add BAPTISTRY Update</h1>
+          <a 
+            href="/admin/users" 
+            className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            📊 User Analytics →
+          </a>
+        </div>
         
         {/* Quick Presets */}
         <div className="mb-4">
