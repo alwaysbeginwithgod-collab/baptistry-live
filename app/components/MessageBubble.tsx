@@ -141,7 +141,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                     </p>
                   </div>
 
-                  <div className="mt-2 flex justify-end gap-3">
+                  <div className="mt-2 flex justify-start gap-3">
                     {/* Copy Button */}
                     <div className="relative">
                       <button
@@ -207,7 +207,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
           )}
 
           {/* Timestamp and action buttons for user messages */}
-          <div className={`text-xs mt-1 flex justify-between items-center ${isUser ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
+          <div className={`text-xs mt-1 text-left ${isUser ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
             <span>
               {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
