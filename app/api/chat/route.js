@@ -1,6 +1,28 @@
 import { NextResponse } from 'next/server';
 
 // ============================================================
+// DICTIONARY HELPER FUNCTION
+// ============================================================
+async function getWebsterDefinition(word) {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.baptistry.app';
+    const url = `${baseUrl}/api/dictionary?word=${encodeURIComponent(word)}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (data.formatted) {
+      return data.formatted;
+    } else if (data.definition) {
+      return `**${word.toUpperCase()}** (Webster's Dictionary 1828)\n\n${data.definition}\n\n*Source: Webster's 1828 Dictionary*`;
+    }
+    return null;
+  } catch (error) {
+    console.error('Dictionary fetch error:', error);
+    return null;
+  }
+}
+
+// ============================================================
 // DOCTRINAL DEFENSE LIBRARY (FALLBACK ONLY)
 // ============================================================
 
@@ -164,6 +186,28 @@ function buildDoctrinalResponse(doctrine, userQuery) {
 export async function POST(request) {
   try {
     const { message, history } = await request.json();
+
+    // ============================================================
+    // STEP 0: Check for dictionary definition request
+    // ============================================================
+    const dictionaryMatch = message.match(/^define\s+(\w+)/i) || 
+                            message.match(/^what does\s+(\w+)\s+mean/i) ||
+                            message.match(/^meaning of\s+(\w+)/i) ||
+                            message.match(/^dictionary\s+(\w+)/i);
+
+    if (dictionaryMatch) {
+      const word = dictionaryMatch[1];
+      console.log('Looking up dictionary definition for:', word);
+      const definition = await getWebsterDefinition(word);
+      
+      if (definition) {
+        return NextResponse.json({ response: definition, source: 'webster-1828' });
+      } else {
+        return NextResponse.json({ 
+          response: `I couldn't find "${word}" in Webster's 1828 Dictionary. Please check the spelling or try another word.\n\nYou can also search directly at: https://webstersdictionary1828.com/Dictionary/${word}` 
+        });
+      }
+    }
 
     const DIFY_API_KEY = process.env.NEXT_PUBLIC_APP_KEY;
     const DIFY_API_URL = 'https://api.dify.ai/v1/chat-messages';
