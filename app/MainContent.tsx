@@ -177,6 +177,8 @@ export default function MainContent() {
           scrollToBottomImmediate();
         }, 50);
       });
+    } else {
+      console.log('Conversation not found:', conversationId);
     }
   };
 
