@@ -258,6 +258,9 @@ export default function RightSidebar() {
                       <a href="https://kingjamesbibledictionary.com/Dictionary/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
                         King James Bible Dictionary
                       </a>
+                      <a href="https://webstersdictionary1828.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                        WEbsters Dictionary Dictionary 1828
+                      </a>
                     </div>
                   </div>
 
