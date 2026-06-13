@@ -259,7 +259,7 @@ export default function RightSidebar() {
                         King James Bible Dictionary
                       </a>
                       <a href="https://webstersdictionary1828.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                        Websters 1882 Dictionary
+                        Websters 1828 Dictionary
                       </a>
                     </div>
                   </div>
