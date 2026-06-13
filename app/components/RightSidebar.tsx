@@ -58,18 +58,13 @@ const searchDictionary = async () => {
     const response = await fetch(`/api/dictionary?word=${encodeURIComponent(dictionaryWord)}`);
     const data = await response.json();
     
-    if (data.formatted) {
-      setDictionaryResult(data.formatted);
-    } else if (data.definition) {
-      // Preserve the formatting (numbered items should stay on separate lines)
-      const displayText = data.definition
-        .replace(/(\d+\.)/g, '\n$1') // Ensure numbers are on new lines
-        .trim();
-      setDictionaryResult(`${displayText}\n\n— Webster's Dictionary 1828`);
-    } else if (data.message) {
-      setDictionaryResult(`${data.message}\n${data.url || ''}`);
+    if (data.definition) {
+      // Clean display - just definition and footnote
+      setDictionaryResult(`${data.definition}\n\n— Webster's Dictionary 1828`);
+    } else if (data.url) {
+      setDictionaryResult(`"${dictionaryWord}" - View the definition online:\n${data.url}`);
     } else {
-      setDictionaryResult(`${dictionaryWord} - Definition not found.`);
+      setDictionaryResult(`"${dictionaryWord}" - Definition not found in Webster's 1828 Dictionary.`);
     }
   } catch (error) {
     console.error('Dictionary API error:', error);
