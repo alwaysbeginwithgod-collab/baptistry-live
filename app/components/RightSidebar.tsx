@@ -49,30 +49,29 @@ export default function RightSidebar() {
   };
 
   // Updated: Use BAPTISTRY's Webster's 1828 Dictionary API
-  const searchDictionary = async () => {
-    if (!dictionaryWord.trim()) return;
-    setIsLoading(true);
-    setDictionaryResult('Searching Webster\'s 1828 Dictionary...');
+const searchDictionary = async () => {
+  if (!dictionaryWord.trim()) return;
+  setIsLoading(true);
+  setDictionaryResult('Searching Webster\'s 1828 Dictionary...');
 
-    try {
-      const response = await fetch(`/api/dictionary?word=${encodeURIComponent(dictionaryWord)}`);
-      const data = await response.json();
-      
-      if (data.formatted) {
-        setDictionaryResult(data.formatted);
-      } else if (data.definition) {
-        setDictionaryResult(`**${dictionaryWord.toUpperCase()}** (Webster's Dictionary 1828)\n\n${data.definition}\n\n*Source: Webster's 1828 Dictionary*`);
-      } else if (data.message) {
-        setDictionaryResult(`${dictionaryWord} - ${data.message}\n\nView online: ${data.url || `https://webstersdictionary1828.com/Dictionary/${dictionaryWord}`}`);
-      } else {
-        setDictionaryResult(`${dictionaryWord} - Definition not found in Webster's 1828 Dictionary.\n\nTry searching directly at: https://webstersdictionary1828.com/Dictionary/${dictionaryWord}`);
-      }
-    } catch (error) {
-      console.error('Dictionary API error:', error);
-      setDictionaryResult(`Unable to fetch definition. Please try again later or visit:\nhttps://webstersdictionary1828.com/Dictionary/${dictionaryWord}`);
+  try {
+    const response = await fetch(`/api/dictionary?word=${encodeURIComponent(dictionaryWord)}`);
+    const data = await response.json();
+    
+    if (data.definition) {
+      // Clean display without the redundant header
+      setDictionaryResult(`${data.definition}\n\n— Webster's Dictionary 1828`);
+    } else if (data.message) {
+      setDictionaryResult(`${dictionaryWord} - ${data.message}\n\nView online: https://webstersdictionary1828.com/Dictionary/${dictionaryWord}`);
+    } else {
+      setDictionaryResult(`${dictionaryWord} - Definition not found in Webster's 1828 Dictionary.\n\nTry searching directly at: https://webstersdictionary1828.com/Dictionary/${dictionaryWord}`);
     }
-    setIsLoading(false);
-  };
+  } catch (error) {
+    console.error('Dictionary API error:', error);
+    setDictionaryResult(`Unable to fetch definition. Please try again later or visit:\nhttps://webstersdictionary1828.com/Dictionary/${dictionaryWord}`);
+  }
+  setIsLoading(false);
+};
 
   const closeTool = () => {
     setActiveTool(null);

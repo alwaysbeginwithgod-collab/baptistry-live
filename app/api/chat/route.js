@@ -10,10 +10,9 @@ async function getWebsterDefinition(word) {
     const response = await fetch(url);
     const data = await response.json();
     
-    if (data.formatted) {
-      return data.formatted;
-    } else if (data.definition) {
-      return `**${word.toUpperCase()}** (Webster's Dictionary 1828)\n\n${data.definition}\n\n*Source: Webster's 1828 Dictionary*`;
+    if (data.definition) {
+      // Clean format without redundant header
+      return `${data.definition}\n\n— Webster's Dictionary 1828`;
     }
     return null;
   } catch (error) {
