@@ -18,55 +18,84 @@ export async function GET(request: Request) {
       return NextResponse.json({
         word: word,
         definition: null,
-        message: `"${word}" - View the definition online:`,
-        url: `https://webstersdictionary1828.com/Dictionary/${word}`
+        error: 'Word not found'
       });
     }
     
     const html = await response.text();
 
-    // Extract definition from the page using simpler methods
+    // Find the definition section
     let definition = '';
     
-    // Method 1: Look for the content div
-    const contentMatch = html.match(/<div class="content">([\s\S]*?)<\/div>/);
-    if (contentMatch && contentMatch[1]) {
-      let text = contentMatch[1];
-      // Remove HTML tags
-      text = text.replace(/<[^>]*>/g, '');
-      // Clean up whitespace
-      text = text.replace(/\s+/g, ' ').trim();
-      // Add line breaks for numbered items
-      text = text.replace(/(\d+\.)/g, '\n$1');
-      // Remove extra spaces after newlines
-      text = text.replace(/\n\s+/g, '\n');
-      definition = text;
+    // Look for the content after the word heading
+    const patterns = [
+      // Pattern 1: Look for numbered definitions in the content
+      /<div class="content">([\s\S]*?)<\/div>/i,
+      // Pattern 2: Look for the definition paragraphs
+      /<p><strong>[\w\s,]+\.<\/strong>([\s\S]*?)<\/p>/i,
+      // Pattern 3: Look for any paragraph with numbered content
+      /<p>(\d+\..*?)<\/p>/gi
+    ];
+    
+    for (const pattern of patterns) {
+      const match = html.match(pattern);
+      if (match && match[1]) {
+        let text = match[1];
+        // Remove HTML tags
+        text = text.replace(/<[^>]*>/g, '');
+        // Clean up whitespace
+        text = text.replace(/\s+/g, ' ').trim();
+        if (text.length > 50) {
+          definition = text;
+          break;
+        }
+      }
     }
     
-    // Method 2: Look for definition paragraphs
+    // If still no definition, try a different approach - extract all text from the main area
     if (!definition || definition.length < 50) {
-      const paraMatch = html.match(/<p>([\s\S]*?)<\/p>/);
-      if (paraMatch && paraMatch[1]) {
-        let text = paraMatch[1];
-        text = text.replace(/<[^>]*>/g, '');
-        text = text.replace(/\s+/g, ' ').trim();
-        text = text.replace(/(\d+\.)/g, '\n$1');
-        definition = text;
+      const bodyMatch = html.match(/<body>([\s\S]*?)<\/body>/i);
+      if (bodyMatch) {
+        const bodyText = bodyMatch[1];
+        // Remove scripts and styles
+        const cleanText = bodyText.replace(/<script[\s\S]*?<\/script>/gi, '')
+                                 .replace(/<style[\s\S]*?<\/style>/gi, '')
+                                 .replace(/<[^>]*>/g, ' ')
+                                 .replace(/\s+/g, ' ')
+                                 .trim();
+        
+        // Look for the word and its definition
+        const wordIndex = cleanText.toLowerCase().indexOf(word.toLowerCase());
+        if (wordIndex !== -1) {
+          // Get a chunk of text around the word
+          definition = cleanText.substring(wordIndex, wordIndex + 1500);
+          // Clean up
+          definition = definition.replace(/\d+\./g, '\n$&').trim();
+        }
       }
     }
 
     if (definition && definition.length > 30) {
+      // Clean up the definition
+      definition = definition
+        .replace(/\s+/g, ' ')
+        .replace(/(\d+\.)/g, '\n$1')
+        .trim();
+      
+      // Limit to first 10 definitions
+      const parts = definition.split(/\n(?=\d+\.)/);
+      const truncated = parts.slice(0, 10).join('\n');
+      
       return NextResponse.json({
         word: word,
-        definition: definition,
+        definition: truncated,
         source: "Webster's Dictionary 1828"
       });
     } else {
-      // Return the URL for the user to view directly
       return NextResponse.json({
         word: word,
         definition: null,
-        message: `"${word}" - View the full definition online:`,
+        message: `Could not parse definition for "${word}". The website has the definition here:`,
         url: `https://webstersdictionary1828.com/Dictionary/${word}`
       });
     }
@@ -75,8 +104,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ 
       word: word,
       definition: null,
-      message: `Unable to fetch definition. View online:`,
-      url: `https://webstersdictionary1828.com/Dictionary/${word}`
+      error: 'Failed to fetch definition'
     });
   }
 }

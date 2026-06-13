@@ -52,13 +52,27 @@ export default function RightSidebar() {
 const searchDictionary = async () => {
   if (!dictionaryWord.trim()) return;
   setIsLoading(true);
-  
-  const word = dictionaryWord.trim();
-  const websterUrl = `https://webstersdictionary1828.com/Dictionary/${encodeURIComponent(word)}`;
-  
-  // Provide a direct link to the website
-  setDictionaryResult(`**${word.toUpperCase()}**\n\n📚 View the complete definition from **Webster's 1828 Dictionary**:\n\n➡️ ${websterUrl}\n\n*The dictionary is best viewed directly on their site for the full formatting and scripture references.*`);
-  
+  setDictionaryResult('Searching Webster\'s 1828 Dictionary...');
+
+  try {
+    const response = await fetch(`/api/dictionary?word=${encodeURIComponent(dictionaryWord)}`);
+    const data = await response.json();
+    
+    if (data.definition) {
+      // Format the definition with proper line breaks
+      const formattedDef = data.definition
+        .replace(/\n/g, '\n')
+        .trim();
+      setDictionaryResult(`${formattedDef}\n\n— Webster's Dictionary 1828`);
+    } else if (data.url) {
+      setDictionaryResult(`${data.message || `"${dictionaryWord}"`}\n${data.url}\n\nYou can copy the link and open it in your browser.`);
+    } else {
+      setDictionaryResult(`"${dictionaryWord}" - Definition not found in Webster's 1828 Dictionary.`);
+    }
+  } catch (error) {
+    console.error('Dictionary API error:', error);
+    setDictionaryResult(`Unable to fetch definition. Please try again later.`);
+  }
   setIsLoading(false);
 };
 
