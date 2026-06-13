@@ -59,15 +59,15 @@ const searchDictionary = async () => {
     const data = await response.json();
     
     if (data.definition) {
-      // Format nicely with line breaks
+      // Format the definition with proper line breaks
       let displayText = data.definition;
-      // Ensure numbered items are on new lines
+      // Ensure numbered items are on separate lines
       displayText = displayText.replace(/(\d+\.)/g, '\n$1');
-      // Remove excessive empty lines
+      // Clean up empty lines
       displayText = displayText.replace(/\n\s*\n/g, '\n').trim();
       setDictionaryResult(`${displayText}\n\n— Webster's Dictionary 1828`);
-    } else if (data.url) {
-      setDictionaryResult(`${data.message || `"${dictionaryWord}"`}\n${data.url}\n\nYou can click the link above to view the definition in your browser.`);
+    } else if (data.message) {
+      setDictionaryResult(`${data.message}\n${data.url || ''}`);
     } else {
       setDictionaryResult(`"${dictionaryWord}" - Definition not found in Webster's 1828 Dictionary.`);
     }

@@ -11,79 +11,71 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Try multiple URL patterns
-    const urlsToTry = [
-      `https://webstersdictionary1828.com/Dictionary/${encodeURIComponent(word)}`,
-      `https://webstersdictionary1828.com/Dictionary/${encodeURIComponent(word.toLowerCase())}`,
-      `https://webstersdictionary1828.com/Home?word=${encodeURIComponent(word)}`
-    ];
+    // Use the direct dictionary URL
+    const url = `https://webstersdictionary1828.com/Dictionary/${encodeURIComponent(word)}`;
+    const response = await fetch(url);
     
-    let html = '';
-    let usedUrl = '';
-    
-    for (const url of urlsToTry) {
-      try {
-        const response = await fetch(url);
-        if (response.ok) {
-          html = await response.text();
-          usedUrl = url;
-          break;
-        }
-      } catch (e) {
-        continue;
-      }
-    }
-    
-    if (!html) {
+    if (!response.ok) {
       return NextResponse.json({
         word: word,
         definition: null,
-        message: `"${word}" not found. Try searching directly:`,
-        url: `https://webstersdictionary1828.com/Home?word=${word}`
+        message: `Could not find "${word}" in Webster's 1828 Dictionary.`
       });
     }
+    
+    const html = await response.text();
 
-    // Extract definition - look for content between <p> tags near the word
+    // Extract the definition using multiple methods
     let definition = '';
     
-    // Look for the main content area
-    const contentMatch = html.match(/<div class="content">([\s\S]*?)<\/div>/i);
-    if (contentMatch) {
+    // Method 1: Look for the definition in the content div
+    const contentMatch = html.match(/<div class="content">([\s\S]*?)<\/div>/);
+    if (contentMatch && contentMatch[1]) {
       let text = contentMatch[1];
-      // Remove HTML tags
+      // Remove HTML tags but preserve line breaks from <br> and <p>
+      text = text.replace(/<br\s*\/?>/gi, '\n');
+      text = text.replace(/<p>/gi, '\n');
+      text = text.replace(/<\/p>/gi, '');
       text = text.replace(/<[^>]*>/g, '');
-      // Clean up whitespace
+      // Clean up entities
+      text = text.replace(/&nbsp;/g, ' ');
+      text = text.replace(/&amp;/g, '&');
+      text = text.replace(/&quot;/g, '"');
+      // Clean up excessive whitespace
       text = text.replace(/\s+/g, ' ').trim();
-      
-      // If the text contains numbered definitions, preserve them
-      if (text.match(/\d+\./)) {
-        definition = text.replace(/(\d+\.)/g, '\n$1').trim();
-      } else if (text.length > 20) {
+      // Format numbered items
+      text = text.replace(/(\d+\.)\s*/g, '\n$1 ');
+      definition = text;
+    }
+    
+    // Method 2: Look for the definition after the word heading
+    if (!definition || definition.length < 30) {
+      // Find the section after the word
+      const wordPattern = new RegExp(`${word.toUpperCase()}[^<]*<\\/h\\d>[\\s\\S]*?<p>([\\s\\S]*?)<\\/p>`, 'i');
+      const match = html.match(wordPattern);
+      if (match && match[1]) {
+        let text = match[1];
+        text = text.replace(/<[^>]*>/g, '');
+        text = text.replace(/\s+/g, ' ').trim();
+        text = text.replace(/(\d+\.)/g, '\n$1');
         definition = text;
       }
     }
     
-    // If no content div, try to find definition paragraphs directly
-    if (!definition) {
-      // Look for definition after the word heading
-      const wordIndex = html.toLowerCase().indexOf(word.toLowerCase());
-      if (wordIndex !== -1) {
-        const snippet = html.substring(wordIndex, wordIndex + 2000);
-        const defMatch = snippet.match(/<p>([\s\S]*?)<\/p>/i);
-        if (defMatch && defMatch[1]) {
-          let text = defMatch[1];
-          text = text.replace(/<[^>]*>/g, '');
-          text = text.replace(/\s+/g, ' ').trim();
-          definition = text;
-        }
+    // Method 3: Look for any paragraph with numbered content
+    if (!definition || definition.length < 30) {
+      const paraMatch = html.match(/<p>(\d+\..*?)<\/p>/i);
+      if (paraMatch && paraMatch[1]) {
+        definition = paraMatch[1].replace(/<[^>]*>/g, '').trim();
       }
     }
 
     if (definition && definition.length > 10) {
       // Clean up the definition
       definition = definition
-        .replace(/\s+/g, ' ')
-        .replace(/(\d+\.)/g, '\n$1')
+        .replace(/\n\s*\n/g, '\n')
+        .replace(/^\s+/, '')
+        .replace(/\s+$/, '')
         .trim();
       
       return NextResponse.json({
@@ -92,6 +84,7 @@ export async function GET(request: Request) {
         source: "Webster's Dictionary 1828"
       });
     } else {
+      // Return just the URL as fallback
       return NextResponse.json({
         word: word,
         definition: null,
@@ -104,8 +97,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ 
       word: word,
       definition: null,
-      message: `Unable to fetch definition. Try searching directly:`,
-      url: `https://webstersdictionary1828.com/Dictionary/${word}`
+      error: 'Failed to fetch definition'
     });
   }
 }
