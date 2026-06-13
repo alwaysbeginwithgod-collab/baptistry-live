@@ -16,25 +16,63 @@ export async function GET(request: Request) {
     const response = await fetch(url);
     const html = await response.text();
 
-    // Extract the definition using regex
-    const definitionMatch = html.match(/<div class="definition">([\s\S]*?)<\/div>/i);
-    let definition = definitionMatch ? definitionMatch[1].trim() : null;
-
-    if (!definition) {
-      // Try alternative parsing
-      const altMatch = html.match(/<p><strong>\w+\.<\/strong> ([\s\S]*?)<\/p>/i);
-      definition = altMatch ? altMatch[1].trim() : null;
+    // Check if the page exists (not a 404)
+    if (html.includes('404') || html.includes('Not Found')) {
+      return NextResponse.json({
+        word: word,
+        definition: null,
+        message: `"${word}" not found in Webster's 1828 Dictionary.`,
+        source: "Webster's Dictionary 1828"
+      });
     }
 
-    if (definition) {
-      // Clean up HTML tags
-      definition = definition.replace(/<[^>]*>/g, '');
-      // Clean up extra whitespace
-      definition = definition.replace(/\s+/g, ' ').trim();
+    // Extract the word/title
+    const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+    const wordTitle = titleMatch ? titleMatch[1].replace(' - Webster\'s Dictionary 1828', '') : word;
+
+    // Extract the definition content - look for the main content area
+    let definitionHtml = '';
+    
+    // Method 1: Get the main content div
+    const contentMatch = html.match(/<div class="content">([\s\S]*?)<\/div>/i);
+    if (contentMatch) {
+      definitionHtml = contentMatch[1];
+    }
+    
+    // Method 2: If not found, try to get definition from paragraph sections
+    if (!definitionHtml) {
+      const definitionMatch = html.match(/<p><strong>\w+\.<\/strong>([\s\S]*?)<\/p>/gi);
+      if (definitionMatch) {
+        definitionHtml = definitionMatch.join('\n');
+      }
+    }
+
+    // Method 3: Extract numbered definitions (1., 2., etc.)
+    if (!definitionHtml || definitionHtml.length < 50) {
+      const numberedMatch = html.match(/<p>(\d+\.\s*[\s\S]*?)<\/p>/gi);
+      if (numberedMatch) {
+        definitionHtml = numberedMatch.join('\n');
+      }
+    }
+
+    // Clean up the definition
+    if (definitionHtml) {
+      // Remove HTML tags
+      let cleanDefinition = definitionHtml.replace(/<[^>]*>/g, '');
+      // Clean up whitespace
+      cleanDefinition = cleanDefinition.replace(/\s+/g, ' ').trim();
+      // Fix numbering format
+      cleanDefinition = cleanDefinition.replace(/(\d+\.)\s*/g, '\n$1 ');
+      // Remove empty lines
+      cleanDefinition = cleanDefinition.replace(/\n\s*\n/g, '\n');
+      
+      // Format the response nicely
+      const formattedDefinition = `**${wordTitle.toUpperCase()}** (Webster's Dictionary 1828)\n\n${cleanDefinition}\n\n*Source: https://webstersdictionary1828.com*`;
       
       return NextResponse.json({
         word: word,
-        definition: definition,
+        definition: cleanDefinition,
+        formatted: formattedDefinition,
         source: "Webster's Dictionary 1828",
         url: url
       });
@@ -42,12 +80,16 @@ export async function GET(request: Request) {
       return NextResponse.json({
         word: word,
         definition: null,
-        message: `Definition for "${word}" not found in Webster's 1828 Dictionary.`,
-        source: "Webster's Dictionary 1828"
+        message: `Could not parse definition for "${word}". Visit the source directly.`,
+        source: "Webster's Dictionary 1828",
+        url: url
       });
     }
   } catch (error) {
     console.error('Dictionary error:', error);
-    return NextResponse.json({ error: 'Failed to fetch definition' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to fetch definition',
+      message: 'Unable to reach the dictionary service. Please try again later.'
+    }, { status: 500 });
   }
 }
