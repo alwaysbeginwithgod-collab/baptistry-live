@@ -21,17 +21,17 @@ export default function RightSidebar() {
     try {
       const formattedQuery = encodeURIComponent(bibleQuery.trim().replace(/ /g, '+'));
       const apiUrl = `https://dailybible.ca/api/${formattedQuery}?translation=kjv`;
-      
+
       const response = await fetch(apiUrl);
-      
+
       if (response.ok) {
         const data = await response.json();
-        
+
         if (data.verses && data.verses.length > 0) {
           const formattedVerses = data.verses.map((v: any) => {
             return `v${v.verse} - ${v.text}`;
           }).join('\n');
-          
+
           setBibleResult(`${data.reference} (KJV)\n\n${formattedVerses}`);
         } else if (data.text) {
           setBibleResult(`${data.reference || bibleQuery} (KJV)\n\n"${data.text}"`);
@@ -48,23 +48,28 @@ export default function RightSidebar() {
     setIsLoading(false);
   };
 
+  // Updated: Use BAPTISTRY's Webster's 1828 Dictionary API
   const searchDictionary = async () => {
     if (!dictionaryWord.trim()) return;
     setIsLoading(true);
-    setDictionaryResult('Searching...');
+    setDictionaryResult('Searching Webster\'s 1828 Dictionary...');
 
     try {
-      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(dictionaryWord)}`);
-      if (response.ok) {
-        const data = await response.json();
-        const definition = data[0]?.meanings[0]?.definitions[0]?.definition || 'Definition not found.';
-        const partOfSpeech = data[0]?.meanings[0]?.partOfSpeech || '';
-        setDictionaryResult(`${dictionaryWord} (${partOfSpeech})\n\n${definition}`);
+      const response = await fetch(`/api/dictionary?word=${encodeURIComponent(dictionaryWord)}`);
+      const data = await response.json();
+      
+      if (data.formatted) {
+        setDictionaryResult(data.formatted);
+      } else if (data.definition) {
+        setDictionaryResult(`**${dictionaryWord.toUpperCase()}** (Webster's Dictionary 1828)\n\n${data.definition}\n\n*Source: Webster's 1828 Dictionary*`);
+      } else if (data.message) {
+        setDictionaryResult(`${dictionaryWord} - ${data.message}\n\nView online: ${data.url || `https://webstersdictionary1828.com/Dictionary/${dictionaryWord}`}`);
       } else {
-        setDictionaryResult(`${dictionaryWord} - Definition not found.`);
+        setDictionaryResult(`${dictionaryWord} - Definition not found in Webster's 1828 Dictionary.\n\nTry searching directly at: https://webstersdictionary1828.com/Dictionary/${dictionaryWord}`);
       }
     } catch (error) {
-      setDictionaryResult(`${dictionaryWord} - Definition not found.`);
+      console.error('Dictionary API error:', error);
+      setDictionaryResult(`Unable to fetch definition. Please try again later or visit:\nhttps://webstersdictionary1828.com/Dictionary/${dictionaryWord}`);
     }
     setIsLoading(false);
   };
@@ -98,8 +103,8 @@ export default function RightSidebar() {
           <button
             onClick={() => setActiveTool(activeTool === 'bible' ? null : 'bible')}
             className={`tool-icon-button p-2 rounded-lg transition-colors ${
-              activeTool === 'bible' 
-                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' 
+              activeTool === 'bible'
+                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
             title="KJV Bible Lookup"
@@ -113,8 +118,8 @@ export default function RightSidebar() {
           <button
             onClick={() => setActiveTool(activeTool === 'dictionary' ? null : 'dictionary')}
             className={`tool-icon-button p-2 rounded-lg transition-colors ${
-              activeTool === 'dictionary' 
-                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' 
+              activeTool === 'dictionary'
+                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
             title="Webster's 1828 Dictionary"
@@ -129,8 +134,8 @@ export default function RightSidebar() {
           <button
             onClick={() => setActiveTool(activeTool === 'reference' ? null : 'reference')}
             className={`tool-icon-button p-2 rounded-lg transition-colors ${
-              activeTool === 'reference' 
-                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' 
+              activeTool === 'reference'
+                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
             title="Baptist Reference Library"
@@ -145,7 +150,7 @@ export default function RightSidebar() {
 
       {/* Tool Panel - Pop-up to the left of icons */}
       {activeTool && (
-        <div 
+        <div
           ref={toolPanelRef}
           className="fixed right-12 top-1/2 transform -translate-y-1/2 z-20"
         >
@@ -201,7 +206,7 @@ export default function RightSidebar() {
                       value={dictionaryWord}
                       onChange={(e) => setDictionaryWord(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && searchDictionary()}
-                      placeholder="Enter a word (e.g., grace, faith)"
+                      placeholder="Enter a word (e.g., grace, faith, calvary)"
                       className="flex-1 px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <button
@@ -213,7 +218,7 @@ export default function RightSidebar() {
                     </button>
                   </div>
                   {dictionaryResult && (
-                    <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg max-h-96 overflow-y-auto">
                       <div className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">
                         {dictionaryResult}
                       </div>
