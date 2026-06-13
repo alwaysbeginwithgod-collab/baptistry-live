@@ -12,7 +12,7 @@ async function getWebsterDefinition(word) {
     
     if (data.definition) {
       // Clean format without redundant header
-      return `${data.definition}\n\nSource: https://webstersdictionary1828.com`;
+      return `${data.definition}\n\n— Webster's Dictionary 1828`;
     }
     return null;
   } catch (error) {
