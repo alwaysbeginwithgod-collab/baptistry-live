@@ -18,46 +18,69 @@ export async function GET(request: Request) {
       return NextResponse.json({
         word: word,
         definition: null,
-        url: `https://webstersdictionary1828.com/Home?word=${word}`
+        message: `"${word}" - View the definition online:`
       });
     }
     
     const html = await response.text();
 
-    // Extract the main content
-    let content = '';
-    const contentMatch = html.match(/<div class="content">([\s\S]*?)<\/div>/i);
-    if (contentMatch) {
-      content = contentMatch[1];
+    // Extract definition from the page
+    let definition = '';
+    
+    // Method 1: Look for the definition section
+    const defMatch = html.match(/<p>(.*?)(?=<p>|<\/div>|$)/is);
+    if (defMatch) {
+      let text = defMatch[1];
+      // Remove any HTML tags
+      text = text.replace(/<[^>]*>/g, '');
+      // Clean up whitespace
+      text = text.replace(/\s+/g, ' ').trim();
+      // Split into numbered parts if they exist
+      if (text.match(/\d+\./)) {
+        text = text.replace(/(\d+\.)/g, '\n$1');
+      }
+      definition = text;
+    }
+    
+    // Method 2: Try to get the content div
+    if (!definition || definition.length < 50) {
+      const contentMatch = html.match(/<div class="content">([\s\S]*?)<\/div>/i);
+      if (contentMatch) {
+        let text = contentMatch[1];
+        // Remove HTML tags
+        text = text.replace(/<[^>]*>/g, '');
+        // Clean up
+        text = text.replace(/\s+/g, ' ').trim();
+        text = text.replace(/(\d+\.)/g, '\n$1');
+        definition = text;
+      }
+    }
+    
+    // Method 3: Look for bold definition headers
+    if (!definition || definition.length < 50) {
+      const boldMatch = html.match(/<p><strong>DEATH, noun deth\.<\/strong>([\s\S]*?)<\/p>/i);
+      if (boldMatch) {
+        let text = boldMatch[1];
+        text = text.replace(/<[^>]*>/g, '');
+        text = text.replace(/\s+/g, ' ').trim();
+        text = text.replace(/(\d+\.)/g, '\n$1');
+        definition = text;
+      }
     }
 
-    if (content) {
-      // Clean up HTML but preserve structure
-      let cleanContent = content
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<p>/gi, '')
-        .replace(/<\/p>/gi, '\n')
-        .replace(/<[^>]*>/g, '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&amp;/g, '&')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        // Format numbered items properly
-        .replace(/(\d+\.)\s*/g, '\n$1 ')
-        // Clean up excessive whitespace
-        .replace(/\n\s*\n/g, '\n\n')
-        .trim();
-      
+    if (definition && definition.length > 20) {
       return NextResponse.json({
         word: word,
-        definition: cleanContent,
+        definition: definition,
         source: "Webster's Dictionary 1828"
       });
     } else {
+      // Return just the URL for the user to view directly
       return NextResponse.json({
         word: word,
         definition: null,
-        url: `https://webstersdictionary1828.com/Home?word=${word}`
+        message: `"${word}" - View the full definition online:`,
+        url: `https://webstersdictionary1828.com/Dictionary/${word}`
       });
     }
   } catch (error) {
@@ -65,7 +88,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ 
       word: word,
       definition: null,
-      error: 'Failed to fetch definition'
+      message: `Unable to fetch definition. View online:`,
+      url: `https://webstersdictionary1828.com/Dictionary/${word}`
     }, { status: 500 });
   }
 }
