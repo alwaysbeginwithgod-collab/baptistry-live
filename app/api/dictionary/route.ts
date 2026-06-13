@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Try multiple URL patterns that the website might use
+    // Try multiple URL patterns
     const urlsToTry = [
       `https://webstersdictionary1828.com/Dictionary/${encodeURIComponent(word)}`,
       `https://webstersdictionary1828.com/Home?word=${encodeURIComponent(word)}`,
@@ -44,38 +44,56 @@ export async function GET(request: Request) {
       });
     }
 
-    // Extract the definition content
-    let definition = '';
-    
-    // Look for the main definition content
+    // Extract the word title
+    const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+    const wordTitle = titleMatch ? titleMatch[1].replace(' - Webster\'s Dictionary 1828', '') : word;
+
+    // Extract the main content
+    let content = '';
     const contentMatch = html.match(/<div class="content">([\s\S]*?)<\/div>/i);
     if (contentMatch) {
-      let content = contentMatch[1];
-      // Remove HTML tags
-      definition = content.replace(/<[^>]*>/g, '');
-      // Clean up whitespace
-      definition = definition.replace(/\s+/g, ' ').trim();
-      // Format numbered definitions
-      definition = definition.replace(/(\d+\.)\s*/g, '\n$1 ');
-    }
-    
-    // If still empty, try other patterns
-    if (!definition || definition.length < 20) {
-      const definitionMatch = html.match(/<p><strong>\w+\.<\/strong>\s*([\s\S]*?)<\/p>/i);
-      if (definitionMatch) {
-        definition = definitionMatch[1].replace(/<[^>]*>/g, '').trim();
+      content = contentMatch[1];
+    } else {
+      // Fallback: look for definition paragraphs
+      const defMatch = html.match(/<p><strong>\w+\.<\/strong>([\s\S]*?)<\/p>/i);
+      if (defMatch) {
+        content = defMatch[1];
       }
     }
 
-    if (definition && definition.length > 10) {
+    if (content) {
+      // Clean but preserve structure
+      let cleanContent = content
+        // Remove HTML tags but keep line breaks
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<p>/gi, '\n')
+        .replace(/<\/p>/gi, '')
+        .replace(/<[^>]*>/g, '')
+        // Clean up special characters
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        // Clean up excessive whitespace
+        .replace(/\n\s*\n/g, '\n\n')
+        .trim();
+      
+      // Add back the word header if needed
+      let formattedDefinition = cleanContent;
+      
+      // If the definition doesn't start with the word, add it
+      if (!cleanContent.toLowerCase().startsWith(word.toLowerCase())) {
+        formattedDefinition = `${wordTitle.toUpperCase()}\n\n${cleanContent}`;
+      }
+      
       return NextResponse.json({
         word: word,
-        definition: definition,
+        definition: cleanContent,
+        formatted: formattedDefinition,
         source: "Webster's Dictionary 1828",
         url: foundUrl
       });
     } else {
-      // Word exists but couldn't parse - provide the URL
       return NextResponse.json({
         word: word,
         definition: null,

@@ -58,17 +58,22 @@ const searchDictionary = async () => {
     const response = await fetch(`/api/dictionary?word=${encodeURIComponent(dictionaryWord)}`);
     const data = await response.json();
     
-    if (data.definition) {
-      // Clean display without the redundant header
-      setDictionaryResult(`${data.definition}\n\n— Webster's Dictionary 1828`);
+    if (data.formatted) {
+      setDictionaryResult(data.formatted);
+    } else if (data.definition) {
+      // Preserve the formatting (numbered items should stay on separate lines)
+      const displayText = data.definition
+        .replace(/(\d+\.)/g, '\n$1') // Ensure numbers are on new lines
+        .trim();
+      setDictionaryResult(`${displayText}\n\n— Webster's Dictionary 1828`);
     } else if (data.message) {
-      setDictionaryResult(`${dictionaryWord} - ${data.message}\n\nView online: https://webstersdictionary1828.com/Dictionary/${dictionaryWord}`);
+      setDictionaryResult(`${data.message}\n${data.url || ''}`);
     } else {
-      setDictionaryResult(`${dictionaryWord} - Definition not found in Webster's 1828 Dictionary.\n\nTry searching directly at: https://webstersdictionary1828.com/Dictionary/${dictionaryWord}`);
+      setDictionaryResult(`${dictionaryWord} - Definition not found.`);
     }
   } catch (error) {
     console.error('Dictionary API error:', error);
-    setDictionaryResult(`Unable to fetch definition. Please try again later or visit:\nhttps://webstersdictionary1828.com/Dictionary/${dictionaryWord}`);
+    setDictionaryResult(`Unable to fetch definition. Please try again later.`);
   }
   setIsLoading(false);
 };
