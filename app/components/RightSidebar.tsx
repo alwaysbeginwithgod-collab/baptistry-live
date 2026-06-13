@@ -9,8 +9,6 @@ export default function RightSidebar() {
   const [bibleQuery, setBibleQuery] = useState('');
   const [bibleResult, setBibleResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [dictionaryWord, setDictionaryWord] = useState('');
-  const [dictionaryResult, setDictionaryResult] = useState('');
   const [dictionaryUrl, setDictionaryUrl] = useState('');
   const toolPanelRef = useRef<HTMLDivElement>(null);
 
@@ -49,19 +47,16 @@ export default function RightSidebar() {
     setIsLoading(false);
   };
 
-  // Updated: Use iframe to show the definition directly
-  const searchDictionary = async () => {
-    if (!dictionaryWord.trim()) return;
-    const word = dictionaryWord.trim();
-    const url = `https://webstersdictionary1828.com/Dictionary/${encodeURIComponent(word)}`;
+  // Dictionary: Open the word directly in the iframe
+  const searchDictionary = (word: string) => {
+    if (!word.trim()) return;
+    const url = `https://webstersdictionary1828.com/Dictionary/${encodeURIComponent(word.trim())}`;
     setDictionaryUrl(url);
-    setDictionaryResult(''); // Clear any previous text result
   };
 
   const closeTool = () => {
     setActiveTool(null);
     setBibleResult('');
-    setDictionaryResult('');
     setDictionaryUrl('');
   };
 
@@ -188,32 +183,36 @@ export default function RightSidebar() {
                   <div className="flex gap-2 mb-4">
                     <input
                       type="text"
-                      value={dictionaryWord}
-                      onChange={(e) => setDictionaryWord(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && searchDictionary()}
                       placeholder="Enter a word (e.g., grace, faith, calvary)"
                       className="flex-1 px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onKeyPress={(e) => e.key === 'Enter' && searchDictionary((e.target as HTMLInputElement).value)}
                     />
                     <button
-                      onClick={searchDictionary}
+                      onClick={() => {
+                        const input = document.querySelector('#dictionary-input') as HTMLInputElement;
+                        if (input) searchDictionary(input.value);
+                      }}
                       className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
                     >
                       Define
                     </button>
                   </div>
-                  {dictionaryUrl && (
-                    <div className="mt-3 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-                      <iframe
-                        src={dictionaryUrl}
-                        className="w-full h-96"
-                        title="Webster's Dictionary 1828"
-                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                      />
-                      <div className="p-2 text-xs text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900">
-                        Definition from Webster's Dictionary 1828
-                      </div>
+                  <input
+                    id="dictionary-input"
+                    type="text"
+                    className="hidden"
+                  />
+                  <div className="mt-3 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <iframe
+                      src={dictionaryUrl || "https://webstersdictionary1828.com"}
+                      className="w-full h-96"
+                      title="Webster's Dictionary 1828"
+                      sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                    />
+                    <div className="p-2 text-xs text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900">
+                      {dictionaryUrl ? "Definition from Webster's Dictionary 1828" : "Enter a word above and click 'Define'"}
                     </div>
-                  )}
+                  </div>
                 </div>
               )}
 
