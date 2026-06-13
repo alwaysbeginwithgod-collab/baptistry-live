@@ -18,53 +18,76 @@ export async function GET(request: Request) {
       return NextResponse.json({
         word: word,
         definition: null,
-        message: `Could not find "${word}" in Webster's 1828 Dictionary.`
+        message: `"${word}" not found.`
       });
     }
     
     const html = await response.text();
 
-    // Extract the numbered definitions
-    let definitions = [];
+    // Get the main content area
+    const contentStart = html.indexOf('<div class="content">');
+    const contentEnd = html.indexOf('</div>', contentStart);
     
-    // Look for numbered list items (1., 2., 3., etc.)
-    const numberedPattern = /<p>(\d+\.\s*[^<]+)<\/p>/gi;
-    let match;
-    while ((match = numberedPattern.exec(html)) !== null) {
-      let text = match[1];
-      // Clean up HTML entities
-      text = text.replace(/&nbsp;/g, ' ');
-      text = text.replace(/&amp;/g, '&');
-      text = text.replace(/&quot;/g, '"');
-      definitions.push(text.trim());
+    if (contentStart === -1 || contentEnd === -1) {
+      return NextResponse.json({
+        word: word,
+        definition: null,
+        message: `"${word}" - View online:`,
+        url: url
+      });
     }
     
-    // If no numbered items, look for definitions in a different format
-    if (definitions.length === 0) {
-      const altPattern = /<p>([\d]+\.\s*[\s\S]*?)<\/p>/gi;
-      while ((match = altPattern.exec(html)) !== null) {
-        let text = match[1];
-        text = text.replace(/<[^>]*>/g, '');
-        text = text.replace(/\s+/g, ' ').trim();
-        if (text.match(/^\d+\./)) {
-          definitions.push(text);
-        }
+    let content = html.substring(contentStart, contentEnd);
+    
+    // Remove HTML tags but preserve structure
+    content = content.replace(/<br\s*\/?>/gi, '\n');
+    content = content.replace(/<p>/gi, '\n');
+    content = content.replace(/<\/p>/gi, '');
+    content = content.replace(/<strong>/gi, '');
+    content = content.replace(/<\/strong>/gi, '');
+    content = content.replace(/<[^>]*>/g, '');
+    
+    // Clean up entities
+    content = content.replace(/&nbsp;/g, ' ');
+    content = content.replace(/&amp;/g, '&');
+    content = content.replace(/&quot;/g, '"');
+    content = content.replace(/&#39;/g, "'");
+    
+    // Split into lines and clean
+    const lines = content.split('\n');
+    const cleanedLines = lines
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+    
+    // Extract numbered definitions (starting with 1., 2., etc.)
+    const numberedDefs = [];
+    let currentDef = '';
+    
+    for (const line of cleanedLines) {
+      if (line.match(/^\d+\./)) {
+        if (currentDef) numberedDefs.push(currentDef);
+        currentDef = line;
+      } else if (currentDef && line.length > 0) {
+        currentDef += ' ' + line;
+      }
+    }
+    if (currentDef) numberedDefs.push(currentDef);
+    
+    // Also look for the part of speech (first line before numbers)
+    let partOfSpeech = '';
+    for (const line of cleanedLines) {
+      if (line.includes(',') && line.length < 100 && !line.match(/^\d+\./)) {
+        partOfSpeech = line;
+        break;
       }
     }
     
-    // Also try to get the word's part of speech if available
-    let partOfSpeech = '';
-    const posMatch = html.match(/<p><strong>([^,<]+),?\s*([^<]+)?<\/strong>/i);
-    if (posMatch) {
-      partOfSpeech = posMatch[1] + (posMatch[2] ? ', ' + posMatch[2] : '');
-    }
-
-    if (definitions.length > 0) {
+    if (numberedDefs.length > 0) {
       let definitionText = '';
       if (partOfSpeech) {
         definitionText = partOfSpeech + '\n\n';
       }
-      definitionText += definitions.map((def, i) => `${def}`).join('\n');
+      definitionText += numberedDefs.join('\n');
       
       return NextResponse.json({
         word: word,
@@ -72,11 +95,21 @@ export async function GET(request: Request) {
         source: "Webster's Dictionary 1828"
       });
     } else {
+      // If no numbered definitions, return the first few lines of content
+      const firstFew = cleanedLines.slice(0, 5).join('\n');
+      if (firstFew.length > 20) {
+        return NextResponse.json({
+          word: word,
+          definition: firstFew,
+          source: "Webster's Dictionary 1828"
+        });
+      }
+      
       return NextResponse.json({
         word: word,
         definition: null,
-        message: `"${word}" - View the full definition online:`,
-        url: `https://webstersdictionary1828.com/Dictionary/${word}`
+        message: `"${word}" - View the full definition:`,
+        url: url
       });
     }
   } catch (error) {
