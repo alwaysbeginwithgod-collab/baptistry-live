@@ -11,7 +11,6 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Use the direct dictionary URL
     const url = `https://webstersdictionary1828.com/Dictionary/${encodeURIComponent(word)}`;
     const response = await fetch(url);
     
@@ -25,66 +24,54 @@ export async function GET(request: Request) {
     
     const html = await response.text();
 
-    // Extract the definition using multiple methods
-    let definition = '';
+    // Extract the numbered definitions
+    let definitions = [];
     
-    // Method 1: Look for the definition in the content div
-    const contentMatch = html.match(/<div class="content">([\s\S]*?)<\/div>/);
-    if (contentMatch && contentMatch[1]) {
-      let text = contentMatch[1];
-      // Remove HTML tags but preserve line breaks from <br> and <p>
-      text = text.replace(/<br\s*\/?>/gi, '\n');
-      text = text.replace(/<p>/gi, '\n');
-      text = text.replace(/<\/p>/gi, '');
-      text = text.replace(/<[^>]*>/g, '');
-      // Clean up entities
+    // Look for numbered list items (1., 2., 3., etc.)
+    const numberedPattern = /<p>(\d+\.\s*[^<]+)<\/p>/gi;
+    let match;
+    while ((match = numberedPattern.exec(html)) !== null) {
+      let text = match[1];
+      // Clean up HTML entities
       text = text.replace(/&nbsp;/g, ' ');
       text = text.replace(/&amp;/g, '&');
       text = text.replace(/&quot;/g, '"');
-      // Clean up excessive whitespace
-      text = text.replace(/\s+/g, ' ').trim();
-      // Format numbered items
-      text = text.replace(/(\d+\.)\s*/g, '\n$1 ');
-      definition = text;
+      definitions.push(text.trim());
     }
     
-    // Method 2: Look for the definition after the word heading
-    if (!definition || definition.length < 30) {
-      // Find the section after the word
-      const wordPattern = new RegExp(`${word.toUpperCase()}[^<]*<\\/h\\d>[\\s\\S]*?<p>([\\s\\S]*?)<\\/p>`, 'i');
-      const match = html.match(wordPattern);
-      if (match && match[1]) {
+    // If no numbered items, look for definitions in a different format
+    if (definitions.length === 0) {
+      const altPattern = /<p>([\d]+\.\s*[\s\S]*?)<\/p>/gi;
+      while ((match = altPattern.exec(html)) !== null) {
         let text = match[1];
         text = text.replace(/<[^>]*>/g, '');
         text = text.replace(/\s+/g, ' ').trim();
-        text = text.replace(/(\d+\.)/g, '\n$1');
-        definition = text;
+        if (text.match(/^\d+\./)) {
+          definitions.push(text);
+        }
       }
     }
     
-    // Method 3: Look for any paragraph with numbered content
-    if (!definition || definition.length < 30) {
-      const paraMatch = html.match(/<p>(\d+\..*?)<\/p>/i);
-      if (paraMatch && paraMatch[1]) {
-        definition = paraMatch[1].replace(/<[^>]*>/g, '').trim();
-      }
+    // Also try to get the word's part of speech if available
+    let partOfSpeech = '';
+    const posMatch = html.match(/<p><strong>([^,<]+),?\s*([^<]+)?<\/strong>/i);
+    if (posMatch) {
+      partOfSpeech = posMatch[1] + (posMatch[2] ? ', ' + posMatch[2] : '');
     }
 
-    if (definition && definition.length > 10) {
-      // Clean up the definition
-      definition = definition
-        .replace(/\n\s*\n/g, '\n')
-        .replace(/^\s+/, '')
-        .replace(/\s+$/, '')
-        .trim();
+    if (definitions.length > 0) {
+      let definitionText = '';
+      if (partOfSpeech) {
+        definitionText = partOfSpeech + '\n\n';
+      }
+      definitionText += definitions.map((def, i) => `${def}`).join('\n');
       
       return NextResponse.json({
         word: word,
-        definition: definition,
+        definition: definitionText,
         source: "Webster's Dictionary 1828"
       });
     } else {
-      // Return just the URL as fallback
       return NextResponse.json({
         word: word,
         definition: null,
