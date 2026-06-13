@@ -213,10 +213,15 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
               </p>
             </div>
 
-            {/* Footer Note */}
-            <div className="text-center pt-3 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-sm text-gray-500 dark:text-gray-400 italic">*This is not a replacement for the infallible Word of God. The Bible is still the final Authority in all matters of our faith and practice.</p>
-            </div>
+{/* Footer Note */}
+<div className="text-center pt-3 border-t border-gray-200 dark:border-gray-700">
+  <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+    *This is not a replacement for the infallible Word of God. The Bible is still the final Authority in all matters of our faith and practice.
+  </p>
+  <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+    © 2026 BAPTISTRY. All rights reserved.
+  </p>
+</div>
           </div>
         </div>
       </div>
