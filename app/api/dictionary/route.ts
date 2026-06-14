@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-// Webster's 1828 Dictionary data
-const dictionaryData: Record<string, { word: string; definition: string; source: string }> = {
+const dictionaryData = {
   calvary: {
     word: "CALVARY",
     definition: "1. A place of skulls; particularly, the place where Christ was crucified, on a small hill west of Jerusalem.\n\n2. In heraldry, a cross so called, set upon steps, resembling the cross on which our Savior was crucified.",
@@ -51,7 +50,7 @@ const dictionaryData: Record<string, { word: string; definition: string; source:
   }
 };
 
-export async function GET(request: Request) {
+export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const word = searchParams.get('word');
   
@@ -67,7 +66,7 @@ export async function GET(request: Request) {
   } else {
     return NextResponse.json({ 
       error: 'Word not found',
-      message: `"${word}" not found in Webster's 1828 Dictionary. Try searching online at https://webstersdictionary1828.com/Dictionary/${word}`
+      message: `"${word}" not found in Webster's 1828 Dictionary.`
     }, { status: 404 });
   }
 }
