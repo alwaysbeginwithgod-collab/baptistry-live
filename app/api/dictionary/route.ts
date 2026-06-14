@@ -1,4 +1,8 @@
-const dictionaryData = {
+import { NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
+
+const dictionaryData: Record<string, { word: string; definition: string; source: string }> = {
   calvary: {
     word: "CALVARY",
     definition: "1. A place of skulls; particularly, the place where Christ was crucified, on a small hill west of Jerusalem.\n\n2. In heraldry, a cross so called, set upon steps, resembling the cross on which our Savior was crucified.",
@@ -50,3 +54,24 @@ const dictionaryData = {
     source: "Webster's Dictionary 1828"
   }
 };
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const word = searchParams.get('word');
+  
+  if (!word) {
+    return NextResponse.json({ error: 'No word provided' }, { status: 400 });
+  }
+  
+  const lowerWord = word.toLowerCase();
+  const entry = dictionaryData[lowerWord];
+  
+  if (entry) {
+    return NextResponse.json(entry);
+  } else {
+    return NextResponse.json({ 
+      error: 'Word not found',
+      message: `"${word}" not found in Webster's 1828 Dictionary.`
+    }, { status: 404 });
+  }
+}
