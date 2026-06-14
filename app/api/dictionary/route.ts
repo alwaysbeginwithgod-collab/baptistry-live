@@ -1,11 +1,12 @@
-import { NextResponse } from 'next/server';
-
-export const dynamic = 'force-dynamic';
-
 const dictionaryData = {
   calvary: {
     word: "CALVARY",
     definition: "1. A place of skulls; particularly, the place where Christ was crucified, on a small hill west of Jerusalem.\n\n2. In heraldry, a cross so called, set upon steps, resembling the cross on which our Savior was crucified.",
+    source: "Webster's Dictionary 1828"
+  },
+  charity: {
+    word: "CHARITY",
+    definition: "1. In theology, the highest of the Christian graces; love; the love of God and our neighbor, influencing the will and affections.\n\n2. The love of our neighbor, prompting to works of kindness, compassion, and benevolence.\n\n3. Almsgiving; the act of giving to the poor.\n\n4. A charitable institution or foundation.\n\n5. In a general sense, goodness; kindness; benevolence.\n\n'And now abideth faith, hope, charity, these three; but the greatest of these is charity.' — 1 Corinthians 13:13 (KJV)",
     source: "Webster's Dictionary 1828"
   },
   grace: {
@@ -49,24 +50,3 @@ const dictionaryData = {
     source: "Webster's Dictionary 1828"
   }
 };
-
-export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const word = searchParams.get('word');
-  
-  if (!word) {
-    return NextResponse.json({ error: 'No word provided' }, { status: 400 });
-  }
-  
-  const lowerWord = word.toLowerCase();
-  const entry = dictionaryData[lowerWord];
-  
-  if (entry) {
-    return NextResponse.json(entry);
-  } else {
-    return NextResponse.json({ 
-      error: 'Word not found',
-      message: `"${word}" not found in Webster's 1828 Dictionary.`
-    }, { status: 404 });
-  }
-}
