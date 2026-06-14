@@ -10,7 +10,7 @@ export default function RightSidebar() {
   const [bibleResult, setBibleResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [dictionaryWord, setDictionaryWord] = useState('');
-  const [dictionaryUrl, setDictionaryUrl] = useState('https://webstersdictionary1828.com');
+  const [dictionaryResult, setDictionaryResult] = useState('');
   const toolPanelRef = useRef<HTMLDivElement>(null);
 
   const searchBible = async () => {
@@ -48,17 +48,38 @@ export default function RightSidebar() {
     setIsLoading(false);
   };
 
-  const searchDictionary = () => {
+  const searchDictionary = async () => {
     if (!dictionaryWord.trim()) return;
-    const url = `https://webstersdictionary1828.com/Dictionary/${encodeURIComponent(dictionaryWord.trim())}`;
-    setDictionaryUrl(url);
+    setIsLoading(true);
+    setDictionaryResult('Searching Webster\'s 1828 Dictionary...');
+
+    try {
+      const response = await fetch(`/api/dictionary?word=${encodeURIComponent(dictionaryWord.trim())}`);
+      const data = await response.json();
+      
+      if (response.ok && data.definition) {
+        // Format the definition nicely
+        let displayText = data.definition;
+        // Ensure numbered items are on new lines
+        displayText = displayText.replace(/(\d+\.)/g, '\n$1');
+        // Clean up
+        displayText = displayText.replace(/\n\s*\n/g, '\n').trim();
+        setDictionaryResult(`${displayText}\n\n— ${data.source}`);
+      } else {
+        setDictionaryResult(`"${dictionaryWord}" - ${data.message || 'Definition not found in Webster\'s 1828 Dictionary.'}`);
+      }
+    } catch (error) {
+      console.error('Dictionary API error:', error);
+      setDictionaryResult(`Unable to fetch definition. Please try again later.`);
+    }
+    setIsLoading(false);
   };
 
   const closeTool = () => {
     setActiveTool(null);
     setBibleResult('');
     setDictionaryWord('');
-    setDictionaryUrl('https://webstersdictionary1828.com');
+    setDictionaryResult('');
   };
 
   // Close tool when clicking outside
@@ -192,24 +213,19 @@ export default function RightSidebar() {
                     />
                     <button
                       onClick={searchDictionary}
+                      disabled={isLoading}
                       className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
                     >
-                      Define
+                      {isLoading ? '...' : 'Define'}
                     </button>
                   </div>
-                  <div className="mt-3 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-                    <iframe
-                      src={dictionaryUrl}
-                      className="w-full h-96"
-                      title="Webster's Dictionary 1828"
-                      sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                    />
-                    <div className="p-2 text-xs text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900">
-                      {dictionaryUrl === 'https://webstersdictionary1828.com' 
-                        ? "Enter a word above and click 'Define'" 
-                        : `Definition for "${dictionaryWord}" from Webster's Dictionary 1828`}
+                  {dictionaryResult && (
+                    <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg max-h-96 overflow-y-auto">
+                      <div className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">
+                        {dictionaryResult}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 
