@@ -668,74 +668,59 @@ export default function MainContent() {
           )}
         </div>
 
-{/* Guest banner - only shows when not signed in */}
-{!userId && (
-  <div className="max-w-4xl mx-auto mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-center">
-    <p className="text-sm text-gray-700 dark:text-gray-300">
-      🔐 <strong>Sign in to save your chat history across all devices.</strong>
-    </p>
-    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-      Your chats will be saved automatically when you sign in.
-    </p>
-  </div>
-)}
+        {/* Guest banner - only shows when not signed in */}
+        {!userId && (
+          <div className="max-w-4xl mx-auto mb-4 px-4">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-center border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                🔐 <strong>Sign in to save your chat history across all your devices.</strong>
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Your chats will be saved automatically when you sign in. It's free!
+              </p>
+            </div>
+          </div>
+        )}
 
-<div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-  {/* ... rest of your chat input ... */}
-</div>
-
-      {/* Guest banner */}
-      {!userId && (
-        <div className="max-w-4xl mx-auto mb-4 px-4">
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-center border border-blue-200 dark:border-blue-800">
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              🔐 <strong>Sign in to save your chat history across all your devices.</strong>
+        <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex gap-3 items-end">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask about Scripture, doctrine, or request a devotion..."
+                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
+                rows={1}
+                style={{ minHeight: '48px', maxHeight: '120px' }}
+                disabled={isGenerating}
+              />
+              {isGenerating ? (
+                <button
+                  onClick={stopResponse}
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2"
+                >
+                  ⏹️ Stop
+                </button>
+              ) : (
+                <button
+                  onClick={sendMessage}
+                  disabled={!input.trim()}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  Send
+                </button>
+              )}
+            </div>
+            
+            <p className="text-xs text-gray-600 dark:text-gray-400 text-center italic mt-3">
+              "A dose of God's Word a day, will keep you going all day."
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Your chats will be saved automatically when you sign in. It's free!
+            <p className="text-xs text-blue-500 dark:text-blue-400 text-center mt-1">
+              — ALWAYS BEGIN WITH GOD —
             </p>
           </div>
-        </div>
-      )}
-
-      <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex gap-3 items-end">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask about Scripture, doctrine, or request a devotion..."
-              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
-              rows={1}
-              style={{ minHeight: '48px', maxHeight: '120px' }}
-              disabled={isGenerating}
-            />
-            {isGenerating ? (
-              <button
-                onClick={stopResponse}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2"
-              >
-                ⏹️ Stop
-              </button>
-            ) : (
-              <button
-                onClick={sendMessage}
-                disabled={!input.trim()}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-              >
-                Send
-              </button>
-            )}
-          </div>
-          
-          <p className="text-xs text-gray-600 dark:text-gray-400 text-center italic mt-3">
-            "A dose of God's Word a day, will keep you going all day."
-          </p>
-          <p className="text-xs text-blue-500 dark:text-blue-400 text-center mt-1">
-            — ALWAYS BEGIN WITH GOD —
-          </p>
         </div>
       </div>
       
