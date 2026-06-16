@@ -29,7 +29,7 @@ export default function MainContent() {
   const { user } = useUser();
   const userId = user?.id;
 
-  // Convex hooks
+  // Convex hooks - UNCOMMENTED AND WORKING
   const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
   const loadConversationsFromCloud = useQuery(
     api.conversations.loadConversations,
@@ -84,15 +84,12 @@ export default function MainContent() {
       return;
     }
     
-    // Wait for cloud data to load
     if (loadConversationsFromCloud === undefined) return;
     
-    // Helper to check if we have valid conversation data
     const isValidCloudData = (data: any): data is Conversation[] => {
       return data !== null && data !== "skip" && Array.isArray(data);
     };
     
-    // Try cloud first
     if (isValidCloudData(loadConversationsFromCloud) && loadConversationsFromCloud.length > 0) {
       console.log('✅ Loading from Convex cloud:', loadConversationsFromCloud.length);
       setConversations(loadConversationsFromCloud);
@@ -100,7 +97,6 @@ export default function MainContent() {
       return;
     }
     
-    // If no cloud data, try localStorage
     const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
     if (savedConversations) {
       try {
@@ -116,7 +112,6 @@ export default function MainContent() {
           })),
         }));
         setConversations(withDates);
-        // Back up to cloud
         saveConversationsToCloud({ userId, conversations: withDates });
       } catch (e) {
         console.error('Failed to load conversations', e);
