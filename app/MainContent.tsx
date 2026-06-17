@@ -733,6 +733,25 @@ export default function MainContent() {
                 </button>
               )}
             </div>
+
+{/* TEMPORARY TEST BUTTON - REMOVE AFTER TESTING */}
+{userId && (
+  <button
+    onClick={() => {
+      console.log('🔵 TEST BUTTON CLICKED');
+      if (conversations.length > 0) {
+        saveConversationsToCloud({ userId, conversations })
+          .then(() => console.log('✅ MANUAL SAVE SUCCESSFUL'))
+          .catch((err) => console.error('❌ MANUAL SAVE FAILED:', err));
+      } else {
+        console.log('⚠️ No conversations to save');
+      }
+    }}
+    className="px-3 py-2 bg-purple-600 text-white text-sm rounded-lg"
+  >
+    Test Save
+  </button>
+)}
             
             <p className="text-xs text-gray-600 dark:text-gray-400 text-center italic mt-3">
               "A dose of God's Word a day, will keep you going all day."
