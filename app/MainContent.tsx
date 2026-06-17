@@ -704,54 +704,53 @@ export default function MainContent() {
 
         <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
           <div className="max-w-4xl mx-auto">
-            <div className="flex gap-3 items-end">
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask about Scripture, doctrine, or request a devotion..."
-                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
-                rows={1}
-                style={{ minHeight: '48px', maxHeight: '120px' }}
-                disabled={isGenerating}
-              />
-              {isGenerating ? (
-                <button
-                  onClick={stopResponse}
-                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2"
-                >
-                  ⏹️ Stop
-                </button>
-              ) : (
-                <button
-                  onClick={sendMessage}
-                  disabled={!input.trim()}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                >
-                  Send
-                </button>
-              )}
-            </div>
-
-{/* TEMPORARY TEST BUTTON - REMOVE AFTER TESTING */}
-{userId && (
-  <button
-    onClick={() => {
-      console.log('🔵 TEST BUTTON CLICKED');
-      if (conversations.length > 0) {
-        saveConversationsToCloud({ userId, conversations })
-          .then(() => console.log('✅ MANUAL SAVE SUCCESSFUL'))
-          .catch((err) => console.error('❌ MANUAL SAVE FAILED:', err));
-      } else {
-        console.log('⚠️ No conversations to save');
-      }
-    }}
-    className="px-3 py-2 bg-purple-600 text-white text-sm rounded-lg"
-  >
-    Test Save
-  </button>
-)}
+<div className="flex gap-3 items-end">
+  <textarea
+    ref={textareaRef}
+    value={input}
+    onChange={handleInputChange}
+    onKeyDown={handleKeyDown}
+    placeholder="Ask about Scripture, doctrine, or request a devotion..."
+    className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
+    rows={1}
+    style={{ minHeight: '48px', maxHeight: '120px' }}
+    disabled={isGenerating}
+  />
+  {isGenerating ? (
+    <button
+      onClick={stopResponse}
+      className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2"
+    >
+      ⏹️ Stop
+    </button>
+  ) : (
+    <button
+      onClick={sendMessage}
+      disabled={!input.trim()}
+      className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+    >
+      Send
+    </button>
+  )}
+  {/* TEMPORARY TEST BUTTON */}
+  {userId && (
+    <button
+      onClick={() => {
+        console.log('🔵 TEST BUTTON CLICKED');
+        if (conversations.length > 0) {
+          saveConversationsToCloud({ userId, conversations })
+            .then(() => console.log('✅ MANUAL SAVE SUCCESSFUL'))
+            .catch((err) => console.error('❌ MANUAL SAVE FAILED:', err));
+        } else {
+          console.log('⚠️ No conversations to save');
+        }
+      }}
+      className="px-3 py-2 bg-purple-600 text-white text-sm rounded-lg"
+    >
+      Test Save
+    </button>
+  )}
+</div>
             
             <p className="text-xs text-gray-600 dark:text-gray-400 text-center italic mt-3">
               "A dose of God's Word a day, will keep you going all day."
