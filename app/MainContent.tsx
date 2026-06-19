@@ -293,26 +293,96 @@ export default function MainContent() {
 
   // === THE FIX: editMessage sends immediately ===
   const editMessage = (messageId: string, newContent: string) => {
-    console.log('✏️ EDIT MESSAGE CALLED:', messageId, newContent);
+    console.log('✏️ EDIT MESSAGE CALLED');
     
     const messageIndex = messages.findIndex(m => m.id === messageId);
-    if (messageIndex === -1) {
-      console.log('⚠️ Message not found');
-      return;
-    }
+    if (messageIndex === -1) return;
     
     const originalMessage = messages[messageIndex];
-    if (originalMessage.role !== 'user') {
-      console.log('⚠️ Not a user message');
-      return;
-    }
+    if (originalMessage.role !== 'user') return;
     
     // Remove this message and all messages after it
     const newMessages = messages.slice(0, messageIndex);
     setMessages(newMessages);
+    setInput('');
     
-    // Send the edited message directly WITHOUT waiting
-    sendEditedMessageDirectly(newContent, newMessages);
+    // CALL THE DIRECT SEND FUNCTION
+    sendEditedNow(newContent, newMessages);
+  };
+
+  // DIRECT EDIT SEND - bypasses everything
+  const sendEditedNow = async (content: string, history: Message[]) => {
+    console.log('🔥🔥🔥 DIRECT EDIT SEND CALLED');
+    
+    // Create conversation if needed
+    if (!currentConversationId) {
+      const newConversation: Conversation = {
+        id: Date.now().toString(),
+        title: content.substring(0, 40),
+        messages: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        pinned: false,
+      };
+      setConversations(prev => [newConversation, ...prev]);
+      setCurrentConversationId(newConversation.id);
+    }
+
+    // Add user message
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: content,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, userMessage]);
+    setIsGenerating(true);
+    setStreamingText('');
+    
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: content, history: history }),
+      });
+
+      const data = await response.json();
+      let fullResponse = data.response || 'I apologize, but I encountered an error.';
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+      const chunkSize = 30;
+      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+        if (stopRequested.current) {
+          setIsGenerating(false);
+          setStreamingText('');
+          return;
+        }
+        setStreamingText(fullResponse.substring(0, i));
+        await new Promise(resolve => setTimeout(resolve, 1));
+      }
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: fullResponse,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+      setStreamingText('');
+      setIsGenerating(false);
+
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I apologize, but I am unable to respond at this moment.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setIsGenerating(false);
+      setStreamingText('');
+    }
   };
 
   // Direct send for edited messages
