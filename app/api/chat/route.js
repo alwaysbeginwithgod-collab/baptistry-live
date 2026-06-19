@@ -240,13 +240,14 @@ const response = await fetch(DIFY_API_URL, {
     query: message,
     response_mode: 'blocking',
     user: 'baptistry_user',
-    // Pass the conversation history so Dify remembers context
-    conversation_history: history.map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'assistant',
-      content: msg.content
-    })),
-  }),
-});
+  // Option 1: For Dify's built-in memory
+  conversation_id: userId || 'guest',
+  // Option 2: For explicit history
+  conversation_history: history.map(msg => ({
+    role: msg.role === 'user' ? 'user' : 'assistant',
+    content: msg.content
+  })),
+}),
 
   const data = await response.json();
   rawDifyData = data;
