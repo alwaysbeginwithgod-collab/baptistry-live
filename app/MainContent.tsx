@@ -380,7 +380,7 @@ export default function MainContent() {
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 4;
+      const chunkSize = 15; // Increased from 4 to 15 characters per chunk
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
@@ -388,7 +388,7 @@ export default function MainContent() {
           return;
         }
         setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 5));
+        await new Promise(resolve => setTimeout(resolve, 3)); // Reduced from 5ms to 3ms
       }
 
       const newAssistantMessage: Message = {

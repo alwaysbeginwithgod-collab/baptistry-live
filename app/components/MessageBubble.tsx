@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 type Message = {
   id: string;
@@ -129,11 +130,32 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                 </div>
               ) : (
                 <>
-                  <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <ReactMarkdown>
-                      {cleanedContent}
-                    </ReactMarkdown>
-                  </div>
+<div className="prose prose-sm max-w-none dark:prose-invert">
+  <ReactMarkdown
+    remarkPlugins={[remarkGfm]}
+    components={{
+      table: ({node, ...props}) => (
+        <div className="overflow-x-auto my-4">
+          <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-700 text-sm" {...props} />
+        </div>
+      ),
+      thead: ({node, ...props}) => (
+        <thead className="bg-gray-100 dark:bg-gray-700" {...props} />
+      ),
+      th: ({node, ...props}) => (
+        <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left font-semibold" {...props} />
+      ),
+      td: ({node, ...props}) => (
+        <td className="border border-gray-300 dark:border-gray-600 px-3 py-2" {...props} />
+      ),
+      tr: ({node, ...props}) => (
+        <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50" {...props} />
+      ),
+    }}
+  >
+    {cleanedContent}
+  </ReactMarkdown>
+</div>
 
                   <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
                     <p className="text-xs text-gray-400 dark:text-gray-500 italic">
