@@ -108,7 +108,6 @@ export default function MainContent() {
       return;
     }
     
-    // Fallback to localStorage
     const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
     if (savedConversations) {
       try {
@@ -124,7 +123,6 @@ export default function MainContent() {
           })),
         }));
         setConversations(withDates);
-        // Backup to cloud
         saveConversationsToCloud({ userId, conversations: withDates })
           .then(() => console.log('✅ Cloud backup successful'))
           .catch((err) => console.error('❌ Cloud backup failed:', err));
@@ -138,23 +136,13 @@ export default function MainContent() {
 
   // Save conversations to Convex cloud AND localStorage
   useEffect(() => {
-    console.log('🔵 SAVE EFFECT - conversations:', conversations.length, 'userId:', userId);
-    
-    if (!userId) {
-      console.log('⚠️ No userId, skipping save');
-      return;
+    if (conversations.length > 0 && userId) {
+      console.log('💾 SAVING to localStorage and Convex cloud:', conversations.length);
+      localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
+      saveConversationsToCloud({ userId, conversations })
+        .then(() => console.log('✅ Convex save successful'))
+        .catch((err) => console.error('❌ Convex save failed:', err));
     }
-    
-    if (conversations.length === 0) {
-      console.log('⚠️ No conversations to save');
-      return;
-    }
-    
-    console.log('💾 SAVING to localStorage and Convex cloud:', conversations.length);
-    localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
-    saveConversationsToCloud({ userId, conversations })
-      .then(() => console.log('✅ Convex save successful'))
-      .catch((err) => console.error('❌ Convex save failed:', err));
   }, [conversations, userId]);
 
   const saveCurrentConversation = () => {
@@ -220,8 +208,6 @@ export default function MainContent() {
           scrollToBottomImmediate();
         }, 50);
       });
-    } else {
-      console.log('Conversation not found:', conversationId);
     }
   };
 
@@ -288,8 +274,6 @@ export default function MainContent() {
         setTimeout(() => {
           messageElement.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/30');
         }, 2000);
-      } else {
-        console.log('Message element not found:', messageId);
       }
     }, 100);
   };
@@ -325,8 +309,8 @@ export default function MainContent() {
     localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
   };
 
-  // FIXED: Edit message - now sends immediately without needing extra click
-    const editMessage = (messageId: string, newContent: string) => {
+  // === FIXED: Edit message - sends automatically without extra click ===
+  const editMessage = (messageId: string, newContent: string) => {
     const messageIndex = messages.findIndex(m => m.id === messageId);
     if (messageIndex === -1) return;
     
@@ -344,20 +328,16 @@ export default function MainContent() {
     const newMessages = messages.slice(0, messageIndex);
     setMessages(newMessages);
     
-    // Clear the input field
-    setInput('');
-    
-    // Send the edited message directly
-    sendEditedMessage(newContent, newMessages);
+    // Send the edited message immediately
+    sendEditedMessageDirect(newContent, newMessages);
   };
 
-  const sendEditedMessage = async (content: string, history: Message[]) => {
+  // Helper: send edited message directly without waiting for user
+  const sendEditedMessageDirect = async (content: string, history: Message[]) => {
     if (!content.trim()) return;
-    if (isGenerating) return;
-
-    // Use existing conversation or create new one
-    let convId = currentConversationId;
-    if (!convId) {
+    
+    // Create conversation if needed
+    if (!currentConversationId) {
       const newConversation: Conversation = {
         id: Date.now().toString(),
         title: content.substring(0, 40),
@@ -366,17 +346,8 @@ export default function MainContent() {
         updatedAt: new Date(),
         pinned: false,
       };
-      setConversations(prev => {
-        const withNew = [newConversation, ...prev];
-        const sorted = [...withNew].sort((a, b) => {
-          if (a.pinned && !b.pinned) return -1;
-          if (!a.pinned && b.pinned) return 1;
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-        });
-        return sorted;
-      });
-      convId = newConversation.id;
-      setCurrentConversationId(convId);
+      setConversations(prev => [newConversation, ...prev]);
+      setCurrentConversationId(newConversation.id);
     }
 
     // Add user message
@@ -387,10 +358,13 @@ export default function MainContent() {
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, userMessage]);
+    setInput('');
     setIsGenerating(true);
     setStreamingText('');
     stopRequested.current = false;
     
+    setTimeout(autoResizeTextarea, 0);
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -402,7 +376,7 @@ export default function MainContent() {
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      // Faster typing: larger chunks, shorter delay
+      // Faster typing: chunk size 30, delay 1ms
       const chunkSize = 30;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
@@ -476,7 +450,7 @@ export default function MainContent() {
           return;
         }
         setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 3));
+        await new Promise(resolve => setTimeout(resolve, 1));
       }
 
       const newAssistantMessage: Message = {
@@ -562,7 +536,7 @@ export default function MainContent() {
           return;
         }
         setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 3));
+        await new Promise(resolve => setTimeout(resolve, 1));
       }
 
       const assistantMessage: Message = {
@@ -776,7 +750,6 @@ export default function MainContent() {
           )}
         </div>
 
-        {/* Guest banner - only shows when not signed in */}
         {!userId && (
           <div className="max-w-4xl mx-auto mb-4 px-4">
             <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-center border border-blue-200 dark:border-blue-800">
