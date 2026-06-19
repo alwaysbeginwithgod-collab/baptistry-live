@@ -311,6 +311,7 @@ export default function MainContent() {
 
   // === FIXED: Edit message - sends automatically without extra click ===
   const editMessage = (messageId: string, newContent: string) => {
+  alert('editMessage called!'); // ← ADD THIS LINE
     console.log('✏️ editMessage called:', messageId, newContent);
     
     const messageIndex = messages.findIndex(m => m.id === messageId);
