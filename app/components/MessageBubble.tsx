@@ -34,29 +34,51 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
 
   const cleanTableContent = (content: string) => {
     // If the content contains a table pattern, clean it
-    if (content.includes('|')) {
-      // Split by lines
-      const lines = content.split('\n');
-      let inTable = false;
-      let cleanedLines = [];
+    if (!content.includes('|')) return content;
+    
+    const lines = content.split('\n');
+    const cleanedLines = [];
+    let inTable = false;
+    let tableHeaderFound = false;
+    
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
       
-      for (const line of lines) {
-        // Check if this is a table row (starts or ends with |)
-        const trimmedLine = line.trim();
-        if (trimmedLine.startsWith('|') || trimmedLine.endsWith('|') || trimmedLine.includes('|---')) {
-          inTable = true;
-          // Remove extra spaces between pipes
-          cleanedLines.push(trimmedLine.replace(/\s*\|\s*/g, '|'));
-        } else {
-          if (inTable && trimmedLine === '') {
-            inTable = false;
-          }
-          cleanedLines.push(line);
+      // Check if this is a table row
+      const trimmed = line.trim();
+      if (trimmed.includes('|')) {
+        inTable = true;
+        
+        // Fix alignment row (remove extra colons and ensure proper format)
+        if (trimmed.includes(':---') || trimmed.includes('---:')) {
+          // Convert alignment row to proper format
+          const parts = trimmed.split('|').filter(p => p.trim() !== '');
+          const alignedParts = parts.map(() => '---');
+          cleanedLines.push('| ' + alignedParts.join(' | ') + ' |');
+          tableHeaderFound = true;
+          continue;
         }
+        
+        // Clean the table row: remove extra spaces between pipes
+        const cells = trimmed.split('|').filter(cell => cell.trim() !== '');
+        if (cells.length > 0) {
+          // Remove empty first/last cells if they exist
+          const cleanedRow = '| ' + cells.map(cell => cell.trim()).join(' | ') + ' |';
+          cleanedLines.push(cleanedRow);
+        } else {
+          cleanedLines.push(trimmed);
+        }
+      } else {
+        // If we were in a table and now we're out, add a blank line
+        if (inTable && trimmed === '') {
+          inTable = false;
+          // Don't add extra blank line
+        }
+        cleanedLines.push(line);
       }
-      return cleanedLines.join('\n');
     }
-    return content;
+    
+    return cleanedLines.join('\n');
   };
 
   const handleFeedback = (type: 'helpful' | 'unhelpful') => {
@@ -173,10 +195,10 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
         <tbody className="divide-y divide-gray-200 dark:divide-gray-700" {...props} />
       ),
       th: ({node, ...props}) => (
-        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-900 dark:text-white" {...props} />
+        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-900 dark:text-white whitespace-nowrap" {...props} />
       ),
       td: ({node, ...props}) => (
-        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300" {...props} />
+        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300 align-top" {...props} />
       ),
       tr: ({node, ...props}) => (
         <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" {...props} />
