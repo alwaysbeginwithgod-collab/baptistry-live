@@ -26,6 +26,9 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const [copySuccess, setCopySuccess] = useState(false);
   const [showCopyTooltip, setShowCopyTooltip] = useState(false);
 
+  // DEBUG: Log when component renders
+  console.log('🔵 MessageBubble rendered - onEdit exists?', !!onEdit, 'message.id:', message.id);
+
   const cleanContent = (content: string) => {
     return content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
   };
@@ -84,17 +87,32 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   };
 
   const handleEdit = () => {
+    console.log('🔵 Edit icon clicked - setting isEditing to true');
     setIsEditing(true);
   };
 
   const handleSave = () => {
+    console.log('🔵 Save & Resend clicked - onEdit exists?', !!onEdit);
+    console.log('🔵 editedText:', editedText);
+    console.log('🔵 original message.content:', message.content);
+    console.log('🔵 message.id:', message.id);
+    
     if (editedText.trim() && editedText !== message.content && onEdit) {
+      console.log('🔵 ✅ Calling onEdit with:', message.id, editedText);
       onEdit(message.id, editedText);
+    } else {
+      console.log('🔵 ⚠️ onEdit NOT called. Conditions:', {
+        trimmed: editedText.trim(),
+        notEmpty: !!editedText.trim(),
+        different: editedText !== message.content,
+        hasOnEdit: !!onEdit
+      });
     }
     setIsEditing(false);
   };
 
   const handleCancel = () => {
+    console.log('🔵 Cancel clicked');
     setIsEditing(false);
     setEditedText(message.content);
   };
@@ -155,10 +173,16 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                 rows={4}
               />
               <div className="flex gap-2 mt-2">
-                <button onClick={handleSave} className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
+                <button 
+                  onClick={handleSave} 
+                  className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                >
                   Save & Resend
                 </button>
-                <button onClick={handleCancel} className="px-3 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 text-sm">
+                <button 
+                  onClick={handleCancel} 
+                  className="px-3 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 text-sm"
+                >
                   Cancel
                 </button>
               </div>
@@ -298,7 +322,10 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
 
                 <div className="relative group">
                   <button
-                    onClick={handleEdit}
+                    onClick={() => {
+                      console.log('🔵 Edit icon clicked from bottom row');
+                      handleEdit();
+                    }}
                     className="text-blue-200 hover:text-white dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
