@@ -311,31 +311,41 @@ export default function MainContent() {
 
   // === FIXED: Edit message - sends automatically without extra click ===
   const editMessage = (messageId: string, newContent: string) => {
+    console.log('✏️ editMessage called:', messageId, newContent);
+    
     const messageIndex = messages.findIndex(m => m.id === messageId);
-    if (messageIndex === -1) return;
+    if (messageIndex === -1) {
+      console.log('⚠️ Message not found');
+      return;
+    }
     
     const originalMessage = messages[messageIndex];
-    if (originalMessage.role !== 'user') return;
-    
-    // Force reset any ongoing generation
-    setIsGenerating(false);
-    setStreamingText('');
-    if (stopRequested.current) {
-      stopRequested.current = false;
+    if (originalMessage.role !== 'user') {
+      console.log('⚠️ Not a user message');
+      return;
     }
     
     // Remove this message and all messages after it
     const newMessages = messages.slice(0, messageIndex);
     setMessages(newMessages);
     
-    // Send the edited message immediately
-    sendEditedMessageDirect(newContent, newMessages);
+    // Send the edited message directly
+    sendEditedMessage(newContent, newMessages);
   };
-
-  // Helper: send edited message directly without waiting for user
-  const sendEditedMessageDirect = async (content: string, history: Message[]) => {
-    if (!content.trim()) return;
+  
+  // Direct send for edited messages - NO isGenerating check
+  const sendEditedMessage = async (content: string, history: Message[]) => {
+    console.log('🔵 sendEditedMessage called with:', content);
+    if (!content.trim()) {
+      console.log('⚠️ Empty content, returning');
+      return;
+    }
     
+    // Clear any existing generation state
+    setIsGenerating(false);
+    setStreamingText('');
+    stopRequested.current = false;
+
     // Create conversation if needed
     if (!currentConversationId) {
       const newConversation: Conversation = {
@@ -358,14 +368,11 @@ export default function MainContent() {
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, userMessage]);
-    setInput('');
     setIsGenerating(true);
     setStreamingText('');
-    stopRequested.current = false;
     
-    setTimeout(autoResizeTextarea, 0);
-
     try {
+      console.log('📤 Fetching API for edited message...');
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -373,10 +380,10 @@ export default function MainContent() {
       });
 
       const data = await response.json();
+      console.log('📥 API response received');
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      // Faster typing: chunk size 30, delay 1ms
       const chunkSize = 30;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
@@ -397,9 +404,10 @@ export default function MainContent() {
       setMessages(prev => [...prev, assistantMessage]);
       setStreamingText('');
       setIsGenerating(false);
+      console.log('✅ Edit complete');
 
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error in edit:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
