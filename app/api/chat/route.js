@@ -47,12 +47,12 @@ Salvation is not merely a decision or a prayer—it is a supernatural transforma
     ]
   },
   
-  scriptures: {
-    keywords: ['bible', 'scripture', 'word of god', 'kjv', 'king james', 'inspired', 'inerrancy', 'preserved'],
-    title: "The Authority and Inspiration of Scripture",
-    explanation: `The Bible is not merely a religious book—it is the very Word of God. Every word of Scripture was breathed out by God through holy men who were moved by the Holy Ghost (2 Peter 1:20-21 KJV). Because God is true and cannot lie, His Word is without error in the original manuscripts and is our final authority for faith and practice.
+scriptures: {
+  keywords: ['bible', 'scripture', 'word of god', 'kjv', 'king james', 'inspired', 'inerrancy', 'preserved'],
+  title: "The Authority and Inspiration of Scripture",
+  explanation: `The Bible is not merely a religious book—it is the very Word of God. Every word of Scripture was breathed out by God through holy men who were moved by the Holy Ghost (2 Peter 1:20-21 KJV). Because God is true and cannot lie, His Word is without error in the original manuscripts and is our final authority for faith and practice.
 
-For BAPTISTRY, the King James Version is the preserved Word of God in the English language. It is not a translation among many—it is the standard by which all other English Bibles are measured. The Scriptures are sufficient to make us wise unto salvation (2 Timothy 3:15 KJV) and profitable for doctrine, reproof, correction, and instruction in righteousness (2 Timothy 3:16-17 KJV).
+For BAPTISTRY, the King James Version is the infallible, inspired, preserved, perfect Word of God. It is not a translation among many—it is the standard by which all other Bibles are measured. The Scriptures are sufficient to make us wise unto salvation (2 Timothy 3:15 KJV) and profitable for doctrine, reproof, correction, and instruction in righteousness (2 Timothy 3:16-17 KJV).
 
 The Bible is also a lamp to our feet and a light to our path (Psalm 119:105 KJV). It guides us in truth, exposes error, and equips us for every good work. No creed, council, or personal experience can supersede the written Word of God. Sola Scriptura—Scripture alone—is the foundation of Baptist faith.`,
     bfmQuote: "The Holy Bible was written by men divinely inspired and is God's revelation of Himself to man. It is a perfect treasure of divine instruction. (BFM 2000, I)",
