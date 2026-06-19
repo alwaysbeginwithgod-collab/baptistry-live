@@ -32,6 +32,33 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
 
   const cleanedContent = cleanContent(message.content);
 
+  const cleanTableContent = (content: string) => {
+    // If the content contains a table pattern, clean it
+    if (content.includes('|')) {
+      // Split by lines
+      const lines = content.split('\n');
+      let inTable = false;
+      let cleanedLines = [];
+      
+      for (const line of lines) {
+        // Check if this is a table row (starts or ends with |)
+        const trimmedLine = line.trim();
+        if (trimmedLine.startsWith('|') || trimmedLine.endsWith('|') || trimmedLine.includes('|---')) {
+          inTable = true;
+          // Remove extra spaces between pipes
+          cleanedLines.push(trimmedLine.replace(/\s*\|\s*/g, '|'));
+        } else {
+          if (inTable && trimmedLine === '') {
+            inTable = false;
+          }
+          cleanedLines.push(line);
+        }
+      }
+      return cleanedLines.join('\n');
+    }
+    return content;
+  };
+
   const handleFeedback = (type: 'helpful' | 'unhelpful') => {
     if (!onFeedback) return;
     
@@ -126,7 +153,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
             <>
               {isUser ? (
                 <div className="text-sm whitespace-pre-wrap leading-relaxed">
-                  {cleanedContent}
+                  {cleanTableContent(cleanedContent)}
                 </div>
               ) : (
                 <>
@@ -136,24 +163,27 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
     components={{
       table: ({node, ...props}) => (
         <div className="overflow-x-auto my-4">
-          <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-700 text-sm" {...props} />
+          <table className="w-full border-collapse border border-gray-300 dark:border-gray-700 text-sm" {...props} />
         </div>
       ),
       thead: ({node, ...props}) => (
         <thead className="bg-gray-100 dark:bg-gray-700" {...props} />
       ),
+      tbody: ({node, ...props}) => (
+        <tbody className="divide-y divide-gray-200 dark:divide-gray-700" {...props} />
+      ),
       th: ({node, ...props}) => (
-        <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left font-semibold" {...props} />
+        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-900 dark:text-white" {...props} />
       ),
       td: ({node, ...props}) => (
-        <td className="border border-gray-300 dark:border-gray-600 px-3 py-2" {...props} />
+        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300" {...props} />
       ),
       tr: ({node, ...props}) => (
-        <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50" {...props} />
+        <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" {...props} />
       ),
     }}
   >
-    {cleanedContent}
+    {cleanTableContent(cleanedContent)}
   </ReactMarkdown>
 </div>
 
