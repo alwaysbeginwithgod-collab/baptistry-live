@@ -229,19 +229,24 @@ let difyError = null;
 let rawDifyData = null;
 
 try {
-  const response = await fetch(DIFY_API_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${DIFY_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      inputs: {},
-      query: message,
-      response_mode: 'blocking',
-      user: 'baptistry_user',
-    }),
-  });
+const response = await fetch(DIFY_API_URL, {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${DIFY_API_KEY}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    inputs: {},
+    query: message,
+    response_mode: 'blocking',
+    user: 'baptistry_user',
+    // Pass the conversation history so Dify remembers context
+    conversation_history: history.map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'assistant',
+      content: msg.content
+    })),
+  }),
+});
 
   const data = await response.json();
   rawDifyData = data;
