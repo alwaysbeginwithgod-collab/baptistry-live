@@ -326,7 +326,7 @@ export default function MainContent() {
   };
 
   // FIXED: Edit message - now sends immediately without needing extra click
-  const editMessage = (messageId: string, newContent: string) => {
+    const editMessage = (messageId: string, newContent: string) => {
     const messageIndex = messages.findIndex(m => m.id === messageId);
     if (messageIndex === -1) return;
     
@@ -344,17 +344,20 @@ export default function MainContent() {
     const newMessages = messages.slice(0, messageIndex);
     setMessages(newMessages);
     
-    // Send the edited message directly without relying on input state
-    sendEditedMessageDirectly(newContent, newMessages);
+    // Clear the input field
+    setInput('');
+    
+    // Send the edited message directly
+    sendEditedMessage(newContent, newMessages);
   };
 
-  // Helper function to send edited message directly
-  const sendEditedMessageDirectly = async (content: string, history: Message[]) => {
+  const sendEditedMessage = async (content: string, history: Message[]) => {
     if (!content.trim()) return;
     if (isGenerating) return;
 
-    // Create a new conversation if needed
-    if (!currentConversationId) {
+    // Use existing conversation or create new one
+    let convId = currentConversationId;
+    if (!convId) {
       const newConversation: Conversation = {
         id: Date.now().toString(),
         title: content.substring(0, 40),
@@ -372,25 +375,22 @@ export default function MainContent() {
         });
         return sorted;
       });
-      setCurrentConversationId(newConversation.id);
+      convId = newConversation.id;
+      setCurrentConversationId(convId);
     }
 
+    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: content,
       timestamp: new Date(),
     };
-
     setMessages(prev => [...prev, userMessage]);
-    // Clear input
-    setInput('');
     setIsGenerating(true);
     setStreamingText('');
     stopRequested.current = false;
     
-    setTimeout(autoResizeTextarea, 0);
-
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -402,7 +402,8 @@ export default function MainContent() {
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 15;
+      // Faster typing: larger chunks, shorter delay
+      const chunkSize = 30;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
@@ -410,7 +411,7 @@ export default function MainContent() {
           return;
         }
         setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 3));
+        await new Promise(resolve => setTimeout(resolve, 1));
       }
 
       const assistantMessage: Message = {
