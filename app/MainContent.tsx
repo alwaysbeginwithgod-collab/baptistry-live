@@ -79,30 +79,18 @@ export default function MainContent() {
 
   // Load conversations from Convex cloud (primary) or localStorage (backup)
   useEffect(() => {
-    console.log('🔵 LOAD EFFECT - userId:', userId, 'isLoaded:', isLoaded);
-    
-    if (!isLoaded) {
-      console.log('⏳ Clerk still loading...');
-      return;
-    }
-    
     if (!userId) {
-      console.log('⚠️ No userId found (user not signed in)');
       setConversations([]);
       return;
     }
     
-    if (loadConversationsFromCloud === undefined) {
-      console.log('⏳ Waiting for Convex cloud data...');
-      return;
-    }
+    if (loadConversationsFromCloud === undefined) return;
     
     const isValidCloudData = (data: any): data is Conversation[] => {
       return data !== null && data !== "skip" && Array.isArray(data);
     };
     
     if (isValidCloudData(loadConversationsFromCloud) && loadConversationsFromCloud.length > 0) {
-      console.log('✅ LOADING FROM CONVEX CLOUD:', loadConversationsFromCloud.length);
       setConversations(loadConversationsFromCloud);
       localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(loadConversationsFromCloud));
       return;
@@ -111,7 +99,6 @@ export default function MainContent() {
     const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
     if (savedConversations) {
       try {
-        console.log('💾 LOADING FROM LOCALSTORAGE (fallback)');
         const parsed = JSON.parse(savedConversations);
         const withDates = parsed.map((conv: any) => ({
           ...conv,
@@ -123,25 +110,20 @@ export default function MainContent() {
           })),
         }));
         setConversations(withDates);
-        saveConversationsToCloud({ userId, conversations: withDates })
-          .then(() => console.log('✅ Cloud backup successful'))
-          .catch((err) => console.error('❌ Cloud backup failed:', err));
+        saveConversationsToCloud({ userId, conversations: withDates });
       } catch (e) {
         console.error('Failed to load conversations', e);
       }
     } else {
       setConversations([]);
     }
-  }, [userId, isLoaded, loadConversationsFromCloud]);
+  }, [userId, loadConversationsFromCloud]);
 
   // Save conversations to Convex cloud AND localStorage
   useEffect(() => {
     if (conversations.length > 0 && userId) {
-      console.log('💾 SAVING to localStorage and Convex cloud:', conversations.length);
       localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
-      saveConversationsToCloud({ userId, conversations })
-        .then(() => console.log('✅ Convex save successful'))
-        .catch((err) => console.error('❌ Convex save failed:', err));
+      saveConversationsToCloud({ userId, conversations });
     }
   }, [conversations, userId]);
 
@@ -309,10 +291,9 @@ export default function MainContent() {
     localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
   };
 
-  // === FIXED: Edit message - sends automatically without extra click ===
+  // === THE FIX: editMessage sends immediately ===
   const editMessage = (messageId: string, newContent: string) => {
-  alert('editMessage called!'); // ← ADD THIS LINE
-    console.log('✏️ editMessage called:', messageId, newContent);
+    console.log('✏️ EDIT MESSAGE CALLED:', messageId, newContent);
     
     const messageIndex = messages.findIndex(m => m.id === messageId);
     if (messageIndex === -1) {
@@ -330,25 +311,24 @@ export default function MainContent() {
     const newMessages = messages.slice(0, messageIndex);
     setMessages(newMessages);
     
-    // Send the edited message directly
-    sendEditedMessage(newContent, newMessages);
+    // Send the edited message directly WITHOUT waiting
+    sendEditedMessageDirectly(newContent, newMessages);
   };
-  
-  // Direct send for edited messages - NO isGenerating check
-  const sendEditedMessage = async (content: string, history: Message[]) => {
-    console.log('🔵 sendEditedMessage called with:', content);
-    if (!content.trim()) {
-      console.log('⚠️ Empty content, returning');
-      return;
-    }
+
+  // Direct send for edited messages
+  const sendEditedMessageDirectly = async (content: string, history: Message[]) => {
+    console.log('🚀 SENDING EDITED MESSAGE DIRECTLY:', content);
     
-    // Clear any existing generation state
-    setIsGenerating(false);
+    if (!content.trim()) return;
+    
+    // Reset states
+    setIsGenerating(true);
     setStreamingText('');
     stopRequested.current = false;
-
+    
     // Create conversation if needed
-    if (!currentConversationId) {
+    let convId = currentConversationId;
+    if (!convId) {
       const newConversation: Conversation = {
         id: Date.now().toString(),
         title: content.substring(0, 40),
@@ -357,8 +337,17 @@ export default function MainContent() {
         updatedAt: new Date(),
         pinned: false,
       };
-      setConversations(prev => [newConversation, ...prev]);
-      setCurrentConversationId(newConversation.id);
+      setConversations(prev => {
+        const withNew = [newConversation, ...prev];
+        const sorted = [...withNew].sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        });
+        return sorted;
+      });
+      convId = newConversation.id;
+      setCurrentConversationId(convId);
     }
 
     // Add user message
@@ -369,11 +358,8 @@ export default function MainContent() {
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, userMessage]);
-    setIsGenerating(true);
-    setStreamingText('');
     
     try {
-      console.log('📤 Fetching API for edited message...');
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -381,7 +367,6 @@ export default function MainContent() {
       });
 
       const data = await response.json();
-      console.log('📥 API response received');
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
