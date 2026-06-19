@@ -403,7 +403,7 @@ export default function MainContent() {
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
       // Faster typing: larger chunks, shorter delay
-      const chunkSize = 15;
+      const chunkSize = 20;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
