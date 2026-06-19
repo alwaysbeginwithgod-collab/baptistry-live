@@ -325,6 +325,7 @@ export default function MainContent() {
     localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
   };
 
+  // FIXED: Edit message - now sends immediately without needing extra click
   const editMessage = (messageId: string, newContent: string) => {
     const messageIndex = messages.findIndex(m => m.id === messageId);
     if (messageIndex === -1) return;
@@ -332,22 +333,108 @@ export default function MainContent() {
     const originalMessage = messages[messageIndex];
     if (originalMessage.role !== 'user') return;
     
+    // Force reset any ongoing generation
     setIsGenerating(false);
     setStreamingText('');
     if (stopRequested.current) {
       stopRequested.current = false;
     }
     
+    // Remove this message and all messages after it
     const newMessages = messages.slice(0, messageIndex);
     setMessages(newMessages);
-    setInput(newContent);
     
-    setTimeout(() => {
-      autoResizeTextarea();
-      setTimeout(() => {
-        sendMessage();
-      }, 100);
-    }, 50);
+    // Send the edited message directly without relying on input state
+    sendEditedMessageDirectly(newContent, newMessages);
+  };
+
+  // Helper function to send edited message directly
+  const sendEditedMessageDirectly = async (content: string, history: Message[]) => {
+    if (!content.trim()) return;
+    if (isGenerating) return;
+
+    // Create a new conversation if needed
+    if (!currentConversationId) {
+      const newConversation: Conversation = {
+        id: Date.now().toString(),
+        title: content.substring(0, 40),
+        messages: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        pinned: false,
+      };
+      setConversations(prev => {
+        const withNew = [newConversation, ...prev];
+        const sorted = [...withNew].sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        });
+        return sorted;
+      });
+      setCurrentConversationId(newConversation.id);
+    }
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: content,
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    // Clear input
+    setInput('');
+    setIsGenerating(true);
+    setStreamingText('');
+    stopRequested.current = false;
+    
+    setTimeout(autoResizeTextarea, 0);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: content, history: history }),
+      });
+
+      const data = await response.json();
+      let fullResponse = data.response || 'I apologize, but I encountered an error.';
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+      const chunkSize = 15;
+      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+        if (stopRequested.current) {
+          setIsGenerating(false);
+          setStreamingText('');
+          return;
+        }
+        setStreamingText(fullResponse.substring(0, i));
+        await new Promise(resolve => setTimeout(resolve, 3));
+      }
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: fullResponse,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+      setStreamingText('');
+      setIsGenerating(false);
+
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I apologize, but I am unable to respond at this moment.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setIsGenerating(false);
+      setStreamingText('');
+    }
   };
 
   const regenerateMessage = async (assistantMessageId: string) => {
@@ -380,7 +467,7 @@ export default function MainContent() {
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 15; // Increased from 4 to 15 characters per chunk
+      const chunkSize = 15;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
@@ -388,7 +475,7 @@ export default function MainContent() {
           return;
         }
         setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 3)); // Reduced from 5ms to 3ms
+        await new Promise(resolve => setTimeout(resolve, 3));
       }
 
       const newAssistantMessage: Message = {
@@ -466,7 +553,7 @@ export default function MainContent() {
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 4;
+      const chunkSize = 15;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
@@ -474,7 +561,7 @@ export default function MainContent() {
           return;
         }
         setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 5));
+        await new Promise(resolve => setTimeout(resolve, 3));
       }
 
       const assistantMessage: Message = {
@@ -704,53 +791,35 @@ export default function MainContent() {
 
         <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
           <div className="max-w-4xl mx-auto">
-<div className="flex gap-3 items-end">
-  <textarea
-    ref={textareaRef}
-    value={input}
-    onChange={handleInputChange}
-    onKeyDown={handleKeyDown}
-    placeholder="Ask about Scripture, doctrine, or request a devotion..."
-    className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
-    rows={1}
-    style={{ minHeight: '48px', maxHeight: '120px' }}
-    disabled={isGenerating}
-  />
-  {isGenerating ? (
-    <button
-      onClick={stopResponse}
-      className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2"
-    >
-      ⏹️ Stop
-    </button>
-  ) : (
-    <button
-      onClick={sendMessage}
-      disabled={!input.trim()}
-      className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-    >
-      Send
-    </button>
-  )}
-  {/* TEMPORARY TEST BUTTON */}
-  {userId && (
-    <button
-      onClick={() => {
-        console.log('🔵 TEST BUTTON CLICKED');
-        if (conversations.length > 0) {
-          saveConversationsToCloud({ userId, conversations })
-            .then(() => console.log('✅ MANUAL SAVE SUCCESSFUL'))
-            .catch((err) => console.error('❌ MANUAL SAVE FAILED:', err));
-        } else {
-          console.log('⚠️ No conversations to save');
-        }
-      }}
-      className="px-3 py-2 bg-purple-600 text-white text-sm rounded-lg"
-    >
-      Test Save
-    </button>
-  )}
-</div>
+            <div className="flex gap-3 items-end">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask about Scripture, doctrine, or request a devotion..."
+                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
+                rows={1}
+                style={{ minHeight: '48px', maxHeight: '120px' }}
+                disabled={isGenerating}
+              />
+              {isGenerating ? (
+                <button
+                  onClick={stopResponse}
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2"
+                >
+                  ⏹️ Stop
+                </button>
+              ) : (
+                <button
+                  onClick={sendMessage}
+                  disabled={!input.trim()}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  Send
+                </button>
+              )}
+            </div>
             
             <p className="text-xs text-gray-600 dark:text-gray-400 text-center italic mt-3">
               "A dose of God's Word a day, will keep you going all day."
