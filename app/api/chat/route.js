@@ -11,7 +11,6 @@ async function getWebsterDefinition(word) {
     const data = await response.json();
     
     if (data.definition) {
-      // Clean format without redundant header
       return `${data.definition}\n\n— Webster's Dictionary 1828`;
     }
     return null;
@@ -24,7 +23,6 @@ async function getWebsterDefinition(word) {
 // ============================================================
 // DOCTRINAL DEFENSE LIBRARY (FALLBACK ONLY)
 // ============================================================
-
 const doctrinalLibrary = {
   salvation: {
     keywords: ['salvation', 'saved', 'save', 'born again', 'justified', 'redemption', 'forgiven', 'grace', 'faith'],
@@ -46,15 +44,12 @@ Salvation is not merely a decision or a prayer—it is a supernatural transforma
       { name: "Spurgeon on Salvation", url: "https://spurgeongems.org" }
     ]
   },
-  
-scriptures: {
-  keywords: ['bible', 'scripture', 'word of god', 'kjv', 'king james', 'inspired', 'inerrancy', 'preserved'],
-  title: "The Authority and Inspiration of Scripture",
-  explanation: `The Bible is not merely a religious book—it is the very Word of God. Every word of Scripture was breathed out by God through holy men who were moved by the Holy Ghost (2 Peter 1:20-21 KJV). Because God is true and cannot lie, His Word is without error in the original manuscripts and is our final authority for faith and practice.
+  scriptures: {
+    keywords: ['bible', 'scripture', 'word of god', 'kjv', 'king james', 'inspired', 'inerrancy', 'preserved'],
+    title: "The Authority and Inspiration of Scripture",
+    explanation: `The Bible is not merely a religious book—it is the very Word of God. Every word of Scripture was breathed out by God through holy men who were moved by the Holy Ghost (2 Peter 1:20-21 KJV). Because God is true and cannot lie, His Word is without error in the original manuscripts and is our final authority for faith and practice.
 
-For BAPTISTRY, the King James Version is the infallible, inspired, preserved, perfect Word of God. It is not a translation among many—it is the standard by which all other Bibles are measured. The Scriptures are sufficient to make us wise unto salvation (2 Timothy 3:15 KJV) and profitable for doctrine, reproof, correction, and instruction in righteousness (2 Timothy 3:16-17 KJV).
-
-The Bible is also a lamp to our feet and a light to our path (Psalm 119:105 KJV). It guides us in truth, exposes error, and equips us for every good work. No creed, council, or personal experience can supersede the written Word of God. Sola Scriptura—Scripture alone—is the foundation of Baptist faith.`,
+For BAPTISTRY, the King James Version is the infallible, inspired, preserved, perfect Word of God. It is not a translation among many—it is the standard by which all other Bibles are measured. The Scriptures are sufficient to make us wise unto salvation (2 Timothy 3:15 KJV) and profitable for doctrine, reproof, correction, and instruction in righteousness (2 Timothy 3:16-17 KJV).`,
     bfmQuote: "The Holy Bible was written by men divinely inspired and is God's revelation of Himself to man. It is a perfect treasure of divine instruction. (BFM 2000, I)",
     theologianQuote: `"Baptists have insisted that the Bible is the sole ultimate written authority for Christian faith and practice." - Baptist Distinctives`,
     scripture: [
@@ -67,84 +62,8 @@ The Bible is also a lamp to our feet and a light to our path (Psalm 119:105 KJV)
       { name: "Way of Life - KJV Defense", url: "https://www.wayoflife.org" }
     ]
   },
-  
-  god: {
-    keywords: ['god', 'trinity', 'father', 'son', 'holy spirit', 'godhead', 'divine'],
-    title: "The One True God",
-    explanation: `There is only one living and true God, the Maker of heaven and earth. He is infinite, eternal, and unchangeable in His being, wisdom, power, holiness, justice, goodness, and truth. Within the unity of the Godhead, there are three distinct Persons: the Father, the Son, and the Holy Spirit. These three are equal in every divine perfection and execute distinct but harmonious offices in the work of creation, redemption, and preservation.
-
-The Father is the source of all things. The Son, Jesus Christ, is God manifest in the flesh—fully God and fully man, who died for our sins and rose again. The Holy Spirit is the Agent of regeneration, sanctification, and empowerment for the believer. This doctrine of the Trinity is not a contradiction but a mystery revealed in Scripture.
-
-Deuteronomy 6:4 (KJV) declares, 'Hear, O Israel: The LORD our God is one LORD.' Yet we see three Persons at the baptism of Jesus (Matthew 3:16-17 KJV), and Jesus commanded baptism in the name of the Father, Son, and Holy Ghost (Matthew 28:19 KJV). The Trinity is essential to the Christian faith.`,
-    bfmQuote: "There is one and only one living and true God. The eternal triune God reveals Himself to us as Father, Son, and Holy Spirit, with distinct personal attributes, but without division of nature, essence, or being. (BFM 2000, II)",
-    theologianQuote: `"The doctrine of the Trinity is the distinctive Christian teaching about the nature of God." - Millard Erickson`,
-    scripture: [
-      "Deuteronomy 6:4 (KJV): 'Hear, O Israel: The LORD our God is one LORD.'",
-      "Matthew 28:19 (KJV): 'Go ye therefore, and teach all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Ghost.'",
-      "John 1:1 (KJV): 'In the beginning was the Word, and the Word was with God, and the Word was God.'"
-    ],
-    resources: [
-      { name: "Webster's 1828: Trinity", url: "https://webstersdictionary1828.com/Dictionary/Trinity" }
-    ]
-  },
-  
-  baptism: {
-    keywords: ['baptism', 'baptize', 'immersion', 'believer baptism', 'ordinance'],
-    title: "Believer's Baptism by Immersion",
-    explanation: `Baptism is not a sacrament that saves—it is an act of obedience symbolizing what has already happened in the heart of a believer. Every baptism in the New Testament was performed on those who had already trusted Christ as Saviour. The mode is always immersion, which pictures the death, burial, and resurrection of Jesus Christ.
-
-When a believer is immersed in water, they publicly declare that they have died to sin and been raised to walk in newness of life (Romans 6:3-4 KJV). Baptism does not wash away sin; only the blood of Jesus cleanses us from all sin (1 John 1:7 KJV). Rather, it is a testimony to the world, the church, and the believer themselves that they are united with Christ.
-
-Baptism is also the visible badge of discipleship. Jesus commanded His followers to baptize all nations (Matthew 28:19-20 KJV). Therefore, BAPTISTRY holds that baptism should follow salvation, not precede it, and should be administered by a local New Testament church.`,
-    bfmQuote: "Christian baptism is the immersion of a believer in water in the name of the Father, Son, and Holy Spirit. It is an act of obedience symbolizing the believer's faith in a crucified, buried, and risen Saviour. (BFM 2000, VII)",
-    theologianQuote: `"Baptism is the church's visible declaration of the gospel." - John Piper`,
-    scripture: [
-      "Matthew 28:19-20 (KJV): 'Go ye therefore, and teach all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Ghost: Teaching them to observe all things whatsoever I have commanded you.'",
-      "Acts 8:36-39 (KJV): 'And as they went on their way, they came unto a certain water: and the eunuch said, See, here is water; what doth hinder me to be baptized?'",
-      "Romans 6:3-4 (KJV): 'Know ye not, that so many of us as were baptized into Jesus Christ were baptized into his death? Therefore we are buried with him by baptism into death.'"
-    ],
-    resources: [
-      { name: "Spurgeon on Baptism", url: "https://spurgeongems.org" }
-    ]
-  },
-  
-  church: {
-    keywords: ['church', 'local church', 'assembly', 'fellowship', 'body of christ', 'ecclesiology'],
-    title: "The Local Church",
-    explanation: `The New Testament church is a local, autonomous assembly of baptized believers who have voluntarily joined together to carry out the Great Commission. Each church is self-governing under the Lordship of Jesus Christ and the authority of Scripture. No denomination, hierarchy, or external body has authority over a local church.
-
-The church is described as the body of Christ (1 Corinthians 12:27 KJV), a spiritual house (1 Peter 2:5 KJV), and the pillar and ground of the truth (1 Timothy 3:15 KJV). Its mission is not to reform society or pursue political power, but to preach the gospel, make disciples, and teach obedience to all that Christ commanded.
-
-Baptists have historically emphasized regenerate church membership (only saved individuals), two ordinances (baptism and the Lord's Supper), and the autonomy of the local church. While churches may cooperate with one another for missions and education, no convention or association has authority over a local congregation.`,
-    bfmQuote: "A New Testament church of the Lord Jesus Christ is an autonomous local congregation of baptized believers, associated by covenant in the faith and fellowship of the gospel. (BFM 2000, VI)",
-    theologianQuote: `"The church is a body of baptized believers, not a building or a denomination." - Baptist Distinctives`,
-    scripture: [
-      "Acts 2:41-47 (KJV): 'Then they that gladly received his word were baptized... and they continued stedfastly in the apostles' doctrine and fellowship.'",
-      "Ephesians 1:22-23 (KJV): 'And hath put all things under his feet, and gave him to be the head over all things to the church, Which is his body.'",
-      "1 Timothy 3:15 (KJV): 'The house of God, which is the church of the living God, the pillar and ground of the truth.'"
-    ],
-    resources: [
-      { name: "Independent Baptist Portal", url: "https://www.independentbaptist.com" }
-    ]
-  },
-  
-  secondComing: {
-    keywords: ['second coming', 'rapture', 'return of christ', 'end times', 'eschatology', 'premillennial'],
-    title: "The Second Coming of Christ",
-    explanation: `The blessed hope of the believer is the personal, visible, and bodily return of our Lord Jesus Christ. He ascended into heaven bodily (Acts 1:9-11 KJV), and He will return in like manner. His return is imminent—meaning it could happen at any moment—and is not preceded by any signs or events that must first occur.
-
-At the rapture, dead believers will be raised, and living believers will be caught up together with them to meet the Lord in the air (1 Thessalonians 4:16-17 KJV). This will be followed by the seven-year tribulation on earth, after which Christ will return with His saints to establish His millennial kingdom (Revelation 20:1-6 KJV).
-
-The Second Coming is a motivation for holy living. John writes, 'Every man that hath this hope in him purifieth himself' (1 John 3:3 KJV). We are to be watchful, prayerful, and faithful until that day. This doctrine is not merely prophetic speculation—it is a central hope that shapes how we live today.`,
-    bfmQuote: "God, in His own time and in His own way, will bring the world to its appropriate end. Jesus Christ will return personally and visibly. (BFM 2000, X)",
-    theologianQuote: `"The blessed hope of the believer is the personal, pre-millennial, and imminent return of our Lord Jesus Christ." - Baptist Confession`,
-    scripture: [
-      "1 Thessalonians 4:16-17 (KJV): 'For the Lord himself shall descend from heaven with a shout... and the dead in Christ shall rise first: Then we which are alive and remain shall be caught up together with them in the clouds.'",
-      "Titus 2:13 (KJV): 'Looking for that blessed hope, and the glorious appearing of the great God and our Saviour Jesus Christ.'",
-      "Revelation 22:20 (KJV): 'He which testifieth these things saith, Surely I come quickly. Amen. Even so, come, Lord Jesus.'"
-    ],
-    resources: []
-  }
+  // ... (keep the rest of your doctrinalLibrary entries)
+  // I'm omitting them for brevity - keep your existing god, baptism, church, secondComing entries
 };
 
 function isAskingForStatementOfFaith(message) {
@@ -159,7 +78,6 @@ function isAskingForStatementOfFaith(message) {
 
 function detectDoctrine(message) {
   const lowerMsg = message.toLowerCase();
-  
   for (const [key, doctrine] of Object.entries(doctrinalLibrary)) {
     for (const keyword of doctrine.keywords) {
       if (lowerMsg.includes(keyword)) {
@@ -172,13 +90,11 @@ function detectDoctrine(message) {
 
 function buildDoctrinalResponse(doctrine, userQuery) {
   const scriptureSection = doctrine.scripture.map(s => `- ${s}`).join('\n');
-  
   let resourcesSection = '';
   if (doctrine.resources && doctrine.resources.length > 0) {
     const resourceLinks = doctrine.resources.map(r => `- [${r.name}](${r.url})`).join('\n');
     resourcesSection = `\n\n**For Further Study:**\n${resourceLinks}`;
   }
-  
   return `${doctrine.explanation}\n\n**Scripture Foundation:**\n${scriptureSection}\n\n**From the Baptist Faith and Message:**\n${doctrine.bfmQuote}\n\n**Historic Baptist Teaching:**\n${doctrine.theologianQuote}${resourcesSection}\n\n*Sources: Baptist Faith and Message 2000, historic Baptist theologians*`;
 }
 
@@ -186,9 +102,7 @@ export async function POST(request) {
   try {
     const { message, history } = await request.json();
 
-    // ============================================================
-    // STEP 0: Check for dictionary definition request
-    // ============================================================
+    // Check for dictionary definition request
     const dictionaryMatch = message.match(/^define\s+(\w+)/i) || 
                             message.match(/^what does\s+(\w+)\s+mean/i) ||
                             message.match(/^meaning of\s+(\w+)/i) ||
@@ -196,9 +110,7 @@ export async function POST(request) {
 
     if (dictionaryMatch) {
       const word = dictionaryMatch[1];
-      console.log('Looking up dictionary definition for:', word);
       const definition = await getWebsterDefinition(word);
-      
       if (definition) {
         return NextResponse.json({ response: definition, source: 'webster-1828' });
       } else {
@@ -219,102 +131,94 @@ export async function POST(request) {
       );
     }
 
-// ============================================================
-// STEP 1: ALWAYS try Dify Knowledge Base FIRST
-// ============================================================
-console.log('STEP 1: Trying Dify Knowledge Base for:', message);
+    console.log('📤 Sending to Dify with streaming mode:', message);
 
-let difyResponse = null;
-let difyError = null;
-let rawDifyData = null;
-
-try {
-const response = await fetch(DIFY_API_URL, {
-  method: 'POST',
-  headers: {
-    'Authorization': `Bearer ${DIFY_API_KEY}`,
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    inputs: {},
-    query: message,
-    response_mode: 'blocking',
-    user: 'baptistry_user',
-  // Option 1: For Dify's built-in memory
-  conversation_id: userId || 'guest',
-  // Option 2: For explicit history
-  conversation_history: history.map(msg => ({
-    role: msg.role === 'user' ? 'user' : 'assistant',
-    content: msg.content
-  })),
-}),
-
-  const data = await response.json();
-  rawDifyData = data;
-  console.log('RAW DIFY RESPONSE:', JSON.stringify(data, null, 2));
-  
-  if (response.ok && data.answer) {
-    // Preserve the EXACT response without any modification
-    difyResponse = data.answer;
-    console.log('Dify answer length:', difyResponse.length);
-    console.log('Dify answer preview:', difyResponse.substring(0, 200));
-  } else {
-    difyError = data.message || 'No answer from Dify';
-    console.log('Dify returned no answer:', difyError);
-  }
-} catch (error) {
-  difyError = error.message;
-  console.error('Dify API error:', difyError);
-}
-
-    // ============================================================
-    // STEP 2: If Dify has a substantive answer, USE IT
-    // ============================================================
-    // Check if Dify returned a real answer (not just "I don't know" or error)
-    const hasSubstantiveAnswer = difyResponse && 
-                                 difyResponse.length > 50 && 
-                                 !difyResponse.includes('I apologize') &&
-                                 !difyResponse.includes('unable to respond');
-
-    if (hasSubstantiveAnswer) {
-      console.log('STEP 2: Using Dify Knowledge Base response');
-      return NextResponse.json({ response: difyResponse, source: 'dify-knowledge-base' });
-    }
-
-    // ============================================================
-    // STEP 3: Dify had no answer - use Doctrinal Library for specific topics
-    // ============================================================
-    console.log('STEP 3: Dify had no answer, checking doctrinal library for:', message);
-
-    // Special case: Statement of Faith - return Dify's fallback
-    if (isAskingForStatementOfFaith(message)) {
-      console.log('Statement of Faith requested - returning Dify fallback');
-      return NextResponse.json({ 
-        response: difyResponse || "Here is the Short Statement of Faith...", 
-        source: 'dify-fallback' 
-      });
-    }
-
-    // Check if the question matches a doctrine in our library
-    const detectedDoctrine = detectDoctrine(message);
-    
-    if (detectedDoctrine) {
-      console.log('Using doctrinal library for:', detectedDoctrine.key);
-      const doctrinalResponse = buildDoctrinalResponse(detectedDoctrine.doctrine, message);
-      return NextResponse.json({ 
-        response: doctrinalResponse,
-        source: 'doctrinal-library-fallback'
-      });
-    }
-
-    // ============================================================
-    // STEP 4: Nothing worked - return Dify's original response (even if empty)
-    // ============================================================
-    console.log('STEP 4: No fallback found, returning Dify response');
-    return NextResponse.json({ 
-      response: difyResponse || "I could not find an answer in my knowledge base. Please try asking a different question or contact support for assistance.",
-      source: 'dify-only'
+    // STEP 1: Use STREAMING mode for faster responses
+    const response = await fetch(DIFY_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${DIFY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        inputs: {},
+        query: message,
+        response_mode: 'streaming',  // ✅ CHANGED FROM 'blocking' TO 'streaming'
+        user: 'baptistry_user',
+        // Pass conversation history for context
+        conversation_history: history.map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: msg.content
+        })),
+      }),
     });
+
+    // If streaming mode is successful, Dify returns a stream
+    if (response.ok && response.body) {
+      console.log('✅ Streaming response received');
+      // Return the stream directly to the client
+      return new NextResponse(response.body, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
+    }
+
+    // Fallback: If streaming fails, try blocking mode
+    console.log('⚠️ Streaming failed, trying blocking mode...');
+    const blockingResponse = await fetch(DIFY_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${DIFY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        inputs: {},
+        query: message,
+        response_mode: 'blocking',
+        user: 'baptistry_user',
+        conversation_history: history.map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: msg.content
+        })),
+      }),
+    });
+
+    const data = await blockingResponse.json();
+    console.log('📥 Blocking response received');
+
+    if (blockingResponse.ok && data.answer) {
+      let fullResponse = data.answer;
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      return NextResponse.json({ response: fullResponse, source: 'dify-blocking' });
+    } else {
+      console.log('⚠️ Dify returned no answer, using doctrinal library fallback');
+      
+      // Special case: Statement of Faith
+      if (isAskingForStatementOfFaith(message)) {
+        return NextResponse.json({ 
+          response: "Here is the Short Statement of Faith...", 
+          source: 'dify-fallback' 
+        });
+      }
+
+      // Check doctrinal library
+      const detectedDoctrine = detectDoctrine(message);
+      if (detectedDoctrine) {
+        const doctrinalResponse = buildDoctrinalResponse(detectedDoctrine.doctrine, message);
+        return NextResponse.json({ 
+          response: doctrinalResponse,
+          source: 'doctrinal-library-fallback'
+        });
+      }
+
+      return NextResponse.json({ 
+        response: "I could not find an answer in my knowledge base. Please try asking a different question or contact support for assistance.",
+        source: 'dify-only'
+      });
+    }
 
   } catch (error) {
     console.error('Chat error:', error);

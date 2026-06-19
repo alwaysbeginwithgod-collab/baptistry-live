@@ -29,7 +29,6 @@ export default function MainContent() {
   const { user, isLoaded } = useUser();
   const userId = user?.id;
 
-  // Convex hooks
   const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
   const loadConversationsFromCloud = useQuery(
     api.conversations.loadConversations,
@@ -77,7 +76,7 @@ export default function MainContent() {
     autoResizeTextarea();
   };
 
-  // Load conversations from Convex cloud (primary) or localStorage (backup)
+  // Load conversations
   useEffect(() => {
     if (!userId) {
       setConversations([]);
@@ -119,7 +118,7 @@ export default function MainContent() {
     }
   }, [userId, loadConversationsFromCloud]);
 
-  // Save conversations to Convex cloud AND localStorage
+  // Save conversations
   useEffect(() => {
     if (conversations.length > 0 && userId) {
       localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
@@ -291,7 +290,48 @@ export default function MainContent() {
     localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
   };
 
-  // === THE FIX: editMessage sends immediately ===
+  // ============================================================
+  // STREAMING HELPER FUNCTION - processes SSE stream from Dify
+  // ============================================================
+  const processStream = async (response: Response): Promise<string> => {
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let fullResponse = '';
+
+    if (!reader) {
+      throw new Error('No reader available');
+    }
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n');
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          try {
+            const data = JSON.parse(line.substring(6));
+            if (data.event === 'message' && data.answer) {
+              fullResponse = data.answer;
+              setStreamingText(fullResponse);
+              // Scroll to bottom as text streams
+              scrollToBottom();
+            }
+          } catch (e) {
+            // Ignore parse errors for non-JSON lines
+          }
+        }
+      }
+    }
+
+    return fullResponse;
+  };
+
+  // ============================================================
+  // EDIT MESSAGE - sends immediately
+  // ============================================================
   const editMessage = (messageId: string, newContent: string) => {
     console.log('✏️ EDIT MESSAGE CALLED');
     
@@ -306,89 +346,14 @@ export default function MainContent() {
     setMessages(newMessages);
     setInput('');
     
-    // CALL THE DIRECT SEND FUNCTION
-    sendEditedNow(newContent, newMessages);
+    // Send the edited message directly
+    sendEditedMessageDirectly(newContent, newMessages);
   };
 
-  // DIRECT EDIT SEND - bypasses everything
-  const sendEditedNow = async (content: string, history: Message[]) => {
-    console.log('🔥🔥🔥 DIRECT EDIT SEND CALLED');
-    
-    // Create conversation if needed
-    if (!currentConversationId) {
-      const newConversation: Conversation = {
-        id: Date.now().toString(),
-        title: content.substring(0, 40),
-        messages: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        pinned: false,
-      };
-      setConversations(prev => [newConversation, ...prev]);
-      setCurrentConversationId(newConversation.id);
-    }
-
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: content,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, userMessage]);
-    setIsGenerating(true);
-    setStreamingText('');
-    
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: content, history: history }),
-      });
-
-      const data = await response.json();
-      let fullResponse = data.response || 'I apologize, but I encountered an error.';
-      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-      const chunkSize = 30;
-      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-        if (stopRequested.current) {
-          setIsGenerating(false);
-          setStreamingText('');
-          return;
-        }
-        setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 1));
-      }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: fullResponse,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-      setStreamingText('');
-      setIsGenerating(false);
-
-    } catch (error) {
-      console.error('Error:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'I apologize, but I am unable to respond at this moment.',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      setIsGenerating(false);
-      setStreamingText('');
-    }
-  };
-
-  // Direct send for edited messages
+  // ============================================================
+  // SEND EDITED MESSAGE DIRECTLY (with streaming)
+  // ============================================================
   const sendEditedMessageDirectly = async (content: string, history: Message[]) => {
-    console.log('🚀 SENDING EDITED MESSAGE DIRECTLY:', content);
-    
     if (!content.trim()) return;
     
     // Reset states
@@ -397,8 +362,7 @@ export default function MainContent() {
     stopRequested.current = false;
     
     // Create conversation if needed
-    let convId = currentConversationId;
-    if (!convId) {
+    if (!currentConversationId) {
       const newConversation: Conversation = {
         id: Date.now().toString(),
         title: content.substring(0, 40),
@@ -416,8 +380,7 @@ export default function MainContent() {
         });
         return sorted;
       });
-      convId = newConversation.id;
-      setCurrentConversationId(convId);
+      setCurrentConversationId(newConversation.id);
     }
 
     // Add user message
@@ -436,31 +399,48 @@ export default function MainContent() {
         body: JSON.stringify({ message: content, history: history }),
       });
 
-      const data = await response.json();
-      let fullResponse = data.response || 'I apologize, but I encountered an error.';
-      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      // If the API returns a stream (SSE), process it
+      if (response.headers.get('content-type')?.includes('text/event-stream')) {
+        const fullResponse = await processStream(response);
+        // Clean up the final response
+        const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+        
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: cleanResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+      } else {
+        // Fallback: regular JSON response
+        const data = await response.json();
+        let fullResponse = data.response || 'I apologize, but I encountered an error.';
+        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 30;
-      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-        if (stopRequested.current) {
-          setIsGenerating(false);
-          setStreamingText('');
-          return;
+        const chunkSize = 30;
+        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+          if (stopRequested.current) {
+            setIsGenerating(false);
+            setStreamingText('');
+            return;
+          }
+          setStreamingText(fullResponse.substring(0, i));
+          await new Promise(resolve => setTimeout(resolve, 1));
         }
-        setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 1));
-      }
 
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: fullResponse,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-      setStreamingText('');
-      setIsGenerating(false);
-      console.log('✅ Edit complete');
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: fullResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+      }
 
     } catch (error) {
       console.error('Error in edit:', error);
@@ -476,6 +456,9 @@ export default function MainContent() {
     }
   };
 
+  // ============================================================
+  // REGENERATE MESSAGE (with streaming)
+  // ============================================================
   const regenerateMessage = async (assistantMessageId: string) => {
     const assistantIndex = messages.findIndex(m => m.id === assistantMessageId);
     if (assistantIndex === -1) return;
@@ -502,30 +485,45 @@ export default function MainContent() {
         body: JSON.stringify({ message: userMessageContent, history: newMessages }),
       });
 
-      const data = await response.json();
-      let fullResponse = data.response || 'I apologize, but I encountered an error.';
-      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      if (response.headers.get('content-type')?.includes('text/event-stream')) {
+        const fullResponse = await processStream(response);
+        const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+        
+        const newAssistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: cleanResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, newAssistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+      } else {
+        const data = await response.json();
+        let fullResponse = data.response || 'I apologize, but I encountered an error.';
+        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 30;
-      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-        if (stopRequested.current) {
-          setIsGenerating(false);
-          setStreamingText('');
-          return;
+        const chunkSize = 30;
+        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+          if (stopRequested.current) {
+            setIsGenerating(false);
+            setStreamingText('');
+            return;
+          }
+          setStreamingText(fullResponse.substring(0, i));
+          await new Promise(resolve => setTimeout(resolve, 1));
         }
-        setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 1));
-      }
 
-      const newAssistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: fullResponse,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, newAssistantMessage]);
-      setStreamingText('');
-      setIsGenerating(false);
+        const newAssistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: fullResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, newAssistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+      }
     } catch (error) {
       console.error('Regeneration error:', error);
       const errorMessage: Message = {
@@ -540,6 +538,9 @@ export default function MainContent() {
     }
   };
 
+  // ============================================================
+  // SEND MESSAGE (with streaming)
+  // ============================================================
   const sendMessage = async () => {
     if (!input.trim()) return;
     if (isGenerating) return;
@@ -588,30 +589,45 @@ export default function MainContent() {
         body: JSON.stringify({ message: sentInput, history: messages }),
       });
 
-      const data = await response.json();
-      let fullResponse = data.response || 'I apologize, but I encountered an error.';
-      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      if (response.headers.get('content-type')?.includes('text/event-stream')) {
+        const fullResponse = await processStream(response);
+        const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+        
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: cleanResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+      } else {
+        const data = await response.json();
+        let fullResponse = data.response || 'I apologize, but I encountered an error.';
+        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 30;
-      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-        if (stopRequested.current) {
-          setIsGenerating(false);
-          setStreamingText('');
-          return;
+        const chunkSize = 30;
+        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+          if (stopRequested.current) {
+            setIsGenerating(false);
+            setStreamingText('');
+            return;
+          }
+          setStreamingText(fullResponse.substring(0, i));
+          await new Promise(resolve => setTimeout(resolve, 1));
         }
-        setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 1));
-      }
 
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: fullResponse,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-      setStreamingText('');
-      setIsGenerating(false);
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: fullResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+      }
 
     } catch (error) {
       console.error('Error:', error);
