@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.8.0",
-    "@tailwindcss/typography": "^0.5.19",
     "@vercel/analytics": "^2.0.1",
     "convex": "^1.41.0",
     "next": "14.2.35",
@@ -21,6 +20,7 @@
     "resend": "^6.12.4"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
