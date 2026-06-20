@@ -23,16 +23,6 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleHelpClick = () => {
-    if (onHelpClick) onHelpClick();
-    setIsOpen(false);
-  };
-
-  const handleFeedbackClick = () => {
-    if (onFeedbackClick) onFeedbackClick();
-    setIsOpen(false);
-  };
-
   const handleInstallClick = async () => {
     if ('beforeinstallprompt' in window) {
       // @ts-ignore
@@ -40,16 +30,12 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const result = await deferredPrompt.userChoice;
-        if (result.outcome === 'accepted') {
-          console.log('✅ User installed the app');
-        } else {
-          console.log('❌ User dismissed the install prompt');
-        }
+        console.log('Install result:', result.outcome);
       } else {
-        alert('📱 To install BAPTISTRY on your phone:\n\n1. Tap the share icon (📤)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');
+        alert('📱 Tap the share icon (📤) then "Add to Home Screen"');
       }
     } else {
-      alert('📱 To install BAPTISTRY on your phone:\n\n1. Tap the share icon (📤)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');
+      alert('📱 Tap the share icon (📤) then "Add to Home Screen"');
     }
     setIsOpen(false);
   };
@@ -67,17 +53,12 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
 
   return (
     <div className="relative" ref={menuRef}>
-      {/* User Avatar Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
       >
         {user.imageUrl ? (
-          <img
-            src={user.imageUrl}
-            alt={user.fullName || 'User'}
-            className="w-8 h-8 rounded-full object-cover"
-          />
+          <img src={user.imageUrl} alt={user.fullName || 'User'} className="w-8 h-8 rounded-full object-cover" />
         ) : (
           <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-medium">
             {getInitials()}
@@ -91,51 +72,37 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
         </svg>
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
-          {/* User Info Header */}
           <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
             {user.imageUrl ? (
-              <img
-                src={user.imageUrl}
-                alt={user.fullName || 'User'}
-                className="w-10 h-10 rounded-full object-cover"
-              />
+              <img src={user.imageUrl} alt={user.fullName || 'User'} className="w-10 h-10 rounded-full object-cover" />
             ) : (
               <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-medium">
                 {getInitials()}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                {user.fullName || 'User'}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                {user.emailAddresses[0]?.emailAddress}
-              </p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.fullName || 'User'}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.emailAddresses[0]?.emailAddress}</p>
             </div>
           </div>
 
-          {/* Install App - Direct button */}
+          {/* Install App - Green button */}
           <button
             onClick={handleInstallClick}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700"
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700"
           >
-            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10l3-3m0 0l3 3m-3-3v8" />
-            </svg>
+            <span className="text-xl">📲</span>
             <div className="flex-1 text-left">
-              <span className="font-medium">📲 Install App</span>
+              <span className="font-medium text-gray-800 dark:text-white">Install App</span>
               <p className="text-xs text-gray-400 dark:text-gray-500">Add to home screen</p>
             </div>
             <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full">Free</span>
           </button>
 
-          {/* Help */}
           <button
-            onClick={handleHelpClick}
+            onClick={onHelpClick}
             className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-t border-gray-200 dark:border-gray-700"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -144,9 +111,8 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             <span>Help</span>
           </button>
 
-          {/* Feedback */}
           <button
-            onClick={handleFeedbackClick}
+            onClick={onFeedbackClick}
             className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,10 +121,8 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             <span>Feedback</span>
           </button>
 
-          {/* Divider */}
           <div className="border-t border-gray-200 dark:border-gray-700"></div>
 
-          {/* Logout */}
           <SignOutButton>
             <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
