@@ -6,8 +6,8 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MessageBubble from './components/MessageBubble';
 import { useUser } from '@clerk/nextjs';
-// import { useMutation, useQuery } from 'convex/react';
-// import { api } from '../convex/_generated/api';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '../convex/_generated/api';
 
 type Message = {
   id: string;
@@ -26,15 +26,14 @@ type Conversation = {
 };
 
 export default function MainContent() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const userId = user?.id;
 
-// Convex hooks - safe to use even if not configured
-//   const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
-//   const loadConversationsFromCloud = useQuery(
-//    api.conversations.loadConversations,
-//    userId ? { userId } : "skip"
-//  );
+  const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
+  const loadConversationsFromCloud = useQuery(
+    api.conversations.loadConversations,
+    userId ? { userId } : "skip"
+  );
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -77,14 +76,12 @@ export default function MainContent() {
     autoResizeTextarea();
   };
 
-  // Load conversations from localStorage only (Convex temporarily disabled)
+  // Load conversations from localStorage
   useEffect(() => {
     if (!userId) {
       setConversations([]);
       return;
     }
-    
-    // Load from localStorage only
     const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
     if (savedConversations) {
       try {
@@ -102,12 +99,10 @@ export default function MainContent() {
       } catch (e) {
         console.error('Failed to load conversations', e);
       }
-    } else {
-      setConversations([]);
     }
   }, [userId]);
 
-  // Save conversations to localStorage only (Convex temporarily disabled)
+  // Save conversations to localStorage
   useEffect(() => {
     if (conversations.length > 0 && userId) {
       localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
@@ -177,8 +172,6 @@ export default function MainContent() {
           scrollToBottomImmediate();
         }, 50);
       });
-    } else {
-      console.log('Conversation not found:', conversationId);
     }
   };
 
@@ -245,8 +238,6 @@ export default function MainContent() {
         setTimeout(() => {
           messageElement.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/30');
         }, 2000);
-      } else {
-        console.log('Message element not found:', messageId);
       }
     }, 100);
   };
@@ -283,17 +274,23 @@ export default function MainContent() {
   };
 
   // ============================================================
-  // SIMPLE EDIT FUNCTION - WORKS DIRECTLY
+  // EDIT MESSAGE FUNCTION - WORKS WITH MESSAGEBUBBLE
   // ============================================================
   const editMessage = async (messageId: string, newContent: string) => {
-    console.log('🔥 EDIT MESSAGE TRIGGERED');
+    console.log('🔥 EDIT MESSAGE TRIGGERED IN MAINCONTENT');
     
     // Find the message to edit
     const messageIndex = messages.findIndex(m => m.id === messageId);
-    if (messageIndex === -1) return;
+    if (messageIndex === -1) {
+      console.log('❌ Message not found');
+      return;
+    }
     
     const originalMessage = messages[messageIndex];
-    if (originalMessage.role !== 'user') return;
+    if (originalMessage.role !== 'user') {
+      console.log('❌ Not a user message');
+      return;
+    }
     
     // Remove this message and all messages after it
     const newMessages = messages.slice(0, messageIndex);
@@ -407,7 +404,7 @@ export default function MainContent() {
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 4;
+      const chunkSize = 15;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
@@ -415,7 +412,7 @@ export default function MainContent() {
           return;
         }
         setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 5));
+        await new Promise(resolve => setTimeout(resolve, 3));
       }
 
       const newAssistantMessage: Message = {
@@ -493,7 +490,7 @@ export default function MainContent() {
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 4;
+      const chunkSize = 15;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
@@ -501,7 +498,7 @@ export default function MainContent() {
           return;
         }
         setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 5));
+        await new Promise(resolve => setTimeout(resolve, 3));
       }
 
       const assistantMessage: Message = {
@@ -714,6 +711,19 @@ export default function MainContent() {
             </div>
           )}
         </div>
+
+        {!userId && (
+          <div className="max-w-4xl mx-auto mb-4 px-4">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-center border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                🔐 <strong>Sign in to save your chat history across all your devices.</strong>
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Your chats will be saved automatically when you sign in. It's free!
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
           <div className="max-w-4xl mx-auto">
