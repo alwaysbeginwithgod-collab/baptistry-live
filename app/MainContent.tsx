@@ -333,21 +333,120 @@ export default function MainContent() {
   // EDIT MESSAGE - sends immediately
   // ============================================================
   const editMessage = (messageId: string, newContent: string) => {
-    console.log('✏️ EDIT MESSAGE CALLED');
+    console.log('🔥🔥🔥 EDIT MESSAGE FIRED!', messageId, newContent);
     
     const messageIndex = messages.findIndex(m => m.id === messageId);
-    if (messageIndex === -1) return;
+    if (messageIndex === -1) {
+      console.log('❌ Message not found');
+      return;
+    }
     
     const originalMessage = messages[messageIndex];
-    if (originalMessage.role !== 'user') return;
+    if (originalMessage.role !== 'user') {
+      console.log('❌ Not a user message');
+      return;
+    }
     
     // Remove this message and all messages after it
     const newMessages = messages.slice(0, messageIndex);
     setMessages(newMessages);
     setInput('');
     
-    // Send the edited message directly
-    sendEditedMessageDirectly(newContent, newMessages);
+    // Direct send - THIS SHOULD WORK
+  const directEditSend = async (content: string, history: Message[]) => {
+    console.log('🔥🔥🔥 DIRECT EDIT SEND CALLED!', content);
+    
+    if (!content.trim()) return;
+    
+    // Reset states
+    setIsGenerating(true);
+    setStreamingText('');
+    stopRequested.current = false;
+    
+    // Create conversation if needed
+    if (!currentConversationId) {
+      const newConversation: Conversation = {
+        id: Date.now().toString(),
+        title: content.substring(0, 40),
+        messages: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        pinned: false,
+      };
+      setConversations(prev => [newConversation, ...prev]);
+      setCurrentConversationId(newConversation.id);
+    }
+
+    // Add user message
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: content,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, userMessage]);
+    
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: content, history: history }),
+      });
+
+      if (response.headers.get('content-type')?.includes('text/event-stream')) {
+        const fullResponse = await processStream(response);
+        const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+        
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: cleanResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+        console.log('✅ Edit complete!');
+      } else {
+        const data = await response.json();
+        let fullResponse = data.response || 'I apologize, but I encountered an error.';
+        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+        const chunkSize = 30;
+        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+          if (stopRequested.current) {
+            setIsGenerating(false);
+            setStreamingText('');
+            return;
+          }
+          setStreamingText(fullResponse.substring(0, i));
+          await new Promise(resolve => setTimeout(resolve, 1));
+        }
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: fullResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+        console.log('✅ Edit complete!');
+      }
+
+    } catch (error) {
+      console.error('Error in edit:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I apologize, but I am unable to respond at this moment.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setIsGenerating(false);
+      setStreamingText('');
+    }
   };
 
   // ============================================================
