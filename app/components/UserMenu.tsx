@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useUser, SignOutButton } from '@clerk/nextjs';
-import QRCode from 'qrcode';
+import QRCode from 'qrcode.react';
 
 interface UserMenuProps {
   onFeedbackClick?: () => void;
@@ -13,7 +13,6 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
   const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
-  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,44 +26,7 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Generate QR code when modal opens
-  useEffect(() => {
-    if (showQRCode && !qrCodeDataUrl) {
-      QRCode.toDataURL('https://www.baptistry.live', {
-        width: 250,
-        margin: 2,
-        color: {
-          dark: '#1e3a5f',
-          light: '#ffffff'
-        }
-      })
-      .then((url) => {
-        setQrCodeDataUrl(url);
-      })
-      .catch((err) => {
-        console.error('QR Code generation error:', err);
-        // Fallback: create a simple text-based QR with error correction
-        QRCode.toDataURL('https://www.baptistry.live', {
-          width: 250,
-          margin: 2,
-          errorCorrectionLevel: 'H',
-          color: {
-            dark: '#1e3a5f',
-            light: '#ffffff'
-          }
-        })
-        .then((url) => {
-          setQrCodeDataUrl(url);
-        })
-        .catch(() => {
-          setQrCodeDataUrl(null);
-        });
-      });
-    }
-  }, [showQRCode, qrCodeDataUrl]);
-
   const handleDownloadClick = () => {
-    setQrCodeDataUrl(null);
     setShowQRCode(true);
     setIsOpen(false);
   };
@@ -81,7 +43,6 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
 
   const handleDirectDownload = () => {
     window.open('https://www.baptistry.live', '_blank');
-    setShowQRCode(false);
   };
 
   const getInitials = () => {
@@ -208,20 +169,16 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             </div>
             
             <div className="text-center">
-              {/* QR Code Display */}
-              <div className="flex justify-center items-center w-48 h-48 mx-auto bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-                {qrCodeDataUrl ? (
-                  <img 
-                    src={qrCodeDataUrl} 
-                    alt="Scan QR code to open BAPTISTRY" 
-                    className="w-48 h-48 object-contain p-2"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center gap-2 text-gray-400">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    <span className="text-xs">Generating QR...</span>
-                  </div>
-                )}
+              {/* QR Code - Now using qrcode.react which is simpler and works reliably */}
+              <div className="flex justify-center items-center w-48 h-48 mx-auto bg-white rounded-lg border border-gray-200 dark:border-gray-700 p-2">
+                <QRCode 
+                  value="https://www.baptistry.live" 
+                  size={200}
+                  level="H"
+                  includeMargin={true}
+                  bgColor="#ffffff"
+                  fgColor="#1e3a5f"
+                />
               </div>
               
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
