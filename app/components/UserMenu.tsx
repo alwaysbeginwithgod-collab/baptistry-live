@@ -12,7 +12,7 @@ interface UserMenuProps {
 export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps) {
   const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
-  const [showQRCode, setShowQRCode] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false); // Updated: Force refresh
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
