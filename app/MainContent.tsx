@@ -276,8 +276,8 @@ export default function MainContent() {
   // ============================================================
   // EDIT MESSAGE FUNCTION - WORKS WITH MESSAGEBUBBLE
   // ============================================================
-  const editMessage = async (messageId: string, newContent: string) => {
-    console.log('🔥 EDIT MESSAGE TRIGGERED IN MAINCONTENT');
+    const editMessage = (messageId: string, newContent: string) => {
+      console.log('✏️ EDIT MESSAGE:', messageId, newContent); // Add this line
     
     // Find the message to edit
     const messageIndex = messages.findIndex(m => m.id === messageId);
