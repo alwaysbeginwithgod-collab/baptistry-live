@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 type Message = {
@@ -23,7 +23,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(message.content);
   const [copySuccess, setCopySuccess] = useState(false);
-  const [showCopyTooltip, setShowCopyTooltip] = useState(false);
 
   const cleanContent = (content: string) => {
     return content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
@@ -33,7 +32,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
 
   const handleFeedback = (type: 'helpful' | 'unhelpful') => {
     if (!onFeedback) return;
-    
     let newFeedback: 'helpful' | 'unhelpful' | null = type;
     if (feedbackStatus === type) {
       newFeedback = null;
@@ -41,30 +39,32 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
     onFeedback(message.id, newFeedback);
   };
 
-  const handleEdit = () => {
+  // ============================================================
+  // SIMPLE EDIT FLOW - WITH ALERT FOR TESTING
+  // ============================================================
+  const handleEditClick = () => {
+    console.log('🔵 EDIT ICON CLICKED - setting isEditing to true');
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    console.log('💾 SAVE & RESEND CLICKED');
+  const handleSaveClick = () => {
+    console.log('💾 SAVE & RESEND BUTTON CLICKED');
     console.log('📝 editedText:', editedText);
     console.log('🔗 onEdit exists?', !!onEdit);
     
-    if (editedText.trim() && editedText !== message.content && onEdit) {
-      console.log('🚀 Calling onEdit NOW');
+    // ALWAYS try to call onEdit if it exists
+    if (onEdit) {
+      console.log('🚀 Calling onEdit NOW with:', message.id, editedText);
       onEdit(message.id, editedText);
     } else {
-      console.log('⚠️ Conditions not met:', {
-        trimmed: editedText.trim(),
-        notEmpty: !!editedText.trim(),
-        different: editedText !== message.content,
-        hasOnEdit: !!onEdit
-      });
+      console.log('❌ onEdit is NULL or UNDEFINED!');
+      alert('onEdit is not available! Check MainContent.');
     }
     setIsEditing(false);
   };
 
-  const handleCancel = () => {
+  const handleCancelClick = () => {
+    console.log('🔵 Cancel clicked');
     setIsEditing(false);
     setEditedText(message.content);
   };
@@ -73,11 +73,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
     try {
       await navigator.clipboard.writeText(cleanedContent);
       setCopySuccess(true);
-      setShowCopyTooltip(true);
-      setTimeout(() => {
-        setCopySuccess(false);
-        setShowCopyTooltip(false);
-      }, 2000);
+      setTimeout(() => setCopySuccess(false), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
     }
@@ -117,6 +113,9 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
           `}
         >
           {isUser && isEditing ? (
+            // ============================================================
+            // EDIT MODE - Textarea with Save & Cancel buttons
+            // ============================================================
             <div className="mt-2">
               <textarea
                 value={editedText}
@@ -125,10 +124,16 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                 rows={4}
               />
               <div className="flex gap-2 mt-2">
-                <button onClick={handleSave} className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
+                <button 
+                  onClick={handleSaveClick} 
+                  className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                >
                   Save & Resend
                 </button>
-                <button onClick={handleCancel} className="px-3 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 text-sm">
+                <button 
+                  onClick={handleCancelClick} 
+                  className="px-3 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 text-sm"
+                >
                   Cancel
                 </button>
               </div>
@@ -165,7 +170,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                         </svg>
                       </button>
-                      {showCopyTooltip && (
+                      {copySuccess && (
                         <span className="absolute bottom-full right-0 mb-1 px-2 py-1 text-xs bg-gray-800 text-white rounded whitespace-nowrap">
                           Copied!
                         </span>
@@ -224,10 +229,8 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
               {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
 
-            {/* Action buttons for user messages (only when not editing) */}
             {isUser && onEdit && !isEditing && (
               <div className="flex gap-2 items-center">
-                {/* Copy button with tooltip */}
                 <div className="relative group">
                   <button
                     onClick={handleCopy}
@@ -237,7 +240,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                     </svg>
                   </button>
-                  {/* Tooltip */}
                   <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-0.5 text-xs bg-gray-800 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                     Copy
                   </span>
@@ -248,17 +250,15 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                   )}
                 </div>
 
-                {/* Edit button with tooltip */}
                 <div className="relative group">
                   <button
-                    onClick={handleEdit}
+                    onClick={handleEditClick}
                     className="text-blue-200 hover:text-white dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                   </button>
-                  {/* Tooltip */}
                   <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-0.5 text-xs bg-gray-800 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                     Edit
                   </span>
