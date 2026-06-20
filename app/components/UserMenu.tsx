@@ -12,9 +12,8 @@ interface UserMenuProps {
 export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps) {
   const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
-  const [showQRCode, setShowQRCode] = useState(false); // Updated: Force refresh
+  const [showQRCode, setShowQRCode] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -30,8 +29,7 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
 
   // Generate QR code when modal opens
   useEffect(() => {
-    if (showQRCode && !qrCodeDataUrl && !isGenerating) {
-      setIsGenerating(true);
+    if (showQRCode && !qrCodeDataUrl) {
       QRCode.toDataURL('https://www.baptistry.live', {
         width: 250,
         margin: 2,
@@ -42,16 +40,28 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
       })
       .then((url) => {
         setQrCodeDataUrl(url);
-        setIsGenerating(false);
       })
       .catch((err) => {
         console.error('QR Code generation error:', err);
-        setIsGenerating(false);
-        // Fallback: create a simple text-based QR
-        setQrCodeDataUrl(null);
+        // Fallback: create a simple text-based QR with error correction
+        QRCode.toDataURL('https://www.baptistry.live', {
+          width: 250,
+          margin: 2,
+          errorCorrectionLevel: 'H',
+          color: {
+            dark: '#1e3a5f',
+            light: '#ffffff'
+          }
+        })
+        .then((url) => {
+          setQrCodeDataUrl(url);
+        })
+        .catch(() => {
+          setQrCodeDataUrl(null);
+        });
       });
     }
-  }, [showQRCode, qrCodeDataUrl, isGenerating]);
+  }, [showQRCode, qrCodeDataUrl]);
 
   const handleDownloadClick = () => {
     setQrCodeDataUrl(null);
@@ -70,19 +80,7 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
   };
 
   const handleDirectDownload = () => {
-    if (window.navigator.userAgent.includes('Mobile')) {
-      if ('beforeinstallprompt' in window) {
-        // @ts-ignore
-        const deferredPrompt = window.deferredPrompt;
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          return;
-        }
-      }
-      window.open('https://www.baptistry.live', '_blank');
-    } else {
-      alert('📱 Open this page on your phone to install the app.');
-    }
+    window.open('https://www.baptistry.live', '_blank');
     setShowQRCode(false);
   };
 
@@ -128,7 +126,6 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
           role="menu"
           aria-orientation="vertical"
         >
-          {/* User Info */}
           <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
             {user.imageUrl ? (
               <img src={user.imageUrl} alt={user.fullName || 'User'} className="w-10 h-10 rounded-full object-cover" />
@@ -143,7 +140,6 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             </div>
           </div>
 
-          {/* Download Mobile App */}
           <button
             onClick={handleDownloadClick}
             className="w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700"
@@ -157,7 +153,6 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full">Free</span>
           </button>
 
-          {/* Help */}
           <button
             onClick={handleHelpClick}
             className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-t border-gray-200 dark:border-gray-700"
@@ -169,7 +164,6 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             <span>Help</span>
           </button>
 
-          {/* Feedback */}
           <button
             onClick={handleFeedbackClick}
             className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -181,10 +175,8 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             <span>Feedback</span>
           </button>
 
-          {/* Divider */}
           <div className="border-t border-gray-200 dark:border-gray-700"></div>
 
-          {/* Sign Out */}
           <SignOutButton>
             <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" role="menuitem">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,14 +208,9 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             </div>
             
             <div className="text-center">
-              {/* QR Code */}
+              {/* QR Code Display */}
               <div className="flex justify-center items-center w-48 h-48 mx-auto bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-                {isGenerating ? (
-                  <div className="flex flex-col items-center gap-2 text-gray-400">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    <span className="text-xs">Generating...</span>
-                  </div>
-                ) : qrCodeDataUrl ? (
+                {qrCodeDataUrl ? (
                   <img 
                     src={qrCodeDataUrl} 
                     alt="Scan QR code to open BAPTISTRY" 
@@ -231,8 +218,8 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
                   />
                 ) : (
                   <div className="flex flex-col items-center gap-2 text-gray-400">
-                    <span className="text-4xl">📱</span>
-                    <span className="text-xs">Tap "Open BAPTISTRY" below</span>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <span className="text-xs">Generating QR...</span>
                   </div>
                 )}
               </div>
@@ -247,7 +234,6 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
                 <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
               </div>
 
-              {/* Direct Download Link */}
               <button
                 onClick={handleDirectDownload}
                 className="w-full py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
@@ -260,7 +246,6 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
                 Available on iOS and Android via browser
               </p>
 
-              {/* Footer note */}
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-4 border-t border-gray-200 dark:border-gray-700 pt-3">
                 <a 
                   href="https://www.baptistry.live" 
