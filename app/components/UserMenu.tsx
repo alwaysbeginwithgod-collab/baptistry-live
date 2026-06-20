@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useUser, SignOutButton } from '@clerk/nextjs';
+import QRCode from 'qrcode';
 
 interface UserMenuProps {
   onFeedbackClick?: () => void;
@@ -11,22 +12,45 @@ interface UserMenuProps {
 export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps) {
   const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
-  const [showInstallInstructions, setShowInstallInstructions] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        setShowInstallInstructions(false);
+        setShowQRCode(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleInstallClick = () => {
-    setShowInstallInstructions(true);
+  // Generate QR code when modal opens
+  useEffect(() => {
+    if (showQRCode) {
+      QRCode.toDataURL('https://www.baptistry.app', {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#1e3a5f',
+          light: '#ffffff'
+        }
+      })
+      .then((url) => {
+        setQrCodeDataUrl(url);
+      })
+      .catch((err) => {
+        console.error('QR Code generation error:', err);
+        // Fallback: use a placeholder
+        setQrCodeDataUrl(null);
+      });
+    }
+  }, [showQRCode]);
+
+  const handleDownloadClick = () => {
+    setShowQRCode(true);
     setIsOpen(false);
   };
 
@@ -38,6 +62,26 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
   const handleFeedbackClick = () => {
     if (onFeedbackClick) onFeedbackClick();
     setIsOpen(false);
+  };
+
+  const handleDirectDownload = () => {
+    // Open the site - this triggers the PWA install prompt on mobile
+    if (window.navigator.userAgent.includes('Mobile')) {
+      // Try to trigger install
+      if ('beforeinstallprompt' in window) {
+        // @ts-ignore
+        const deferredPrompt = window.deferredPrompt;
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          return;
+        }
+      }
+      // Fallback: open in new tab
+      window.open('https://www.baptistry.app', '_blank');
+    } else {
+      alert('📱 Open this page on your phone to install the app.');
+    }
+    setShowQRCode(false);
   };
 
   const getInitials = () => {
@@ -88,15 +132,15 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             </div>
           </div>
 
-          {/* Download Mobile App - Opens Install Instructions */}
+          {/* Download Mobile App - Opens QR Code Modal */}
           <button
-            onClick={handleInstallClick}
+            onClick={handleDownloadClick}
             className="w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700"
           >
             <span className="text-xl">📲</span>
             <div className="flex-1 text-left">
               <span className="font-medium text-gray-800 dark:text-white">Download Mobile App</span>
-              <p className="text-xs text-gray-400 dark:text-gray-500">Install on your phone</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">QR code & direct link</p>
             </div>
             <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full">Free</span>
           </button>
@@ -134,15 +178,15 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
         </div>
       )}
 
-      {/* Install Instructions Modal - No QR code, just helpful info */}
-      {showInstallInstructions && (
+      {/* QR Code Modal with Direct Link */}
+      {showQRCode && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm mx-4 w-full">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                📱 Install BAPTISTRY
+                📱 Download BAPTISTRY
               </h3>
-              <button onClick={() => setShowInstallInstructions(false)} className="text-gray-500 hover:text-gray-700">
+              <button onClick={() => setShowQRCode(false)} className="text-gray-500 hover:text-gray-700">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -150,38 +194,41 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             </div>
             
             <div className="text-center">
-              <div className="text-6xl mb-4">📲</div>
-              <h4 className="text-md font-semibold text-gray-800 dark:text-white mb-2">
-                Install on Your Phone
-              </h4>
+              {/* QR Code */}
+              {qrCodeDataUrl ? (
+                <img 
+                  src={qrCodeDataUrl} 
+                  alt="QR Code for BAPTISTRY" 
+                  className="w-48 h-48 mx-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white"
+                />
+              ) : (
+                <div className="w-48 h-48 mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                  <span className="text-gray-400">Loading QR code...</span>
+                </div>
+              )}
               
-              <div className="text-left space-y-3 mb-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>1.</strong> Open this page in <strong>Chrome</strong> or <strong>Safari</strong> on your phone.
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>2.</strong> Tap the <strong>share icon</strong> (📤) in your browser.
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>3.</strong> Scroll down and tap <strong>"Add to Home Screen"</strong>.
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>4.</strong> Tap <strong>"Add"</strong> — BAPTISTRY will appear on your home screen! 🎉
-                </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
+                Scan with your phone camera to open BAPTISTRY
+              </p>
+
+              <div className="my-3 flex items-center gap-2">
+                <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
+                <span className="text-xs text-gray-400">OR</span>
+                <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
               </div>
 
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 mb-4">
-                <p className="text-xs text-blue-600 dark:text-blue-400">
-                  💡 <strong>Tip:</strong> This works on both iPhone and Android!
-                </p>
-              </div>
-              
+              {/* Direct Download Link */}
               <button
-                onClick={() => setShowInstallInstructions(false)}
-                className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                onClick={handleDirectDownload}
+                className="w-full py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
               >
-                Got it!
+                <span>📲</span>
+                Download Mobile App
               </button>
+              
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                Available on iOS and Android via browser
+              </p>
             </div>
           </div>
         </div>
