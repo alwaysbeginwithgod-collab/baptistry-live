@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
 type Message = {
   id: string;
@@ -26,55 +25,11 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const [copySuccess, setCopySuccess] = useState(false);
   const [showCopyTooltip, setShowCopyTooltip] = useState(false);
 
-  // DEBUG: Log when component renders
-  console.log('🔵 MessageBubble rendered - onEdit exists?', !!onEdit, 'message.id:', message.id);
-
   const cleanContent = (content: string) => {
     return content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
   };
 
   const cleanedContent = cleanContent(message.content);
-
-  const cleanTableContent = (content: string) => {
-    if (!content.includes('|')) return content;
-    
-    const lines = content.split('\n');
-    const cleanedLines = [];
-    let inTable = false;
-    
-    for (let i = 0; i < lines.length; i++) {
-      let line = lines[i];
-      const trimmed = line.trim();
-      
-      if (trimmed.includes('---')) {
-        const parts = trimmed.split('|').filter(p => p.trim() !== '');
-        const cleanedParts = parts.map(p => {
-          const dashOnly = p.replace(/[^\-]/g, '');
-          return dashOnly || '---';
-        });
-        cleanedLines.push('| ' + cleanedParts.join(' | ') + ' |');
-        inTable = true;
-        continue;
-      }
-      
-      if (trimmed.includes('|') && (trimmed.startsWith('|') || trimmed.endsWith('|'))) {
-        const cells = trimmed.split('|').filter(cell => cell.trim() !== '');
-        if (cells.length > 0) {
-          cleanedLines.push('| ' + cells.map(cell => cell.trim()).join(' | ') + ' |');
-          inTable = true;
-        } else {
-          cleanedLines.push(trimmed);
-        }
-      } else {
-        if (inTable && trimmed === '') {
-          inTable = false;
-        }
-        cleanedLines.push(line);
-      }
-    }
-    
-    return cleanedLines.join('\n');
-  };
 
   const handleFeedback = (type: 'helpful' | 'unhelpful') => {
     if (!onFeedback) return;
@@ -87,32 +42,17 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   };
 
   const handleEdit = () => {
-    console.log('🔵 Edit icon clicked - setting isEditing to true');
     setIsEditing(true);
   };
 
   const handleSave = () => {
-    console.log('🔵 Save & Resend clicked - onEdit exists?', !!onEdit);
-    console.log('🔵 editedText:', editedText);
-    console.log('🔵 original message.content:', message.content);
-    console.log('🔵 message.id:', message.id);
-    
     if (editedText.trim() && editedText !== message.content && onEdit) {
-      console.log('🔵 ✅ Calling onEdit with:', message.id, editedText);
       onEdit(message.id, editedText);
-    } else {
-      console.log('🔵 ⚠️ onEdit NOT called. Conditions:', {
-        trimmed: editedText.trim(),
-        notEmpty: !!editedText.trim(),
-        different: editedText !== message.content,
-        hasOnEdit: !!onEdit
-      });
     }
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    console.log('🔵 Cancel clicked');
     setIsEditing(false);
     setEditedText(message.content);
   };
@@ -173,16 +113,10 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                 rows={4}
               />
               <div className="flex gap-2 mt-2">
-                <button 
-                  onClick={handleSave} 
-                  className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
-                >
+                <button onClick={handleSave} className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
                   Save & Resend
                 </button>
-                <button 
-                  onClick={handleCancel} 
-                  className="px-3 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 text-sm"
-                >
+                <button onClick={handleCancel} className="px-3 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 text-sm">
                   Cancel
                 </button>
               </div>
@@ -191,34 +125,13 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
             <>
               {isUser ? (
                 <div className="text-sm whitespace-pre-wrap leading-relaxed">
-                  {cleanTableContent(cleanedContent)}
+                  {cleanedContent}
                 </div>
               ) : (
                 <>
                   <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        table: ({node, ...props}) => (
-                          <div className="overflow-x-auto my-4">
-                            <table className="w-full border-collapse border border-gray-300 dark:border-gray-700 text-sm" {...props} />
-                          </div>
-                        ),
-                        thead: ({node, ...props}) => (
-                          <thead className="bg-gray-100 dark:bg-gray-700" {...props} />
-                        ),
-                        th: ({node, ...props}) => (
-                          <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-900 dark:text-white" {...props} />
-                        ),
-                        td: ({node, ...props}) => (
-                          <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300" {...props} />
-                        ),
-                        tr: ({node, ...props}) => (
-                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" {...props} />
-                        ),
-                      }}
-                    >
-                      {cleanTableContent(cleanedContent)}
+                    <ReactMarkdown>
+                      {cleanedContent}
                     </ReactMarkdown>
                   </div>
 
@@ -299,8 +212,10 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
               {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
 
+            {/* Action buttons for user messages (only when not editing) */}
             {isUser && onEdit && !isEditing && (
               <div className="flex gap-2 items-center">
+                {/* Copy button with tooltip */}
                 <div className="relative group">
                   <button
                     onClick={handleCopy}
@@ -310,6 +225,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                     </svg>
                   </button>
+                  {/* Tooltip */}
                   <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-0.5 text-xs bg-gray-800 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                     Copy
                   </span>
@@ -320,18 +236,17 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                   )}
                 </div>
 
+                {/* Edit button with tooltip */}
                 <div className="relative group">
                   <button
-                    onClick={() => {
-                      console.log('🔵 Edit icon clicked from bottom row');
-                      handleEdit();
-                    }}
+                    onClick={handleEdit}
                     className="text-blue-200 hover:text-white dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                   </button>
+                  {/* Tooltip */}
                   <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-0.5 text-xs bg-gray-800 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                     Edit
                   </span>

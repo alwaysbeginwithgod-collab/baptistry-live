@@ -6,8 +6,8 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MessageBubble from './components/MessageBubble';
 import { useUser } from '@clerk/nextjs';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '../convex/_generated/api';
+// import { useMutation, useQuery } from 'convex/react';
+// import { api } from '../convex/_generated/api';
 
 type Message = {
   id: string;
@@ -26,14 +26,15 @@ type Conversation = {
 };
 
 export default function MainContent() {
-  const { user, isLoaded } = useUser();
+  const { user } = useUser();
   const userId = user?.id;
 
-  const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
-  const loadConversationsFromCloud = useQuery(
-    api.conversations.loadConversations,
-    userId ? { userId } : "skip"
-  );
+// Convex hooks - safe to use even if not configured
+//   const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
+//   const loadConversationsFromCloud = useQuery(
+//    api.conversations.loadConversations,
+//    userId ? { userId } : "skip"
+//  );
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -76,25 +77,14 @@ export default function MainContent() {
     autoResizeTextarea();
   };
 
-  // Load conversations
+  // Load conversations from localStorage only (Convex temporarily disabled)
   useEffect(() => {
     if (!userId) {
       setConversations([]);
       return;
     }
     
-    if (loadConversationsFromCloud === undefined) return;
-    
-    const isValidCloudData = (data: any): data is Conversation[] => {
-      return data !== null && data !== "skip" && Array.isArray(data);
-    };
-    
-    if (isValidCloudData(loadConversationsFromCloud) && loadConversationsFromCloud.length > 0) {
-      setConversations(loadConversationsFromCloud);
-      localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(loadConversationsFromCloud));
-      return;
-    }
-    
+    // Load from localStorage only
     const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
     if (savedConversations) {
       try {
@@ -109,20 +99,18 @@ export default function MainContent() {
           })),
         }));
         setConversations(withDates);
-        saveConversationsToCloud({ userId, conversations: withDates });
       } catch (e) {
         console.error('Failed to load conversations', e);
       }
     } else {
       setConversations([]);
     }
-  }, [userId, loadConversationsFromCloud]);
+  }, [userId]);
 
-  // Save conversations
+  // Save conversations to localStorage only (Convex temporarily disabled)
   useEffect(() => {
     if (conversations.length > 0 && userId) {
       localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
-      saveConversationsToCloud({ userId, conversations });
     }
   }, [conversations, userId]);
 
@@ -189,6 +177,8 @@ export default function MainContent() {
           scrollToBottomImmediate();
         }, 50);
       });
+    } else {
+      console.log('Conversation not found:', conversationId);
     }
   };
 
@@ -255,6 +245,8 @@ export default function MainContent() {
         setTimeout(() => {
           messageElement.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/30');
         }, 2000);
+      } else {
+        console.log('Message element not found:', messageId);
       }
     }, 100);
   };
@@ -290,274 +282,31 @@ export default function MainContent() {
     localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
   };
 
-  // ============================================================
-  // STREAMING HELPER FUNCTION - processes SSE stream from Dify
-  // ============================================================
-  const processStream = async (response: Response): Promise<string> => {
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder();
-    let fullResponse = '';
-
-    if (!reader) {
-      throw new Error('No reader available');
-    }
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      
-      const chunk = decoder.decode(value);
-      const lines = chunk.split('\n');
-      
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          try {
-            const data = JSON.parse(line.substring(6));
-            if (data.event === 'message' && data.answer) {
-              fullResponse = data.answer;
-              setStreamingText(fullResponse);
-              // Scroll to bottom as text streams
-              scrollToBottom();
-            }
-          } catch (e) {
-            // Ignore parse errors for non-JSON lines
-          }
-        }
-      }
-    }
-
-    return fullResponse;
-  };
-
-  // ============================================================
-  // EDIT MESSAGE - sends immediately
-  // ============================================================
   const editMessage = (messageId: string, newContent: string) => {
-    console.log('🔥🔥🔥 EDIT MESSAGE FIRED!', messageId, newContent);
-    
     const messageIndex = messages.findIndex(m => m.id === messageId);
-    if (messageIndex === -1) {
-      console.log('❌ Message not found');
-      return;
-    }
+    if (messageIndex === -1) return;
     
     const originalMessage = messages[messageIndex];
-    if (originalMessage.role !== 'user') {
-      console.log('❌ Not a user message');
-      return;
+    if (originalMessage.role !== 'user') return;
+    
+    setIsGenerating(false);
+    setStreamingText('');
+    if (stopRequested.current) {
+      stopRequested.current = false;
     }
     
-    // Remove this message and all messages after it
     const newMessages = messages.slice(0, messageIndex);
     setMessages(newMessages);
-    setInput('');
+    setInput(newContent);
     
-    // Direct send - THIS SHOULD WORK
-  const directEditSend = async (content: string, history: Message[]) => {
-    console.log('🔥🔥🔥 DIRECT EDIT SEND CALLED!', content);
-    
-    if (!content.trim()) return;
-    
-    // Reset states
-    setIsGenerating(true);
-    setStreamingText('');
-    stopRequested.current = false;
-    
-    // Create conversation if needed
-    if (!currentConversationId) {
-      const newConversation: Conversation = {
-        id: Date.now().toString(),
-        title: content.substring(0, 40),
-        messages: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        pinned: false,
-      };
-      setConversations(prev => [newConversation, ...prev]);
-      setCurrentConversationId(newConversation.id);
-    }
-
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: content,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, userMessage]);
-    
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: content, history: history }),
-      });
-
-      if (response.headers.get('content-type')?.includes('text/event-stream')) {
-        const fullResponse = await processStream(response);
-        const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-        
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: cleanResponse,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        setStreamingText('');
-        setIsGenerating(false);
-        console.log('✅ Edit complete!');
-      } else {
-        const data = await response.json();
-        let fullResponse = data.response || 'I apologize, but I encountered an error.';
-        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-        const chunkSize = 30;
-        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-          if (stopRequested.current) {
-            setIsGenerating(false);
-            setStreamingText('');
-            return;
-          }
-          setStreamingText(fullResponse.substring(0, i));
-          await new Promise(resolve => setTimeout(resolve, 1));
-        }
-
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: fullResponse,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        setStreamingText('');
-        setIsGenerating(false);
-        console.log('✅ Edit complete!');
-      }
-
-    } catch (error) {
-      console.error('Error in edit:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'I apologize, but I am unable to respond at this moment.',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      setIsGenerating(false);
-      setStreamingText('');
-    }
+    setTimeout(() => {
+      autoResizeTextarea();
+      setTimeout(() => {
+        sendMessage();
+      }, 100);
+    }, 50);
   };
 
-  // ============================================================
-  // SEND EDITED MESSAGE DIRECTLY (with streaming)
-  // ============================================================
-  const sendEditedMessageDirectly = async (content: string, history: Message[]) => {
-    if (!content.trim()) return;
-    
-    // Reset states
-    setIsGenerating(true);
-    setStreamingText('');
-    stopRequested.current = false;
-    
-    // Create conversation if needed
-    if (!currentConversationId) {
-      const newConversation: Conversation = {
-        id: Date.now().toString(),
-        title: content.substring(0, 40),
-        messages: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        pinned: false,
-      };
-      setConversations(prev => {
-        const withNew = [newConversation, ...prev];
-        const sorted = [...withNew].sort((a, b) => {
-          if (a.pinned && !b.pinned) return -1;
-          if (!a.pinned && b.pinned) return 1;
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-        });
-        return sorted;
-      });
-      setCurrentConversationId(newConversation.id);
-    }
-
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: content,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, userMessage]);
-    
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: content, history: history }),
-      });
-
-      // If the API returns a stream (SSE), process it
-      if (response.headers.get('content-type')?.includes('text/event-stream')) {
-        const fullResponse = await processStream(response);
-        // Clean up the final response
-        const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-        
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: cleanResponse,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        setStreamingText('');
-        setIsGenerating(false);
-      } else {
-        // Fallback: regular JSON response
-        const data = await response.json();
-        let fullResponse = data.response || 'I apologize, but I encountered an error.';
-        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-        const chunkSize = 30;
-        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-          if (stopRequested.current) {
-            setIsGenerating(false);
-            setStreamingText('');
-            return;
-          }
-          setStreamingText(fullResponse.substring(0, i));
-          await new Promise(resolve => setTimeout(resolve, 1));
-        }
-
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: fullResponse,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        setStreamingText('');
-        setIsGenerating(false);
-      }
-
-    } catch (error) {
-      console.error('Error in edit:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'I apologize, but I am unable to respond at this moment.',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      setIsGenerating(false);
-      setStreamingText('');
-    }
-  };
-
-  // ============================================================
-  // REGENERATE MESSAGE (with streaming)
-  // ============================================================
   const regenerateMessage = async (assistantMessageId: string) => {
     const assistantIndex = messages.findIndex(m => m.id === assistantMessageId);
     if (assistantIndex === -1) return;
@@ -584,45 +333,30 @@ export default function MainContent() {
         body: JSON.stringify({ message: userMessageContent, history: newMessages }),
       });
 
-      if (response.headers.get('content-type')?.includes('text/event-stream')) {
-        const fullResponse = await processStream(response);
-        const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-        
-        const newAssistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: cleanResponse,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, newAssistantMessage]);
-        setStreamingText('');
-        setIsGenerating(false);
-      } else {
-        const data = await response.json();
-        let fullResponse = data.response || 'I apologize, but I encountered an error.';
-        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      const data = await response.json();
+      let fullResponse = data.response || 'I apologize, but I encountered an error.';
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-        const chunkSize = 30;
-        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-          if (stopRequested.current) {
-            setIsGenerating(false);
-            setStreamingText('');
-            return;
-          }
-          setStreamingText(fullResponse.substring(0, i));
-          await new Promise(resolve => setTimeout(resolve, 1));
+      const chunkSize = 4;
+      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+        if (stopRequested.current) {
+          setIsGenerating(false);
+          setStreamingText('');
+          return;
         }
-
-        const newAssistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: fullResponse,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, newAssistantMessage]);
-        setStreamingText('');
-        setIsGenerating(false);
+        setStreamingText(fullResponse.substring(0, i));
+        await new Promise(resolve => setTimeout(resolve, 5));
       }
+
+      const newAssistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: fullResponse,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, newAssistantMessage]);
+      setStreamingText('');
+      setIsGenerating(false);
     } catch (error) {
       console.error('Regeneration error:', error);
       const errorMessage: Message = {
@@ -637,9 +371,6 @@ export default function MainContent() {
     }
   };
 
-  // ============================================================
-  // SEND MESSAGE (with streaming)
-  // ============================================================
   const sendMessage = async () => {
     if (!input.trim()) return;
     if (isGenerating) return;
@@ -688,45 +419,30 @@ export default function MainContent() {
         body: JSON.stringify({ message: sentInput, history: messages }),
       });
 
-      if (response.headers.get('content-type')?.includes('text/event-stream')) {
-        const fullResponse = await processStream(response);
-        const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-        
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: cleanResponse,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        setStreamingText('');
-        setIsGenerating(false);
-      } else {
-        const data = await response.json();
-        let fullResponse = data.response || 'I apologize, but I encountered an error.';
-        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      const data = await response.json();
+      let fullResponse = data.response || 'I apologize, but I encountered an error.';
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-        const chunkSize = 30;
-        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-          if (stopRequested.current) {
-            setIsGenerating(false);
-            setStreamingText('');
-            return;
-          }
-          setStreamingText(fullResponse.substring(0, i));
-          await new Promise(resolve => setTimeout(resolve, 1));
+      const chunkSize = 4;
+      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+        if (stopRequested.current) {
+          setIsGenerating(false);
+          setStreamingText('');
+          return;
         }
-
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: fullResponse,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        setStreamingText('');
-        setIsGenerating(false);
+        setStreamingText(fullResponse.substring(0, i));
+        await new Promise(resolve => setTimeout(resolve, 5));
       }
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: fullResponse,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+      setStreamingText('');
+      setIsGenerating(false);
 
     } catch (error) {
       console.error('Error:', error);
@@ -928,19 +644,6 @@ export default function MainContent() {
             </div>
           )}
         </div>
-
-        {!userId && (
-          <div className="max-w-4xl mx-auto mb-4 px-4">
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-center border border-blue-200 dark:border-blue-800">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                🔐 <strong>Sign in to save your chat history across all your devices.</strong>
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Your chats will be saved automatically when you sign in. It's free!
-              </p>
-            </div>
-          </div>
-        )}
 
         <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
           <div className="max-w-4xl mx-auto">
