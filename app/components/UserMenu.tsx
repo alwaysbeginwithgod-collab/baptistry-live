@@ -23,19 +23,12 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleInstallClick = async () => {
-    if ('beforeinstallprompt' in window) {
-      // @ts-ignore
-      const deferredPrompt = window.deferredPrompt;
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
-        console.log('Install result:', result.outcome);
-      } else {
-        alert('📱 Tap the share icon (📤) then "Add to Home Screen"');
-      }
+  const handleInstallClick = () => {
+    // Direct users to install via browser
+    if (navigator.userAgent.includes('Mobile')) {
+      alert('📱 To install BAPTISTRY on your phone:\n\n1. Tap the share icon (📤)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');
     } else {
-      alert('📱 Tap the share icon (📤) then "Add to Home Screen"');
+      alert('📱 Open this page on your phone to install the app.');
     }
     setIsOpen(false);
   };
@@ -88,14 +81,14 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             </div>
           </div>
 
-          {/* Install App - Green button */}
+          {/* Install App - Simple working version */}
           <button
             onClick={handleInstallClick}
             className="w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700"
           >
             <span className="text-xl">📲</span>
             <div className="flex-1 text-left">
-              <span className="font-medium text-gray-800 dark:text-white">Install App</span>
+              <span className="font-medium text-gray-800 dark:text-white">Download Mobile App</span>
               <p className="text-xs text-gray-400 dark:text-gray-500">Add to home screen</p>
             </div>
             <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full">Free</span>
