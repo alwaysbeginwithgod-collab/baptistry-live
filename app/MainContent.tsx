@@ -282,29 +282,99 @@ export default function MainContent() {
     localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
   };
 
-  const editMessage = (messageId: string, newContent: string) => {
+  // ============================================================
+  // SIMPLE EDIT FUNCTION - WORKS DIRECTLY
+  // ============================================================
+  const editMessage = async (messageId: string, newContent: string) => {
+    console.log('🔥 EDIT MESSAGE TRIGGERED');
+    
+    // Find the message to edit
     const messageIndex = messages.findIndex(m => m.id === messageId);
     if (messageIndex === -1) return;
     
     const originalMessage = messages[messageIndex];
     if (originalMessage.role !== 'user') return;
     
-    setIsGenerating(false);
-    setStreamingText('');
-    if (stopRequested.current) {
-      stopRequested.current = false;
-    }
-    
+    // Remove this message and all messages after it
     const newMessages = messages.slice(0, messageIndex);
     setMessages(newMessages);
-    setInput(newContent);
     
-    setTimeout(() => {
-      autoResizeTextarea();
-      setTimeout(() => {
-        sendMessage();
-      }, 100);
-    }, 50);
+    // Reset states
+    setIsGenerating(true);
+    setStreamingText('');
+    stopRequested.current = false;
+    
+    // Create conversation if needed
+    if (!currentConversationId) {
+      const newConversation: Conversation = {
+        id: Date.now().toString(),
+        title: newContent.substring(0, 40),
+        messages: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        pinned: false,
+      };
+      setConversations(prev => [newConversation, ...prev]);
+      setCurrentConversationId(newConversation.id);
+    }
+
+    // Add the edited user message
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: newContent,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    
+    try {
+      // Call the API directly
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: newContent, history: newMessages }),
+      });
+
+      const data = await response.json();
+      let fullResponse = data.response || 'I apologize, but I encountered an error.';
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+      // Type the response
+      const chunkSize = 15;
+      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+        if (stopRequested.current) {
+          setIsGenerating(false);
+          setStreamingText('');
+          return;
+        }
+        setStreamingText(fullResponse.substring(0, i));
+        await new Promise(resolve => setTimeout(resolve, 3));
+      }
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: fullResponse,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+      setStreamingText('');
+      setIsGenerating(false);
+      console.log('✅ EDIT COMPLETE');
+
+    } catch (error) {
+      console.error('Edit error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I apologize, but I am unable to respond at this moment.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setIsGenerating(false);
+      setStreamingText('');
+    }
   };
 
   const regenerateMessage = async (assistantMessageId: string) => {

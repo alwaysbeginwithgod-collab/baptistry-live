@@ -46,8 +46,20 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   };
 
   const handleSave = () => {
+    console.log('💾 SAVE & RESEND CLICKED');
+    console.log('📝 editedText:', editedText);
+    console.log('🔗 onEdit exists?', !!onEdit);
+    
     if (editedText.trim() && editedText !== message.content && onEdit) {
+      console.log('🚀 Calling onEdit NOW');
       onEdit(message.id, editedText);
+    } else {
+      console.log('⚠️ Conditions not met:', {
+        trimmed: editedText.trim(),
+        notEmpty: !!editedText.trim(),
+        different: editedText !== message.content,
+        hasOnEdit: !!onEdit
+      });
     }
     setIsEditing(false);
   };
