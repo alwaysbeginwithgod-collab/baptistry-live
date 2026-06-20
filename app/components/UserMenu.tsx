@@ -11,12 +11,14 @@ interface UserMenuProps {
 export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps) {
   const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
+  const [showInstallInstructions, setShowInstallInstructions] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setShowInstallInstructions(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -24,12 +26,17 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
   }, []);
 
   const handleInstallClick = () => {
-    // Direct users to install via browser
-    if (navigator.userAgent.includes('Mobile')) {
-      alert('📱 To install BAPTISTRY on your phone:\n\n1. Tap the share icon (📤)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');
-    } else {
-      alert('📱 Open this page on your phone to install the app.');
-    }
+    setShowInstallInstructions(true);
+    setIsOpen(false);
+  };
+
+  const handleHelpClick = () => {
+    if (onHelpClick) onHelpClick();
+    setIsOpen(false);
+  };
+
+  const handleFeedbackClick = () => {
+    if (onFeedbackClick) onFeedbackClick();
     setIsOpen(false);
   };
 
@@ -81,7 +88,7 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             </div>
           </div>
 
-          {/* Install App - Simple working version */}
+          {/* Download Mobile App - Opens Install Instructions */}
           <button
             onClick={handleInstallClick}
             className="w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700"
@@ -89,13 +96,13 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             <span className="text-xl">📲</span>
             <div className="flex-1 text-left">
               <span className="font-medium text-gray-800 dark:text-white">Download Mobile App</span>
-              <p className="text-xs text-gray-400 dark:text-gray-500">Add to home screen</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">Install on your phone</p>
             </div>
             <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full">Free</span>
           </button>
 
           <button
-            onClick={onHelpClick}
+            onClick={handleHelpClick}
             className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-t border-gray-200 dark:border-gray-700"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,7 +112,7 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
           </button>
 
           <button
-            onClick={onFeedbackClick}
+            onClick={handleFeedbackClick}
             className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,6 +131,59 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
               <span>Logout</span>
             </button>
           </SignOutButton>
+        </div>
+      )}
+
+      {/* Install Instructions Modal - No QR code, just helpful info */}
+      {showInstallInstructions && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm mx-4 w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                📱 Install BAPTISTRY
+              </h3>
+              <button onClick={() => setShowInstallInstructions(false)} className="text-gray-500 hover:text-gray-700">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="text-center">
+              <div className="text-6xl mb-4">📲</div>
+              <h4 className="text-md font-semibold text-gray-800 dark:text-white mb-2">
+                Install on Your Phone
+              </h4>
+              
+              <div className="text-left space-y-3 mb-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <strong>1.</strong> Open this page in <strong>Chrome</strong> or <strong>Safari</strong> on your phone.
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <strong>2.</strong> Tap the <strong>share icon</strong> (📤) in your browser.
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <strong>3.</strong> Scroll down and tap <strong>"Add to Home Screen"</strong>.
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <strong>4.</strong> Tap <strong>"Add"</strong> — BAPTISTRY will appear on your home screen! 🎉
+                </p>
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 mb-4">
+                <p className="text-xs text-blue-600 dark:text-blue-400">
+                  💡 <strong>Tip:</strong> This works on both iPhone and Android!
+                </p>
+              </div>
+              
+              <button
+                onClick={() => setShowInstallInstructions(false)}
+                className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Got it!
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
