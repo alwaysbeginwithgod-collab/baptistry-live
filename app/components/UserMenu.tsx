@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useUser, SignOutButton } from '@clerk/nextjs';
+import QRCode from 'qrcode';
 
 interface UserMenuProps {
   onFeedbackClick?: () => void;
@@ -13,6 +14,7 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
   const [isOpen, setIsOpen] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,32 +30,31 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
 
   // Generate QR code when modal opens
   useEffect(() => {
-    if (showQRCode) {
-      import('qrcode').then((QRCode) => {
-        QRCode.default.toDataURL('https://www.baptistry.live', {
-          width: 200,
-          margin: 2,
-          color: {
-            dark: '#1e3a5f',
-            light: '#ffffff'
-          }
-        })
-        .then((url) => {
-          setQrCodeDataUrl(url);
-        })
-        .catch((err) => {
-          console.error('QR Code generation error:', err);
-          setQrCodeDataUrl(null);
-        });
-      }).catch(() => {
-        // Fallback if qrcode is not installed
-        console.warn('QRCode library not loaded');
+    if (showQRCode && !qrCodeDataUrl && !isGenerating) {
+      setIsGenerating(true);
+      QRCode.toDataURL('https://www.baptistry.live', {
+        width: 250,
+        margin: 2,
+        color: {
+          dark: '#1e3a5f',
+          light: '#ffffff'
+        }
+      })
+      .then((url) => {
+        setQrCodeDataUrl(url);
+        setIsGenerating(false);
+      })
+      .catch((err) => {
+        console.error('QR Code generation error:', err);
+        setIsGenerating(false);
+        // Fallback: create a simple text-based QR
         setQrCodeDataUrl(null);
       });
     }
-  }, [showQRCode]);
+  }, [showQRCode, qrCodeDataUrl, isGenerating]);
 
   const handleDownloadClick = () => {
+    setQrCodeDataUrl(null);
     setShowQRCode(true);
     setIsOpen(false);
   };
@@ -69,9 +70,7 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
   };
 
   const handleDirectDownload = () => {
-    // Open the site - triggers PWA install on mobile
     if (window.navigator.userAgent.includes('Mobile')) {
-      // Try to trigger install prompt
       if ('beforeinstallprompt' in window) {
         // @ts-ignore
         const deferredPrompt = window.deferredPrompt;
@@ -80,7 +79,6 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
           return;
         }
       }
-      // Fallback: open in new tab
       window.open('https://www.baptistry.live', '_blank');
     } else {
       alert('📱 Open this page on your phone to install the app.');
@@ -220,7 +218,12 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
             <div className="text-center">
               {/* QR Code */}
               <div className="flex justify-center items-center w-48 h-48 mx-auto bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-                {qrCodeDataUrl ? (
+                {isGenerating ? (
+                  <div className="flex flex-col items-center gap-2 text-gray-400">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <span className="text-xs">Generating...</span>
+                  </div>
+                ) : qrCodeDataUrl ? (
                   <img 
                     src={qrCodeDataUrl} 
                     alt="Scan QR code to open BAPTISTRY" 
@@ -229,7 +232,7 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
                 ) : (
                   <div className="flex flex-col items-center gap-2 text-gray-400">
                     <span className="text-4xl">📱</span>
-                    <span className="text-xs">Loading QR...</span>
+                    <span className="text-xs">Tap "Open BAPTISTRY" below</span>
                   </div>
                 )}
               </div>
