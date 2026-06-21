@@ -85,25 +85,34 @@ const handleInstallClick = async () => {
 
 {/* Right side */}
 <div className="flex items-center gap-3">
-  {!isSignedIn ? (
-    <>
-      <SignInButton mode="modal">
-        <button className="text-sm text-blue-600 dark:text-blue-400 hover:underline">Sign In</button>
-      </SignInButton>
-      
-      {/* 📱 Install Button - Only for guests (not signed in) */}
-      <button
-        onClick={handleInstallClick}
-        className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium"
-        title="Install BAPTISTRY on your phone"
+{!isSignedIn ? (
+  <>
+    <SignInButton mode="modal">
+      <button 
+        className="text-sm text-blue-600 dark:text-blue-400 hover:underline relative group"
+        title="Sign in to save your chat history across all devices"
       >
-        <span>📲</span>
-        <span className="hidden sm:inline">Install</span>
+        Sign In
+        {/* Tooltip */}
+        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 text-xs bg-gray-800 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+          Sign in to save your chat history across all devices
+        </span>
       </button>
-    </>
-  ) : (
-    <UserMenu onHelpClick={() => setIsHelpOpen(true)} onFeedbackClick={() => setIsFeedbackOpen(true)} />
-  )}
+    </SignInButton>
+    
+    {/* 📱 Install Button - Only for guests */}
+    <button
+      onClick={handleInstallClick}
+      className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium"
+      title="Install BAPTISTRY on your phone"
+    >
+      <span>📲</span>
+      <span className="hidden sm:inline">Install</span>
+    </button>
+  </>
+) : (
+  <UserMenu onHelpClick={() => setIsHelpOpen(true)} onFeedbackClick={() => setIsFeedbackOpen(true)} />
+)}
 
   <div className="w-px h-5 bg-gray-300 dark:bg-gray-600"></div>
 

@@ -767,20 +767,6 @@ export default function MainContent() {
           )}
         </div>
 
-        {/* Guest banner - only shows when not signed in */}
-        {!userId && (
-          <div className="max-w-4xl mx-auto mb-4 px-4">
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-center border border-blue-200 dark:border-blue-800">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                🔐 <strong>Sign in to save your chat history across all your devices.</strong>
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Your chats will be saved automatically when you sign in. It's free!
-              </p>
-            </div>
-          </div>
-        )}
-
         <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
           <div className="max-w-4xl mx-auto">
             <div className="flex gap-3 items-end">
