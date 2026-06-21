@@ -42,7 +42,6 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
 
   // Handle install prompt
   const handleInstallClick = async () => {
-    // Detect device type
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const isAndroid = /Android/i.test(navigator.userAgent);
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -65,18 +64,16 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
           return;
         }
       }
-      // If beforeinstallprompt is not available, show instructions
       alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
       return;
     }
     
-    // iOS: Show instructions with visual guide
+    // iOS: Show instructions
     if (isIOS) {
       alert('📱 To install BAPTISTRY on your iPhone/iPad:\n\n1. Tap the share icon (📤) at the bottom\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" in the top-right corner');
       return;
     }
     
-    // Fallback
     alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
   };
 

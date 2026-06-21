@@ -117,27 +117,6 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
     alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
     setShowQRCode(false);
   };
-  
-  // Fallback for iOS or if beforeinstallprompt is not available
-  // Show instructions with a direct link to open the site
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: 'BAPTISTRY',
-        text: 'Install BAPTISTRY on your phone!',
-        url: 'https://www.baptistry.app',
-      });
-      setShowQRCode(false);
-      return;
-    } catch (err) {
-      console.log('Share cancelled');
-    }
-  }
-  
-  // Final fallback: open the site (user can install from there)
-  window.open('https://www.baptistry.app', '_blank');
-  setShowQRCode(false);
-};
 
   const getInitials = () => {
     if (!user) return 'U';
