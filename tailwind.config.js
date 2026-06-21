@@ -11,9 +11,9 @@ module.exports = {
       colors: {
         // Primary BAPTISTRY colors
         'baptistry-primary': {
-          light: '#1e3a5f',  // Dark blue for light mode
+          light: '#1e3a5f',
           DEFAULT: '#1e3a5f',
-          dark: '#3b6ea0',    // Lighter blue for dark mode
+          dark: '#3b6ea0',
         },
         'baptistry-secondary': {
           light: '#8b4513',
@@ -25,20 +25,29 @@ module.exports = {
           DEFAULT: '#c5a059',
           dark: '#e0c080',
         },
-        // Link colors - consistent across modes
+        // Link colors
         link: {
-          light: '#2563eb',   // Blue-600 for light mode
-          dark: '#60a5fa',    // Blue-400 for dark mode
+          light: '#2563eb',
+          dark: '#60a5fa',
         },
         // Text colors
         text: {
-          light: '#1f2937',   // Gray-800 for light mode
-          dark: '#e5e7eb',    // Gray-200 for dark mode
+          light: '#1f2937',
+          dark: '#e5e7eb',
         },
+        // Background colors
+        background: {
+          light: '#f9fafb',
+          dark: '#111827',
+        },
+      },
+      fontFamily: {
+        'sans': ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        'serif': ['Georgia', 'serif'],
       },
     },
   },
   plugins: [
     require('@tailwindcss/typography'),
   ],
-}
+};

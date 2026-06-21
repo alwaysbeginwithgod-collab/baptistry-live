@@ -6,6 +6,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/react';
 import { ConvexProvider, ConvexReactClient } from "convex/react";
+import PWAInstall from './components/PWAInstall';
 
 // Create the Convex client
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
@@ -21,6 +22,11 @@ export default function RootLayout({
         <ThemeProvider>
           <html lang="en">
             <head>
+              <link rel="manifest" href="/manifest.json" />
+              <meta name="theme-color" content="#1e3a5f" />
+              <meta name="apple-mobile-web-app-capable" content="yes" />
+              <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+              <link rel="apple-touch-icon" href="/baptistry-logo.png" />
               <title>BAPTISTRY - KJV Bible Teaching</title>
               <meta name="description" content="Biblical teaching from the King James Version" />
               <link rel="icon" href="/baptistry-logo.png" />
@@ -32,6 +38,7 @@ export default function RootLayout({
               />
               {children}
               <Analytics />
+              <PWAInstall />
             </body>
           </html>
         </ThemeProvider>

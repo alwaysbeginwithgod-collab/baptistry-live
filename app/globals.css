@@ -7,6 +7,75 @@
 @tailwind typography;
 
 /* ============================================ */
+/* CSS VARIABLES (Theme System)                  */
+/* ============================================ */
+:root {
+  /* Light Mode Variables */
+  --bg-primary: #f5f7fa;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-header: #ffffff;
+  
+  --text-primary: #1a1a2e;
+  --text-secondary: #2c3e50;
+  --text-muted: #8e9eae;
+  --text-inverse: #ffffff;
+  
+  --border-primary: #e9ecef;
+  --border-secondary: #dee2e6;
+  
+  --brand-primary: #1e3a5f;
+  --brand-secondary: #2563eb;
+  --brand-accent: #c5a059;
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+.dark {
+  /* Dark Mode Variables */
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-card: #16213e;
+  --bg-sidebar: #1a1a2e;
+  --bg-header: #16213e;
+  
+  --text-primary: #e0e0e0;
+  --text-secondary: #c0c0d0;
+  --text-muted: #808090;
+  --text-inverse: #1a1a2e;
+  
+  --border-primary: #2d2d4a;
+  --border-secondary: #3d3d5a;
+  
+  --brand-primary: #3b6ea0;
+  --brand-secondary: #60a5fa;
+  --brand-accent: #e0c080;
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+}
+
+/* Theme Utility Classes */
+.bg-theme-primary { background-color: var(--bg-primary); }
+.bg-theme-secondary { background-color: var(--bg-secondary); }
+.bg-theme-card { background-color: var(--bg-card); }
+
+.text-theme-primary { color: var(--text-primary); }
+.text-theme-secondary { color: var(--text-secondary); }
+.text-theme-muted { color: var(--text-muted); }
+
+.border-theme-primary { border-color: var(--border-primary); }
+.border-theme-secondary { border-color: var(--border-secondary); }
+
+.brand-primary { color: var(--brand-primary); }
+.brand-secondary { color: var(--brand-secondary); }
+.brand-accent { color: var(--brand-accent); }
+
+/* ============================================ */
 /* CSS VARIABLES (Brand Colors)                  */
 /* ============================================ */
 :root {
@@ -458,9 +527,4 @@ body {
 /* Unified muted text */
 .text-muted {
   @apply text-gray-500 dark:text-gray-400;
-}
-
-/* Unified link styling for both light and dark mode */
-.link-unified {
-  @apply text-blue-600 dark:text-blue-400 hover:underline cursor-pointer transition-colors;
 }

@@ -26,10 +26,10 @@ type Conversation = {
 };
 
 export default function MainContent() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const userId = user?.id;
 
-  // Convex mutations and queries
+  // Convex hooks
   const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
   const loadConversationsFromCloud = useQuery(
     api.conversations.loadConversations,
@@ -79,31 +79,40 @@ export default function MainContent() {
 
   // Load conversations from Convex cloud (primary) or localStorage (backup)
   useEffect(() => {
+    console.log('🔵 LOAD EFFECT - userId:', userId, 'isLoaded:', isLoaded);
+    
+    if (!isLoaded) {
+      console.log('⏳ Clerk still loading...');
+      return;
+    }
+    
     if (!userId) {
+      console.log('⚠️ No userId found (user not signed in)');
       setConversations([]);
       return;
     }
     
-    // Wait for cloud data to load
-    if (loadConversationsFromCloud === undefined) return;
+    if (loadConversationsFromCloud === undefined) {
+      console.log('⏳ Waiting for Convex cloud data...');
+      return;
+    }
     
-    // Helper to check if we have valid conversation data
     const isValidCloudData = (data: any): data is Conversation[] => {
       return data !== null && data !== "skip" && Array.isArray(data);
     };
     
-    // Try cloud first
     if (isValidCloudData(loadConversationsFromCloud) && loadConversationsFromCloud.length > 0) {
+      console.log('✅ LOADING FROM CONVEX CLOUD:', loadConversationsFromCloud.length);
       setConversations(loadConversationsFromCloud);
-      // Also save to localStorage as backup
       localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(loadConversationsFromCloud));
       return;
     }
     
-    // If no cloud data, try localStorage
+    // Fallback to localStorage
     const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
     if (savedConversations) {
       try {
+        console.log('💾 LOADING FROM LOCALSTORAGE (fallback)');
         const parsed = JSON.parse(savedConversations);
         const withDates = parsed.map((conv: any) => ({
           ...conv,
@@ -115,32 +124,38 @@ export default function MainContent() {
           })),
         }));
         setConversations(withDates);
-        // Back up to cloud
-        saveConversationsToCloud({ userId, conversations: withDates });
+        // Backup to cloud
+        saveConversationsToCloud({ userId, conversations: withDates })
+          .then(() => console.log('✅ Cloud backup successful'))
+          .catch((err) => console.error('❌ Cloud backup failed:', err));
       } catch (e) {
         console.error('Failed to load conversations', e);
       }
     } else {
       setConversations([]);
     }
-  }, [userId, loadConversationsFromCloud]);
+  }, [userId, isLoaded, loadConversationsFromCloud]);
 
   // Save conversations to Convex cloud AND localStorage
   useEffect(() => {
-    if (conversations.length > 0 && userId) {
-      // Save to localStorage as backup
-      localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
-      // Save to Convex cloud
-      saveConversationsToCloud({ userId, conversations });
+    console.log('🔵 SAVE EFFECT - conversations:', conversations.length, 'userId:', userId);
+    
+    if (!userId) {
+      console.log('⚠️ No userId, skipping save');
+      return;
     }
+    
+    if (conversations.length === 0) {
+      console.log('⚠️ No conversations to save');
+      return;
+    }
+    
+    console.log('💾 SAVING to localStorage and Convex cloud:', conversations.length);
+    localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
+    saveConversationsToCloud({ userId, conversations })
+      .then(() => console.log('✅ Convex save successful'))
+      .catch((err) => console.error('❌ Convex save failed:', err));
   }, [conversations, userId]);
-
-  // Save current conversation when messages change
-  useEffect(() => {
-    if (messages.length > 0 && currentConversationId && !isGenerating) {
-      saveCurrentConversation();
-    }
-  }, [messages, isGenerating]);
 
   const saveCurrentConversation = () => {
     if (!currentConversationId) return;
@@ -205,6 +220,8 @@ export default function MainContent() {
           scrollToBottomImmediate();
         }, 50);
       });
+    } else {
+      console.log('Conversation not found:', conversationId);
     }
   };
 
@@ -308,29 +325,108 @@ export default function MainContent() {
     localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
   };
 
+  // EDIT MESSAGE FUNCTION - fixed with proper async
   const editMessage = (messageId: string, newContent: string) => {
+    console.log('✏️ EDIT MESSAGE:', messageId, newContent);
+    
     const messageIndex = messages.findIndex(m => m.id === messageId);
     if (messageIndex === -1) return;
     
     const originalMessage = messages[messageIndex];
     if (originalMessage.role !== 'user') return;
     
+    // Force reset any ongoing generation
     setIsGenerating(false);
     setStreamingText('');
     if (stopRequested.current) {
       stopRequested.current = false;
     }
     
+    // Remove this message and all messages after it
     const newMessages = messages.slice(0, messageIndex);
     setMessages(newMessages);
+    
+    // Set the edited text as input
     setInput(newContent);
     
+    // Send automatically after a short delay
     setTimeout(() => {
       autoResizeTextarea();
-      setTimeout(() => {
-        sendMessage();
-      }, 100);
-    }, 50);
+      const sendEditedMessage = async () => {
+        if (!newContent.trim()) return;
+        
+        if (!currentConversationId) {
+          const newConversation: Conversation = {
+            id: Date.now().toString(),
+            title: newContent.substring(0, 40),
+            messages: [],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            pinned: false,
+          };
+          setConversations(prev => [newConversation, ...prev]);
+          setCurrentConversationId(newConversation.id);
+        }
+        
+        const userMessage: Message = {
+          id: Date.now().toString(),
+          role: 'user',
+          content: newContent,
+          timestamp: new Date(),
+        };
+        
+        setMessages(prev => [...prev, userMessage]);
+        setIsGenerating(true);
+        setStreamingText('');
+        stopRequested.current = false;
+        
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: newContent, history: newMessages }),
+          });
+          
+          const data = await response.json();
+          let fullResponse = data.response || 'I apologize, but I encountered an error.';
+          fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+          
+          const chunkSize = 20;
+          for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+            if (stopRequested.current) {
+              setIsGenerating(false);
+              setStreamingText('');
+              return;
+            }
+            setStreamingText(fullResponse.substring(0, i));
+            await new Promise(resolve => setTimeout(resolve, 3));
+          }
+          
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: fullResponse,
+            timestamp: new Date(),
+          };
+          setMessages(prev => [...prev, assistantMessage]);
+          setStreamingText('');
+          setIsGenerating(false);
+        } catch (error) {
+          console.error('Error:', error);
+          const errorMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: 'I apologize, but I am unable to respond at this moment.',
+            timestamp: new Date(),
+          };
+          setMessages(prev => [...prev, errorMessage]);
+          setIsGenerating(false);
+          setStreamingText('');
+        }
+      };
+      
+      sendEditedMessage();
+    }, 100);
   };
 
   const regenerateMessage = async (assistantMessageId: string) => {
@@ -363,7 +459,7 @@ export default function MainContent() {
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 4;
+      const chunkSize = 20;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
@@ -371,7 +467,7 @@ export default function MainContent() {
           return;
         }
         setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 5));
+        await new Promise(resolve => setTimeout(resolve, 3));
       }
 
       const newAssistantMessage: Message = {
@@ -449,7 +545,7 @@ export default function MainContent() {
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 4;
+      const chunkSize = 20;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
@@ -457,7 +553,7 @@ export default function MainContent() {
           return;
         }
         setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 5));
+        await new Promise(resolve => setTimeout(resolve, 3));
       }
 
       const assistantMessage: Message = {
@@ -670,6 +766,20 @@ export default function MainContent() {
             </div>
           )}
         </div>
+
+        {/* Guest banner - only shows when not signed in */}
+        {!userId && (
+          <div className="max-w-4xl mx-auto mb-4 px-4">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-center border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                🔐 <strong>Sign in to save your chat history across all your devices.</strong>
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Your chats will be saved automatically when you sign in. It's free!
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
           <div className="max-w-4xl mx-auto">
