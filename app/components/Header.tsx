@@ -23,29 +23,6 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
   const historyDropdownRef = useRef<HTMLDivElement>(null);
   const { isSignedIn } = useUser();
 
-const handleInstallClick = async () => {
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  
-  if (!isMobile) {
-    alert('📱 Please open this page on your phone to install the app.');
-    return;
-  }
-  
-  if ('beforeinstallprompt' in window) {
-    // @ts-ignore
-    const deferredPrompt = window.deferredPrompt;
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const result = await deferredPrompt.userChoice;
-      console.log('Install result:', result.outcome);
-      return;
-    }
-  }
-  
-  // iOS fallback: show instructions
-  alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');
-};
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (historyDropdownRef.current && !historyDropdownRef.current.contains(event.target as Node)) {
@@ -61,6 +38,30 @@ const handleInstallClick = async () => {
   const getPreview = (content: string) => {
     const words = content.split(' ').slice(0, 5).join(' ');
     return words.length < content.length ? words + '...' : words;
+  };
+
+  // Handle install prompt
+  const handleInstallClick = async () => {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    
+    if (!isMobile) {
+      alert('📱 Please open this page on your phone to install the app.');
+      return;
+    }
+    
+    if ('beforeinstallprompt' in window) {
+      // @ts-ignore
+      const deferredPrompt = window.deferredPrompt;
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        console.log('Install result:', result.outcome);
+        return;
+      }
+    }
+    
+    // iOS fallback: show instructions
+    alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');
   };
 
   return (
@@ -83,38 +84,34 @@ const handleInstallClick = async () => {
           </div>
         </div>
 
-{/* Right side */}
-<div className="flex items-center gap-3">
-{!isSignedIn ? (
-  <>
-    <SignInButton mode="modal">
-      <button 
-        className="text-sm text-blue-600 dark:text-blue-400 hover:underline relative group"
-        title="Sign in to save your chat history across all devices"
-      >
-        Sign In
-        {/* Tooltip */}
-        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 text-xs bg-gray-800 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
-          Sign in to save your chat history across all devices
-        </span>
-      </button>
-    </SignInButton>
-    
-    {/* 📱 Install Button - Only for guests */}
-    <button
-      onClick={handleInstallClick}
-      className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium"
-      title="Install BAPTISTRY on your phone"
-    >
-      <span>📲</span>
-      <span className="hidden sm:inline">Install</span>
-    </button>
-  </>
-) : (
-  <UserMenu onHelpClick={() => setIsHelpOpen(true)} onFeedbackClick={() => setIsFeedbackOpen(true)} />
-)}
+        {/* Right side */}
+        <div className="flex items-center gap-3">
+          {!isSignedIn ? (
+            <>
+              <SignInButton mode="modal">
+                <button 
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                  title="Sign in to save your chat history across all devices"
+                >
+                  Sign In
+                </button>
+              </SignInButton>
 
-  <div className="w-px h-5 bg-gray-300 dark:bg-gray-600"></div>
+              {/* 📱 Install Button - Only for guests (not signed in) */}
+              <button
+                onClick={handleInstallClick}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium"
+                title="Install BAPTISTRY on your phone"
+              >
+                <span>📲</span>
+                <span className="hidden sm:inline">Install</span>
+              </button>
+            </>
+          ) : (
+            <UserMenu onHelpClick={() => setIsHelpOpen(true)} onFeedbackClick={() => setIsFeedbackOpen(true)} />
+          )}
+
+          <div className="w-px h-5 bg-gray-300 dark:bg-gray-600"></div>
 
           {/* Message Count Dropdown */}
           <div className="relative" ref={historyDropdownRef}>
