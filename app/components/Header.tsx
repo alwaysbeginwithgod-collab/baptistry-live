@@ -42,26 +42,42 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
 
   // Handle install prompt
   const handleInstallClick = async () => {
+    // Detect device type
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
     
+    // Desktop
     if (!isMobile) {
       alert('📱 Please open this page on your phone to install the app.');
       return;
     }
     
-    if ('beforeinstallprompt' in window) {
-      // @ts-ignore
-      const deferredPrompt = window.deferredPrompt;
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
-        console.log('Install result:', result.outcome);
-        return;
+    // Android: Try native install prompt
+    if (isAndroid) {
+      if ('beforeinstallprompt' in window) {
+        // @ts-ignore
+        const deferredPrompt = window.deferredPrompt;
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const result = await deferredPrompt.userChoice;
+          console.log('Install result:', result.outcome);
+          return;
+        }
       }
+      // If beforeinstallprompt is not available, show instructions
+      alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
+      return;
     }
     
-    // iOS fallback: show instructions
-    alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');
+    // iOS: Show instructions with visual guide
+    if (isIOS) {
+      alert('📱 To install BAPTISTRY on your iPhone/iPad:\n\n1. Tap the share icon (📤) at the bottom\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" in the top-right corner');
+      return;
+    }
+    
+    // Fallback
+    alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
   };
 
   return (

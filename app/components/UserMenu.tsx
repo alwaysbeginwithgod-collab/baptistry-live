@@ -63,32 +63,60 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
     setIsOpen(false);
   };
 
-const handleDirectDownload = async () => {
-  // Check if on mobile device
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  
-  if (!isMobile) {
-    alert('📱 Please open this page on your phone to install the app.');
-    setShowQRCode(false);
-    return;
-  }
-  
-  // Try PWA install prompt first
-  if ('beforeinstallprompt' in window) {
-    // @ts-ignore
-    const deferredPrompt = window.deferredPrompt;
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const result = await deferredPrompt.userChoice;
-      if (result.outcome === 'accepted') {
-        console.log('✅ User installed the app');
-      } else {
-        console.log('❌ User dismissed the install prompt');
-      }
+  const handleDirectDownload = async () => {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    
+    // Desktop
+    if (!isMobile) {
+      alert('📱 Please open this page on your phone to install the app.');
       setShowQRCode(false);
       return;
     }
-  }
+    
+    // Android: Try native install prompt
+    if (isAndroid) {
+      if ('beforeinstallprompt' in window) {
+        // @ts-ignore
+        const deferredPrompt = window.deferredPrompt;
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const result = await deferredPrompt.userChoice;
+          console.log('Install result:', result.outcome);
+          setShowQRCode(false);
+          return;
+        }
+      }
+      alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
+      setShowQRCode(false);
+      return;
+    }
+    
+    // iOS: Show instructions
+    if (isIOS) {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'BAPTISTRY',
+            text: 'Install BAPTISTRY on your phone!',
+            url: 'https://www.baptistry.app',
+          });
+          setShowQRCode(false);
+          return;
+        } catch (err) {
+          console.log('Share cancelled');
+        }
+      }
+      alert('📱 To install BAPTISTRY on your iPhone/iPad:\n\n1. Tap the share icon (📤) at the bottom\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" in the top-right corner');
+      setShowQRCode(false);
+      return;
+    }
+    
+    // Fallback
+    alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
+    setShowQRCode(false);
+  };
   
   // Fallback for iOS or if beforeinstallprompt is not available
   // Show instructions with a direct link to open the site
