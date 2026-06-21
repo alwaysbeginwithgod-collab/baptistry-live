@@ -23,21 +23,27 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
   const historyDropdownRef = useRef<HTMLDivElement>(null);
   const { isSignedIn } = useUser();
 
-  const handleInstallClick = async () => {
-    if ('beforeinstallprompt' in window) {
-      // @ts-ignore
-      const deferredPrompt = window.deferredPrompt;
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
-        console.log('Install result:', result.outcome);
-      } else {
-        alert('📱 Tap the share icon (📤) then "Add to Home Screen"');
-      }
-    } else {
-      alert('📱 Tap the share icon (📤) then "Add to Home Screen"');
+const handleInstallClick = async () => {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  
+  if (!isMobile) {
+    alert('📱 Please open this page on your phone to install the app.');
+    return;
+  }
+  
+  if ('beforeinstallprompt' in window) {
+    // @ts-ignore
+    const deferredPrompt = window.deferredPrompt;
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const result = await deferredPrompt.userChoice;
+      console.log('Install result:', result.outcome);
+      return;
     }
-  };
+  }
+  
+  alert('📱 Tap the share icon (📤) then "Add to Home Screen"');
+};
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -78,26 +84,25 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
 
         {/* Right side */}
         <div className="flex items-center gap-3">
-          {!isSignedIn ? (
-            <SignInButton mode="modal">
-              <button className="text-sm text-blue-600 dark:text-blue-400 hover:underline">Sign In</button>
-            </SignInButton>
-          ) : (
-            <>
-              <UserMenu onHelpClick={() => setIsHelpOpen(true)} onFeedbackClick={() => setIsFeedbackOpen(true)} />
-              
-              {/* 📱 Install Button - Always Visible */}
-              <button
-                onClick={handleInstallClick}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium"
-                title="Install BAPTISTRY on your phone"
-              >
-                <span>📲</span>
-                <span className="hidden sm:inline">Install</span>
-              </button>
-            </>
-          )}
-
+{!isSignedIn ? (
+  <>
+    <SignInButton mode="modal">
+      <button className="text-sm text-blue-600 dark:text-blue-400 hover:underline">Sign In</button>
+    </SignInButton>
+    
+    {/* 📱 Install Button - Only for guests (not signed in) */}
+    <button
+      onClick={handleInstallClick}
+      className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium"
+      title="Install BAPTISTRY on your phone"
+    >
+      <span>📲</span>
+      <span className="hidden sm:inline">Install</span>
+    </button>
+  </>
+) : (
+  <UserMenu onHelpClick={() => setIsHelpOpen(true)} onFeedbackClick={() => setIsFeedbackOpen(true)} />
+)}
           <div className="w-px h-5 bg-gray-300 dark:bg-gray-600"></div>
 
           {/* Message Count Dropdown */}

@@ -63,22 +63,37 @@ export default function UserMenu({ onFeedbackClick, onHelpClick }: UserMenuProps
     setIsOpen(false);
   };
 
-  const handleDirectDownload = () => {
-    if (window.navigator.userAgent.includes('Mobile')) {
-      if ('beforeinstallprompt' in window) {
-        // @ts-ignore
-        const deferredPrompt = window.deferredPrompt;
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          return;
-        }
-      }
-      window.open('https://www.baptistry.app', '_blank');
-    } else {
-      alert('📱 Open this page on your phone to install the app.');
-    }
+const handleDirectDownload = async () => {
+  // Check if on mobile device
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  
+  if (!isMobile) {
+    alert('📱 Please open this page on your phone to install the app.');
     setShowQRCode(false);
-  };
+    return;
+  }
+  
+  // Try PWA install prompt first
+  if ('beforeinstallprompt' in window) {
+    // @ts-ignore
+    const deferredPrompt = window.deferredPrompt;
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const result = await deferredPrompt.userChoice;
+      if (result.outcome === 'accepted') {
+        console.log('✅ User installed the app');
+      } else {
+        console.log('❌ User dismissed the install prompt');
+      }
+      setShowQRCode(false);
+      return;
+    }
+  }
+  
+  // Fallback for iOS or if beforeinstallprompt is not available
+  alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');
+  setShowQRCode(false);
+};
 
   const getInitials = () => {
     if (!user) return 'U';
