@@ -199,31 +199,68 @@ export default function MainContent() {
     setTimeout(autoResizeTextarea, 0);
   };
 
-  const loadConversation = (conversationId: string) => {
-    if (messages.length > 0 && currentConversationId) {
-      saveCurrentConversation();
+const loadConversation = (conversationId: string) => {
+  console.log('🔵 loadConversation called for:', conversationId);
+  console.log('🔵 Current conversations count:', conversations.length);
+  console.log('🔵 Current conversations IDs:', conversations.map(c => c.id));
+  
+  if (messages.length > 0 && currentConversationId) {
+    saveCurrentConversation();
+  }
+  
+  // Try to find the conversation in state
+  let conversation = conversations.find(c => c.id === conversationId);
+  
+  // If not found in state, try to load from localStorage directly
+  if (!conversation && userId) {
+    console.log('🔵 Conversation not in state, trying localStorage...');
+    const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
+    if (savedConversations) {
+      try {
+        const parsed = JSON.parse(savedConversations);
+        const withDates = parsed.map((conv: any) => ({
+          ...conv,
+          createdAt: new Date(conv.createdAt),
+          updatedAt: new Date(conv.updatedAt),
+          messages: conv.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          })),
+        }));
+        // Update the conversations state
+        setConversations(withDates);
+        // Now find the conversation in the loaded data
+        conversation = withDates.find(c => c.id === conversationId);
+        console.log('🔵 Found in localStorage:', conversation ? 'Yes' : 'No');
+      } catch (e) {
+        console.error('Failed to load from localStorage', e);
+      }
     }
+  }
+  
+  if (conversation) {
+    console.log('🔵 Messages in conversation:', conversation.messages.length);
+    console.log('🔵 First message:', conversation.messages[0]?.content?.substring(0, 50) || 'No messages');
     
-    const conversation = conversations.find(c => c.id === conversationId);
-    if (conversation) {
-      setConversations(prev => prev.map(conv =>
-        conv.id === conversationId
-          ? { ...conv, updatedAt: new Date() }
-          : conv
-      ));
-      
-      setMessages(conversation.messages);
-      setCurrentConversationId(conversationId);
-      
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          scrollToBottomImmediate();
-        }, 50);
-      });
-    } else {
-      console.log('Conversation not found:', conversationId);
-    }
-  };
+    setConversations(prev => prev.map(conv =>
+      conv.id === conversationId
+        ? { ...conv, updatedAt: new Date() }
+        : conv
+    ));
+    
+    setMessages(conversation.messages);
+    setCurrentConversationId(conversationId);
+    
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        scrollToBottomImmediate();
+      }, 50);
+    });
+  } else {
+    console.log('❌ Conversation not found anywhere:', conversationId);
+    alert('Could not load this conversation. It may have been deleted.');
+  }
+};
 
   const renameConversation = (conversationId: string, newTitle: string) => {
     setConversations(prev => prev.map(conv =>
