@@ -204,6 +204,7 @@ const loadConversation = (conversationId: string) => {
   console.log('🔵 Current conversations count:', conversations.length);
   console.log('🔵 Current conversations IDs:', conversations.map(c => c.id));
   
+  // Save current conversation first if any
   if (messages.length > 0 && currentConversationId) {
     saveCurrentConversation();
   }
@@ -218,6 +219,7 @@ const loadConversation = (conversationId: string) => {
     if (savedConversations) {
       try {
         const parsed = JSON.parse(savedConversations);
+        // Parse dates back to Date objects
         const withDates = parsed.map((conv: any) => ({
           ...conv,
           createdAt: new Date(conv.createdAt),
@@ -229,7 +231,7 @@ const loadConversation = (conversationId: string) => {
         }));
         // Update the conversations state
         setConversations(withDates);
-        // Now find the conversation in the loaded data
+        // Find the conversation in the loaded data
         conversation = withDates.find(c => c.id === conversationId);
         console.log('🔵 Found in localStorage:', conversation ? 'Yes' : 'No');
       } catch (e) {
@@ -239,26 +241,64 @@ const loadConversation = (conversationId: string) => {
   }
   
   if (conversation) {
-    console.log('🔵 Messages in conversation:', conversation.messages.length);
-    console.log('🔵 First message:', conversation.messages[0]?.content?.substring(0, 50) || 'No messages');
+    console.log('🔵 Loading conversation:', conversationId);
+    console.log('🔵 Messages count:', conversation.messages.length);
+    console.log('🔵 First message preview:', conversation.messages[0]?.content?.substring(0, 50) || 'No messages');
     
-    setConversations(prev => prev.map(conv =>
-      conv.id === conversationId
-        ? { ...conv, updatedAt: new Date() }
-        : conv
-    ));
-    
-    setMessages(conversation.messages);
-    setCurrentConversationId(conversationId);
-    
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        scrollToBottomImmediate();
-      }, 50);
-    });
+    // Make sure we have messages to display
+    if (conversation.messages && conversation.messages.length > 0) {
+      // Update the updatedAt timestamp
+      setConversations(prev => prev.map(conv =>
+        conv.id === conversationId
+          ? { ...conv, updatedAt: new Date() }
+          : conv
+      ));
+      
+      // Set messages and current conversation ID
+      setMessages(conversation.messages);
+      setCurrentConversationId(conversationId);
+      
+      // Scroll to bottom after messages are rendered
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          scrollToBottomImmediate();
+        }, 100);
+      });
+    } else {
+      console.log('⚠️ Conversation has no messages');
+      setMessages([]);
+      setCurrentConversationId(conversationId);
+    }
   } else {
     console.log('❌ Conversation not found anywhere:', conversationId);
-    alert('Could not load this conversation. It may have been deleted.');
+    // Try to reload conversations from localStorage
+    if (userId) {
+      const saved = localStorage.getItem(`baptistry_conversations_${userId}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          const withDates = parsed.map((conv: any) => ({
+            ...conv,
+            createdAt: new Date(conv.createdAt),
+            updatedAt: new Date(conv.updatedAt),
+            messages: conv.messages.map((msg: any) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp),
+            })),
+          }));
+          setConversations(withDates);
+          // Try again to find the conversation
+          const found = withDates.find(c => c.id === conversationId);
+          if (found) {
+            setMessages(found.messages);
+            setCurrentConversationId(conversationId);
+            console.log('✅ Found conversation after reload');
+          }
+        } catch (e) {
+          console.error('Failed to reload conversations', e);
+        }
+      }
+    }
   }
 };
 
