@@ -11,7 +11,7 @@ export default function MaintenanceMode() {
       try {
         const response = await fetch('/api/maintenance');
         const data = await response.json();
-        setIsMaintenance(data.isMaintenance);
+        setIsMaintenance(data.isMaintenance === true);
       } catch (error) {
         console.error('Maintenance check failed:', error);
         setIsMaintenance(false);
