@@ -4,23 +4,29 @@ import { useState, useEffect } from 'react';
 
 export default function MaintenanceMode() {
   const [isMaintenance, setIsMaintenance] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if maintenance mode is enabled via environment variable
     const checkMaintenance = async () => {
       try {
         const response = await fetch('/api/maintenance');
         const data = await response.json();
         setIsMaintenance(data.isMaintenance);
       } catch (error) {
-        // If API fails, assume no maintenance
+        console.error('Maintenance check failed:', error);
         setIsMaintenance(false);
+      } finally {
+        setLoading(false);
       }
     };
 
     checkMaintenance();
   }, []);
 
+  // Don't show anything while loading
+  if (loading) return null;
+
+  // If not in maintenance mode, don't show anything
   if (!isMaintenance) return null;
 
   return (
