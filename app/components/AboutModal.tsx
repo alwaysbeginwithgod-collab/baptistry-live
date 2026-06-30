@@ -185,7 +185,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
 
             {/* Invitation */}
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-8 text-center text-white shadow-xl">
-              <h3 className="text-2xl font-bold mb-3">Looking for the best Bible study tool?</h3>
+              <h3 className="text-2xl font-bold mb-3">Looking for a FREE and realiable Bible study tool?</h3>
               <p className="text-xl mb-2"><strong>BAPTISTRY is created for you.</strong></p>
               <p className="text-blue-100 mb-6 max-w-md mx-auto">Use it freely. Share it freely. Grow in grace and in the knowledge of our Lord Jesus Christ.</p>
               <button onClick={onClose} className="px-6 py-2.5 bg-white text-blue-600 rounded-full font-semibold hover:bg-gray-100 transition-all shadow-lg transform hover:scale-105">Start Studying Now →</button>
