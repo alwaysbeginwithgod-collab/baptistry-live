@@ -9,6 +9,7 @@ interface BookDetailModalProps {
     series?: string;
     cover: string;
     flipbookLink: string;
+    amazonLink?: string; // ← NEW
     description?: string;
     tagline?: string;
     author?: string;
@@ -83,13 +84,26 @@ export default function BookDetailModal({ isOpen, onClose, book }: BookDetailMod
                 </p>
               )}
               
-              <div className="pt-4 flex gap-4">
+              <div className="pt-4 flex flex-wrap gap-4">
                 <button
                   onClick={handleFlipbook}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   📖 Preview Book
                 </button>
+                
+                {/* ✅ NEW: Amazon Purchase Link */}
+                {book.amazonLink && (
+                  <a
+                    href={book.amazonLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                  >
+                    <span>📚</span> Buy on Amazon
+                  </a>
+                )}
+                
                 <button
                   onClick={onClose}
                   className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
