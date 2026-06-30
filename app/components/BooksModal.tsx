@@ -16,7 +16,7 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
   if (!isOpen) return null;
 
   // ============================================
-  // REPLACE THESE WITH YOUR ACTUAL DATA
+  // BOOK DATA
   // ============================================
 
   const anchoredSeries = [
@@ -26,7 +26,7 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
       cover: "/books/anchored-1-identity.jpg", 
       flipbookLink: "https://online.fliphtml5.com/xmsuz/ihaa/",
       tagline: "Know who you are in Christ, and never question your worth again.",
-      description: "A 30-day devotional journey to help you discover your true identity in Christ. Each day brings you closer to understanding who God created you to be."
+      description: "A 30-day devotional journey to help you discover your true identity in Christ."
     },
     { 
       number: 2, 
@@ -100,7 +100,7 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
       title: "Ignited By Faith", 
       cover: "/books/ignited-4-faith.jpg", 
       flipbookLink: "#",
-      tagline: "Walk boldy with God, and never doubt His promises again..",
+      tagline: "Walk by faith, not by sight, and never shrink back again.",
       description: "Cultivate bold, active faith that moves mountains and pleases God."
     },
     { 
@@ -150,14 +150,6 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
       window.open(flipbookLink, '_blank');
     } else {
       alert(`"${bookTitle}" preview is coming soon! Stay tuned.`);
-    }
-  };
-
-  const getSeriesName = (series: string) => {
-    switch(series) {
-      case 'anchored': return 'The Anchored Series';
-      case 'ignited': return 'The Ignited Series';
-      default: return '';
     }
   };
 
@@ -268,25 +260,28 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
               </div>
             </div>
 
-{/* Purchase Options Footer */}
-<div className="mt-8 p-5 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
-  <p className="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">
-    📚 Grab your copy here:
-  </p>
-  <div className="flex flex-wrap gap-4 justify-center">
-    <a href="https://www.amazon.com/author/dennislastimoso" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Amazon</a>
-    <span className="text-gray-400">•</span>
-    <span 
-      onClick={() => setShowEmailModal(true)}
-      className="link-unified"
-    >
-      Email us
-    </span>
-  </div>
-  <p className="text-xs text-gray-400 mt-3 italic">
-    Thank you for supporting BAPTISTRY ministry.
-  </p>
-</div>
+            {/* Purchase Options Footer */}
+            <div className="mt-8 p-5 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+              <p className="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">
+                📚 Grab your copy here:
+              </p>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <a href="https://www.amazon.com/author/dennislastimoso" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Amazon</a>
+                <span className="text-gray-400">•</span>
+                <span 
+                  onClick={() => setShowEmailModal(true)}
+                  className="link-unified"
+                >
+                  Email us
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mt-3 italic">
+                Thank you for supporting BAPTISTRY ministry.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Book Detail Modal */}
       <BookDetailModal 
