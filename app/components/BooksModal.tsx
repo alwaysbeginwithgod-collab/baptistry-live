@@ -138,7 +138,7 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
       title: "FireProof Christian", 
       cover: "/books/standalone-fireproof.jpg", 
       flipbookLink: "https://online.fliphtml5.com/xmsuz/pmky/",
-      amazonLink: "https://www.amazon.com/dp/YOUR_AMAZON_LINK",
+      amazonLink: "https://www.amazon.com/dp/6210645585",
       tagline: "Building a faith that endures every trial.",
       description: "A powerful guide to developing a resilient, unshakeable faith that withstands life's fiercest storms."
     },
@@ -199,6 +199,7 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
                         ...book,
                         series: "The Anchored Series",
                         author: "Dennis Lastimoso"
+			amazonLink: book.amazonLink // ✅ Add this
                       })}
                     />
                     <p className="text-xs font-medium text-gray-800 dark:text-white">Book {book.number}</p>
@@ -230,6 +231,7 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
                         ...book,
                         series: "The Ignited Series",
                         author: "Dennis Lastimoso"
+			amazonLink: book.amazonLink // ✅ Add this
                       })}
                     />
                     <p className="text-xs font-medium text-gray-800 dark:text-white">Book {book.number}</p>
@@ -261,6 +263,7 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
                         ...book,
                         series: "Standalone",
                         author: "Dennis Lastimoso"
+			amazonLink: book.amazonLink // ✅ Add this
                       })}
                     />
                     <p className="text-xs font-medium text-gray-800 dark:text-white line-clamp-2 mb-2">{book.title}</p>

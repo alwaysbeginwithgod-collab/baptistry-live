@@ -9,7 +9,7 @@ interface BookDetailModalProps {
     series?: string;
     cover: string;
     flipbookLink: string;
-    amazonLink?: string; // ← NEW
+    amazonLink?: string;
     description?: string;
     tagline?: string;
     author?: string;
@@ -23,7 +23,15 @@ export default function BookDetailModal({ isOpen, onClose, book }: BookDetailMod
     if (book.flipbookLink && book.flipbookLink !== "#") {
       window.open(book.flipbookLink, '_blank');
     } else {
-      alert('Preview coming soon!');
+      alert(`"${book.title}" preview is coming soon! Stay tuned.`);
+    }
+  };
+
+  const handleAmazonLink = () => {
+    if (book.amazonLink && book.amazonLink !== "https://www.amazon.com/dp/YOUR_AMAZON_LINK") {
+      window.open(book.amazonLink, '_blank');
+    } else {
+      alert(`"${book.title}" Amazon link is coming soon! Stay tuned.`);
     }
   };
 
@@ -92,17 +100,13 @@ export default function BookDetailModal({ isOpen, onClose, book }: BookDetailMod
                   📖 Preview Book
                 </button>
                 
-                {/* ✅ NEW: Amazon Purchase Link */}
-                {book.amazonLink && (
-                  <a
-                    href={book.amazonLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors flex items-center gap-2"
-                  >
-                    <span>📚</span> Buy on Amazon
-                  </a>
-                )}
+                {/* Amazon Purchase Link */}
+                <button
+                  onClick={handleAmazonLink}
+                  className="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <span>📚</span> Buy on Amazon
+                </button>
                 
                 <button
                   onClick={onClose}
