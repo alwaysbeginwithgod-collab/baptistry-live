@@ -110,7 +110,7 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
       cover: "/books/ignited-4-faith.jpg", 
       flipbookLink: "#",
       amazonLink: "https://www.amazon.com/dp/6210660819",
-      tagline: "Walk boldy with God, and never doubt His promises again.",
+      tagline: "Walk boldly with God, and never doubt His promises again.",
       description: "Cultivate bold, active faith that moves mountains and pleases God."
     },
     { 
@@ -198,8 +198,8 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
                       onClick={() => setSelectedBook({
                         ...book,
                         series: "The Anchored Series",
-                        author: "Dennis Lastimoso"
-			amazonLink: book.amazonLink // ✅ Add this
+                        author: "Dennis Lastimoso",
+                        amazonLink: book.amazonLink
                       })}
                     />
                     <p className="text-xs font-medium text-gray-800 dark:text-white">Book {book.number}</p>
@@ -230,8 +230,8 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
                       onClick={() => setSelectedBook({
                         ...book,
                         series: "The Ignited Series",
-                        author: "Dennis Lastimoso"
-			amazonLink: book.amazonLink // ✅ Add this
+                        author: "Dennis Lastimoso",
+                        amazonLink: book.amazonLink
                       })}
                     />
                     <p className="text-xs font-medium text-gray-800 dark:text-white">Book {book.number}</p>
@@ -262,8 +262,8 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
                       onClick={() => setSelectedBook({
                         ...book,
                         series: "Standalone",
-                        author: "Dennis Lastimoso"
-			amazonLink: book.amazonLink // ✅ Add this
+                        author: "Dennis Lastimoso",
+                        amazonLink: book.amazonLink
                       })}
                     />
                     <p className="text-xs font-medium text-gray-800 dark:text-white line-clamp-2 mb-2">{book.title}</p>
