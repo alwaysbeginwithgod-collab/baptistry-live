@@ -100,7 +100,7 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
       title: "Ignited By Faith", 
       cover: "/books/ignited-4-faith.jpg", 
       flipbookLink: "#",
-      tagline: "Walk by faith, not by sight, and never shrink back again.",
+      tagline: "Walk boldy with God, and never doubt His promises again..",
       description: "Cultivate bold, active faith that moves mountains and pleases God."
     },
     { 
@@ -268,30 +268,25 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
               </div>
             </div>
 
-            {/* Purchase Options Footer */}
-            <div className="mt-8 p-5 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
-              <p className="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">
-                📚 Grab your copy here:
-              </p>
-              <div className="flex flex-wrap gap-4 justify-center">
-                <a href="https://www.amazon.com/author/dennislastimoso" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Amazon</a>
-                <span className="text-gray-400">•</span>
-                <a href="https://payhip.com/AlwaysBeginWithGod" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Payhip</a>
-                <span className="text-gray-400">•</span>
-                <button 
-                  onClick={() => setShowEmailModal(true)}
-                  className="link-unified"
-                >
-                  Email us
-                </button>
-              </div>
-              <p className="text-xs text-gray-400 mt-3 italic">
-                Thank you for supporting BAPTISTRY ministry.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+{/* Purchase Options Footer */}
+<div className="mt-8 p-5 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+  <p className="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">
+    📚 Grab your copy here:
+  </p>
+  <div className="flex flex-wrap gap-4 justify-center">
+    <a href="https://www.amazon.com/author/dennislastimoso" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Amazon</a>
+    <span className="text-gray-400">•</span>
+    <span 
+      onClick={() => setShowEmailModal(true)}
+      className="link-unified"
+    >
+      Email us
+    </span>
+  </div>
+  <p className="text-xs text-gray-400 mt-3 italic">
+    Thank you for supporting BAPTISTRY ministry.
+  </p>
+</div>
 
       {/* Book Detail Modal */}
       <BookDetailModal 
