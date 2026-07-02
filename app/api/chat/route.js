@@ -11,7 +11,6 @@ async function getWebsterDefinition(word) {
     const data = await response.json();
     
     if (data.definition) {
-      // Clean format without redundant header
       return `${data.definition}\n\n— Webster's Dictionary 1828`;
     }
     return null;
@@ -22,9 +21,16 @@ async function getWebsterDefinition(word) {
 }
 
 // ============================================================
+// HELPERS: Reduce history size for faster processing
+// ============================================================
+function getRecentHistory(history, limit = 5) {
+  // Only send the last `limit` messages to reduce API load
+  return history.slice(-limit);
+}
+
+// ============================================================
 // DOCTRINAL DEFENSE LIBRARY (FALLBACK ONLY)
 // ============================================================
-
 const doctrinalLibrary = {
   salvation: {
     keywords: ['salvation', 'saved', 'save', 'born again', 'justified', 'redemption', 'forgiven', 'grace', 'faith'],
@@ -219,72 +225,94 @@ export async function POST(request) {
       );
     }
 
-// ============================================================
-// STEP 1: ALWAYS try Dify Knowledge Base FIRST
-// ============================================================
-console.log('STEP 1: Trying Dify Knowledge Base for:', message);
-
-let difyResponse = null;
-let difyError = null;
-let rawDifyData = null;
-
-try {
-  const response = await fetch(DIFY_API_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${DIFY_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      inputs: {},
-      query: message,
-      response_mode: 'blocking',
-      user: 'baptistry_user',
-    }),
-  });
-
-  const data = await response.json();
-  rawDifyData = data;
-  console.log('RAW DIFY RESPONSE:', JSON.stringify(data, null, 2));
-  
-  if (response.ok && data.answer) {
-    // Preserve the EXACT response without any modification
-    difyResponse = data.answer;
-    console.log('Dify answer length:', difyResponse.length);
-    console.log('Dify answer preview:', difyResponse.substring(0, 200));
-  } else {
-    difyError = data.message || 'No answer from Dify';
-    console.log('Dify returned no answer:', difyError);
-  }
-} catch (error) {
-  difyError = error.message;
-  console.error('Dify API error:', difyError);
-}
-
     // ============================================================
-    // STEP 2: If Dify has a substantive answer, USE IT
+    // STEP 1: Call Dify with STREAMING mode and reduced history
     // ============================================================
-    // Check if Dify returned a real answer (not just "I don't know" or error)
-    const hasSubstantiveAnswer = difyResponse && 
-                                 difyResponse.length > 50 && 
-                                 !difyResponse.includes('I apologize') &&
-                                 !difyResponse.includes('unable to respond');
+    console.log('STEP 1: Trying Dify Knowledge Base for:', message);
 
-    if (hasSubstantiveAnswer) {
-      console.log('STEP 2: Using Dify Knowledge Base response');
-      return NextResponse.json({ response: difyResponse, source: 'dify-knowledge-base' });
+    // Only send last 5 messages for faster response
+    const recentHistory = getRecentHistory(history, 5);
+
+    try {
+      const response = await fetch(DIFY_API_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${DIFY_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inputs: {},
+          query: message,
+          response_mode: 'streaming',  // ← Streaming for faster perceived speed
+          user: 'baptistry_user',
+          conversation_history: recentHistory.map(msg => ({
+            role: msg.role === 'user' ? 'user' : 'assistant',
+            content: msg.content
+          })),
+        }),
+      });
+
+      // Handle streaming response
+      if (!response.ok) {
+        console.log('Dify API error:', response.status);
+        return NextResponse.json({
+          response: 'I apologize, but I encountered an error. Please try again later.'
+        });
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.substring(6));
+              if (data.event === 'message' && data.answer) {
+                fullResponse += data.answer;
+              }
+              // Handle end of stream
+              if (data.event === 'message_end') {
+                break;
+              }
+            } catch (e) {
+              // Ignore parse errors
+            }
+          }
+        }
+      }
+      
+      if (fullResponse && fullResponse.length > 50) {
+        console.log('✅ Dify streaming response received, length:', fullResponse.length);
+        return NextResponse.json({ 
+          response: fullResponse, 
+          source: 'dify-knowledge-base' 
+        });
+      } else {
+        console.log('⚠️ No substantive response from Dify, falling back to doctrinal library');
+        // Fall through to doctrinal library
+      }
+    } catch (error) {
+      console.error('Dify API error:', error);
+      // Fall through to doctrinal library
     }
 
     // ============================================================
-    // STEP 3: Dify had no answer - use Doctrinal Library for specific topics
+    // STEP 2: Fallback to Doctrinal Library
     // ============================================================
-    console.log('STEP 3: Dify had no answer, checking doctrinal library for:', message);
+    console.log('STEP 2: Using doctrinal library fallback for:', message);
 
-    // Special case: Statement of Faith - return Dify's fallback
+    // Special case: Statement of Faith
     if (isAskingForStatementOfFaith(message)) {
-      console.log('Statement of Faith requested - returning Dify fallback');
       return NextResponse.json({ 
-        response: difyResponse || "Here is the Short Statement of Faith...", 
+        response: "Here is the Short Statement of Faith...", 
         source: 'dify-fallback' 
       });
     }
@@ -302,11 +330,10 @@ try {
     }
 
     // ============================================================
-    // STEP 4: Nothing worked - return Dify's original response (even if empty)
+    // STEP 3: Nothing worked
     // ============================================================
-    console.log('STEP 4: No fallback found, returning Dify response');
     return NextResponse.json({ 
-      response: difyResponse || "I could not find an answer in my knowledge base. Please try asking a different question or contact support for assistance.",
+      response: "I could not find an answer in my knowledge base. Please try asking a different question or contact support for assistance.",
       source: 'dify-only'
     });
 
