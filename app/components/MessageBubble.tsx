@@ -41,27 +41,17 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   };
 
   const handleEditClick = () => {
-    console.log('🔵 EDIT ICON CLICKED - setting isEditing to true');
     setIsEditing(true);
   };
 
   const handleSaveClick = () => {
-    console.log('💾 SAVE & RESEND BUTTON CLICKED');
-    console.log('📝 editedText:', editedText);
-    console.log('🔗 onEdit exists?', !!onEdit);
-    
     if (onEdit) {
-      console.log('🚀 Calling onEdit NOW with:', message.id, editedText);
       onEdit(message.id, editedText);
-    } else {
-      console.log('❌ onEdit is NULL or UNDEFINED!');
-      alert('onEdit is not available! Check MainContent.');
     }
     setIsEditing(false);
   };
 
   const handleCancelClick = () => {
-    console.log('🔵 Cancel clicked');
     setIsEditing(false);
     setEditedText(message.content);
   };
@@ -97,24 +87,79 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   };
 
   // ============================================================
-  // PROCESS SCRIPTURE REFERENCES IN MARKDOWN
+  // RENDER CONTENT WITH SCRIPTURE LINKS
+  // This function splits the content by scripture references
+  // and returns an array of text and clickable buttons
   // ============================================================
-  // This function wraps scripture references with special markers
-  // so they can be detected and rendered as buttons
-  const processScriptureReferences = (text: string) => {
+  const renderContentWithScriptureLinks = (text: string) => {
+    // Match scripture references like:
+    // Acts 2:38, John 3:16, 1 Corinthians 13:4-7, etc.
     const scripturePattern = /\b(\d?\s*[A-Za-z]+\s+\d+:\d+(-\d+)?)\b/g;
-    let processed = text;
-    
-    // Replace each scripture reference with a custom marker
-    // We'll use a unique pattern that won't conflict with Markdown
-    processed = processed.replace(scripturePattern, (match) => {
-      return `[[SCRIPTURE:${match}]]`;
-    });
-    
-    return processed;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = scripturePattern.exec(text)) !== null) {
+      // Add text before the match
+      if (match.index > lastIndex) {
+        parts.push({
+          type: 'text',
+          content: text.substring(lastIndex, match.index)
+        });
+      }
+      // Add the scripture reference as a clickable button
+      parts.push({
+        type: 'scripture',
+        content: match[0]
+      });
+      lastIndex = scripturePattern.lastIndex;
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push({
+        type: 'text',
+        content: text.substring(lastIndex)
+      });
+    }
+
+    // If no scripture references were found, return the original text
+    if (parts.length === 0) {
+      return <>{text}</>;
+    }
+
+    // Render the parts
+    return (
+      <>
+        {parts.map((part, index) => {
+          if (part.type === 'text') {
+            // Render text content - we need to process it as Markdown
+            // But since we're inside a ReactMarkdown component, we'll let it handle the text
+            return <span key={`text-${index}`}>{part.content}</span>;
+          } else {
+            // Render scripture reference as a clickable button
+            return (
+              <button
+                key={`scripture-${index}`}
+                onClick={() => handleScriptureClick(part.content)}
+                className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 font-medium cursor-pointer transition-colors"
+                title={`Click to look up ${part.content} in the Bible`}
+              >
+                {part.content}
+              </button>
+            );
+          }
+        })}
+      </>
+    );
   };
 
-  const processedContent = processScriptureReferences(cleanedContent);
+  // ============================================================
+  // DECIDE WHICH RENDER METHOD TO USE
+  // ============================================================
+  // If the content contains scripture references, use the custom renderer
+  // Otherwise, use standard ReactMarkdown
+  const hasScriptureReferences = /\b(\d?\s*[A-Za-z]+\s+\d+:\d+(-\d+)?)\b/.test(cleanedContent);
 
   return (
     <div id={message.id} className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -172,79 +217,54 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
               ) : (
                 <>
                   <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        // Custom component to handle scripture markers
-                        text: ({ children }) => {
-                          const text = children as string;
-                          // Check if this text contains scripture markers
-                          if (text.includes('[[SCRIPTURE:')) {
-                            // Split by markers
-                            const parts = text.split(/\[\[SCRIPTURE:([^\]]+)\]\]/);
-                            return (
-                              <>
-                                {parts.map((part, index) => {
-                                  // Even indices are plain text, odd indices are scripture references
-                                  if (index % 2 === 0) {
-                                    return <span key={index}>{part}</span>;
-                                  } else {
-                                    // This is a scripture reference
-                                    return (
-                                      <button
-                                        key={index}
-                                        onClick={() => handleScriptureClick(part)}
-                                        className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 font-medium cursor-pointer transition-colors"
-                                        title={`Click to look up ${part} in the Bible`}
-                                      >
-                                        {part}
-                                      </button>
-                                    );
-                                  }
-                                })}
-                              </>
-                            );
-                          }
-                          return <>{text}</>;
-                        },
-                        // Preserve all other Markdown components
-                        table: ({node, ...props}) => (
-                          <div className="overflow-x-auto my-4">
-                            <table className="w-full border-collapse border border-gray-300 dark:border-gray-700 text-sm" {...props} />
-                          </div>
-                        ),
-                        thead: ({node, ...props}) => (
-                          <thead className="bg-gray-100 dark:bg-gray-700" {...props} />
-                        ),
-                        tbody: ({node, ...props}) => (
-                          <tbody className="divide-y divide-gray-200 dark:divide-gray-700" {...props} />
-                        ),
-                        th: ({node, ...props}) => (
-                          <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-900 dark:text-white" {...props} />
-                        ),
-                        td: ({node, ...props}) => (
-                          <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300" {...props} />
-                        ),
-                        tr: ({node, ...props}) => (
-                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" {...props} />
-                        ),
-                        h1: ({node, ...props}) => <h1 className="text-xl font-bold mt-4 mb-2" {...props} />,
-                        h2: ({node, ...props}) => <h2 className="text-lg font-semibold mt-3 mb-2" {...props} />,
-                        h3: ({node, ...props}) => <h3 className="text-md font-semibold mt-2 mb-1" {...props} />,
-                        h4: ({node, ...props}) => <h4 className="text-sm font-semibold mt-2 mb-1" {...props} />,
-                        p: ({node, ...props}) => <p className="mb-3 leading-relaxed" {...props} />,
-                        ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
-                        ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
-                        li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                        strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
-                        em: ({node, ...props}) => <em className="italic" {...props} />,
-                        hr: ({node, ...props}) => <hr className="my-4 border-gray-300 dark:border-gray-700" {...props} />,
-                        blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-400 pl-4 italic my-3" {...props} />,
-                        a: ({node, ...props}) => <a className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
-                      }}
-                    >
-                      {processedContent}
-                    </ReactMarkdown>
+                    {hasScriptureReferences ? (
+                      // Custom rendering with clickable scripture references
+                      <div className="whitespace-pre-wrap leading-relaxed">
+                        {renderContentWithScriptureLinks(cleanedContent)}
+                      </div>
+                    ) : (
+                      // Standard Markdown rendering
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          table: ({node, ...props}) => (
+                            <div className="overflow-x-auto my-4">
+                              <table className="w-full border-collapse border border-gray-300 dark:border-gray-700 text-sm" {...props} />
+                            </div>
+                          ),
+                          thead: ({node, ...props}) => (
+                            <thead className="bg-gray-100 dark:bg-gray-700" {...props} />
+                          ),
+                          tbody: ({node, ...props}) => (
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700" {...props} />
+                          ),
+                          th: ({node, ...props}) => (
+                            <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-900 dark:text-white" {...props} />
+                          ),
+                          td: ({node, ...props}) => (
+                            <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300" {...props} />
+                          ),
+                          tr: ({node, ...props}) => (
+                            <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" {...props} />
+                          ),
+                          h1: ({node, ...props}) => <h1 className="text-xl font-bold mt-4 mb-2" {...props} />,
+                          h2: ({node, ...props}) => <h2 className="text-lg font-semibold mt-3 mb-2" {...props} />,
+                          h3: ({node, ...props}) => <h3 className="text-md font-semibold mt-2 mb-1" {...props} />,
+                          h4: ({node, ...props}) => <h4 className="text-sm font-semibold mt-2 mb-1" {...props} />,
+                          p: ({node, ...props}) => <p className="mb-3 leading-relaxed" {...props} />,
+                          ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
+                          ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
+                          li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                          strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                          em: ({node, ...props}) => <em className="italic" {...props} />,
+                          hr: ({node, ...props}) => <hr className="my-4 border-gray-300 dark:border-gray-700" {...props} />,
+                          blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-400 pl-4 italic my-3" {...props} />,
+                          a: ({node, ...props}) => <a className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                        }}
+                      >
+                        {cleanedContent}
+                      </ReactMarkdown>
+                    )}
                   </div>
 
                   <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
