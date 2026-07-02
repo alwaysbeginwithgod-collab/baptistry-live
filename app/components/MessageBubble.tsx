@@ -85,23 +85,46 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const isUnhelpfulSelected = feedbackStatus === 'unhelpful';
 
   // ============================================================
-  // SCRIPTURE REFERENCE HANDLER
+  // AUTO-CONVERT SCRIPTURE REFERENCES TO CLICKABLE BUTTONS
   // ============================================================
-  const handleScriptureClick = (reference: string) => {
-    console.log('📖 Scripture clicked:', reference);
-    
-    // Dispatch custom event for RightSidebar to listen to
-    const event = new CustomEvent('bibleLookup', { 
-      detail: { reference: reference } 
-    });
-    window.dispatchEvent(event);
-  };
+  const renderContentWithScriptureLinks = (text: string) => {
+    // Match scripture references like:
+    // Acts 2:38, John 3:16, 1 Corinthians 13:4-7, etc.
+    const scripturePattern = /\b(\d?\s*[A-Za-z]+\s+\d+:\d+(-\d+)?)\b/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
 
-  // Check if text is a scripture reference
-  const isScriptureReference = (text: string): boolean => {
-    // Matches patterns like "Acts 2:38", "John 3:16", "1 Corinthians 13:4-7"
-    const scripturePattern = /^(\d?\s*[A-Za-z]+\s+\d+:\d+(-\d+)?)$/;
-    return scripturePattern.test(text.trim());
+    while ((match = scripturePattern.exec(text)) !== null) {
+      // Add text before the match
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index));
+      }
+      // Add the clickable scripture reference
+      parts.push(
+        <button
+          key={`scripture-${match.index}`}
+          onClick={() => {
+            const event = new CustomEvent('bibleLookup', {
+              detail: { reference: match[0] }
+            });
+            window.dispatchEvent(event);
+          }}
+          className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 font-medium cursor-pointer transition-colors"
+          title={`Click to look up ${match[0]} in the Bible`}
+        >
+          {match[0]}
+        </button>
+      );
+      lastIndex = scripturePattern.lastIndex;
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+
+    return parts;
   };
 
   return (
@@ -160,34 +183,9 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
               ) : (
                 <>
                   <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <ReactMarkdown
-                      components={{
-                        // Custom link component to handle scripture references
-                        a: ({ href, children }) => {
-                          const text = children as string;
-                          // Check if it's a scripture reference
-                          if (isScriptureReference(text)) {
-                            return (
-                              <button
-                                onClick={() => handleScriptureClick(text)}
-                                className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 font-medium cursor-pointer transition-colors"
-                                title={`Click to look up ${text} in the Bible`}
-                              >
-                                {text}
-                              </button>
-                            );
-                          }
-                          // Regular link
-                          return (
-                            <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                              {children}
-                            </a>
-                          );
-                        },
-                      }}
-                    >
-                      {cleanedContent}
-                    </ReactMarkdown>
+                    <div className="whitespace-pre-wrap leading-relaxed">
+                      {renderContentWithScriptureLinks(cleanedContent)}
+                    </div>
                   </div>
 
                   <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
