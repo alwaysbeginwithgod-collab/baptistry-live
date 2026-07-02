@@ -13,8 +13,13 @@ export default function RightSidebar() {
   const [dictionaryResult, setDictionaryResult] = useState('');
   const toolPanelRef = useRef<HTMLDivElement>(null);
 
+  // ============================================================
+  // BIBLE SEARCH FUNCTION
+  // ============================================================
   const searchBible = async () => {
     if (!bibleQuery.trim()) return;
+    console.log('🔍 searchBible called with:', bibleQuery);
+    
     setIsLoading(true);
     setBibleResult('Searching...');
 
@@ -48,6 +53,9 @@ export default function RightSidebar() {
     setIsLoading(false);
   };
 
+  // ============================================================
+  // DICTIONARY SEARCH FUNCTION
+  // ============================================================
   const searchDictionary = async () => {
     if (!dictionaryWord.trim()) return;
     setIsLoading(true);
@@ -58,11 +66,8 @@ export default function RightSidebar() {
       const data = await response.json();
       
       if (response.ok && data.definition) {
-        // Format the definition nicely
         let displayText = data.definition;
-        // Ensure numbered items are on new lines
         displayText = displayText.replace(/(\d+\.)/g, '\n$1');
-        // Clean up
         displayText = displayText.replace(/\n\s*\n/g, '\n').trim();
         setDictionaryResult(`${displayText}\n\n— ${data.source}`);
       } else {
@@ -75,6 +80,9 @@ export default function RightSidebar() {
     setIsLoading(false);
   };
 
+  // ============================================================
+  // CLOSE TOOL
+  // ============================================================
   const closeTool = () => {
     setActiveTool(null);
     setBibleResult('');
@@ -82,7 +90,9 @@ export default function RightSidebar() {
     setDictionaryResult('');
   };
 
-  // Close tool when clicking outside
+  // ============================================================
+  // CLICK OUTSIDE HANDLER
+  // ============================================================
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (toolPanelRef.current && !toolPanelRef.current.contains(event.target as Node)) {
@@ -96,30 +106,43 @@ export default function RightSidebar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-// Listen for scripture reference clicks from MessageBubble
-useEffect(() => {
-  const handleBibleLookup = (event: CustomEvent) => {
-    const reference = event.detail.reference;
-    console.log('📖 RightSidebar received scripture:', reference);
-    
-    // Open Bible Lookup tab
-    setActiveTool('bible');
-    
-    // Set the query and trigger search
-    setBibleQuery(reference);
-    
-    // Small delay to ensure UI updates, then search
-    setTimeout(() => {
-      searchBible();
-    }, 100);
-  };
+  // ============================================================
+  // SCRIPTURE REFERENCE LISTENER
+  // ============================================================
+  useEffect(() => {
+    const handleBibleLookup = (event: CustomEvent) => {
+      const reference = event.detail.reference;
+      console.log('📖 RightSidebar received scripture:', reference);
+      
+      if (!reference) {
+        console.log('❌ No reference provided in event');
+        return;
+      }
+      
+      // Open Bible Lookup tab
+      setActiveTool('bible');
+      
+      // Set the query
+      setBibleQuery(reference);
+      
+      // Clear previous results
+      setBibleResult('');
+      
+      // Search after a small delay to ensure UI updates
+      setTimeout(() => {
+        console.log('🔍 Triggering search for:', reference);
+        searchBible();
+      }, 300);
+    };
 
-  window.addEventListener('bibleLookup' as any, handleBibleLookup);
+    console.log('📖 RightSidebar: Adding bibleLookup event listener');
+    window.addEventListener('bibleLookup' as any, handleBibleLookup);
 
-  return () => {
-    window.removeEventListener('bibleLookup' as any, handleBibleLookup);
-  };
-}, [searchBible]);
+    return () => {
+      console.log('📖 RightSidebar: Removing bibleLookup event listener');
+      window.removeEventListener('bibleLookup' as any, handleBibleLookup);
+    };
+  }, []); // Empty dependency array - only runs once
 
   return (
     <>
