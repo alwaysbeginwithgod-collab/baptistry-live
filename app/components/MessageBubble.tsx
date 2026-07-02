@@ -39,9 +39,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
     onFeedback(message.id, newFeedback);
   };
 
-  // ============================================================
-  // SIMPLE EDIT FLOW - WITH ALERT FOR TESTING
-  // ============================================================
   const handleEditClick = () => {
     console.log('🔵 EDIT ICON CLICKED - setting isEditing to true');
     setIsEditing(true);
@@ -52,7 +49,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
     console.log('📝 editedText:', editedText);
     console.log('🔗 onEdit exists?', !!onEdit);
     
-    // ALWAYS try to call onEdit if it exists
     if (onEdit) {
       console.log('🚀 Calling onEdit NOW with:', message.id, editedText);
       onEdit(message.id, editedText);
@@ -88,6 +84,26 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const isHelpfulSelected = feedbackStatus === 'helpful';
   const isUnhelpfulSelected = feedbackStatus === 'unhelpful';
 
+  // ============================================================
+  // SCRIPTURE REFERENCE HANDLER
+  // ============================================================
+  const handleScriptureClick = (reference: string) => {
+    console.log('📖 Scripture clicked:', reference);
+    
+    // Dispatch custom event for RightSidebar to listen to
+    const event = new CustomEvent('bibleLookup', { 
+      detail: { reference: reference } 
+    });
+    window.dispatchEvent(event);
+  };
+
+  // Check if text is a scripture reference
+  const isScriptureReference = (text: string): boolean => {
+    // Matches patterns like "Acts 2:38", "John 3:16", "1 Corinthians 13:4-7"
+    const scripturePattern = /^(\d?\s*[A-Za-z]+\s+\d+:\d+(-\d+)?)$/;
+    return scripturePattern.test(text.trim());
+  };
+
   return (
     <div id={message.id} className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
       {!isUser && (
@@ -113,9 +129,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
           `}
         >
           {isUser && isEditing ? (
-            // ============================================================
-            // EDIT MODE - Textarea with Save & Cancel buttons
-            // ============================================================
             <div className="mt-2">
               <textarea
                 value={editedText}
@@ -147,7 +160,32 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
               ) : (
                 <>
                   <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <ReactMarkdown>
+                    <ReactMarkdown
+                      components={{
+                        // Custom link component to handle scripture references
+                        a: ({ href, children }) => {
+                          const text = children as string;
+                          // Check if it's a scripture reference
+                          if (isScriptureReference(text)) {
+                            return (
+                              <button
+                                onClick={() => handleScriptureClick(text)}
+                                className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 font-medium cursor-pointer transition-colors"
+                                title={`Click to look up ${text} in the Bible`}
+                              >
+                                {text}
+                              </button>
+                            );
+                          }
+                          // Regular link
+                          return (
+                            <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                              {children}
+                            </a>
+                          );
+                        },
+                      }}
+                    >
                       {cleanedContent}
                     </ReactMarkdown>
                   </div>

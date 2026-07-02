@@ -96,6 +96,31 @@ export default function RightSidebar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+// Listen for scripture reference clicks from MessageBubble
+useEffect(() => {
+  const handleBibleLookup = (event: CustomEvent) => {
+    const reference = event.detail.reference;
+    console.log('📖 RightSidebar received scripture:', reference);
+    
+    // Open Bible Lookup tab
+    setActiveTool('bible');
+    
+    // Set the query and trigger search
+    setBibleQuery(reference);
+    
+    // Small delay to ensure UI updates, then search
+    setTimeout(() => {
+      searchBible();
+    }, 100);
+  };
+
+  window.addEventListener('bibleLookup' as any, handleBibleLookup);
+
+  return () => {
+    window.removeEventListener('bibleLookup' as any, handleBibleLookup);
+  };
+}, [searchBible]);
+
   return (
     <>
       {/* Icon Bar - Fixed on right edge */}
