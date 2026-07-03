@@ -87,13 +87,23 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   };
 
   // ============================================================
-  // SCRIPTURE REFERENCE DETECTOR
+  // CONVERT SCRIPTURE REFERENCES TO CLICKABLE MARKDOWN LINKS
   // ============================================================
-  const isScriptureReference = (text: string): boolean => {
-    // Matches patterns like "Acts 2:38", "John 3:16", "1 Corinthians 13:4-7"
-    const scripturePattern = /^(\d?\s*[A-Za-z]+\s+\d+:\d+(-\d+)?)$/;
-    return scripturePattern.test(text.trim());
+  const convertScriptureToMarkdown = (text: string) => {
+    // Match scripture references like:
+    // Acts 2:38, John 3:16, 1 Corinthians 13:4-7, etc.
+    const scripturePattern = /\b(\d?\s*[A-Za-z]+\s+\d+:\d+(-\d+)?)\b/g;
+    
+    // Replace each scripture reference with a Markdown link
+    // The link will be rendered as a clickable button by our custom component
+    return text.replace(scripturePattern, (match) => {
+      // Use a special URL format that we'll detect in the custom component
+      return `[${match}](bible://${match.replace(/\s/g, '%20')})`;
+    });
   };
+
+  // Convert scripture references to Markdown links
+  const contentWithLinks = convertScriptureToMarkdown(cleanedContent);
 
   return (
     <div id={message.id} className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -154,18 +164,18 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
-                        // Custom link component to detect scripture references
+                        // Custom link component to detect bible:// links
                         a: ({ href, children }) => {
-                          const text = children as string;
-                          // Check if it's a scripture reference
-                          if (isScriptureReference(text)) {
+                          // Check if it's a bible:// link (scripture reference)
+                          if (href && href.startsWith('bible://')) {
+                            const reference = decodeURIComponent(href.replace('bible://', ''));
                             return (
                               <button
-                                onClick={() => handleScriptureClick(text)}
+                                onClick={() => handleScriptureClick(reference)}
                                 className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 font-medium cursor-pointer transition-colors"
-                                title={`Click to look up ${text} in the Bible`}
+                                title={`Click to look up ${reference} in the Bible`}
                               >
-                                {text}
+                                {children}
                               </button>
                             );
                           }
@@ -211,7 +221,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                         blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-400 pl-4 italic my-3" {...props} />,
                       }}
                     >
-                      {cleanedContent}
+                      {contentWithLinks}
                     </ReactMarkdown>
                   </div>
 
