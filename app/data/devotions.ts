@@ -2,7 +2,6 @@
 
 export interface Devotion {
   id: string;
-  date: string;
   title: string;
   tagline: string;
   scripture: string;
@@ -14,11 +13,10 @@ export interface Devotion {
 
 export const devotions: Devotion[] = [
   {
-    id: '2026-07-03',
-    date: 'July 3, 2026',
+    id: 'Devotion-1',
     title: 'Ask and Receive',
-    tagline: 'When every road is dark and you don\'t know the way, Ask God for wisdom—His light will guide the way.',
-    scripture: 'James 1:5',
+    tagline: '"When every road is dark and you don\'t know the way, \nAsk God for wisdom—His light will guide the way."',
+    scripture: 'James 1:5 "If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him"',
     content: `Life is full of crossroads. It often confronts us with decisions bigger than our understanding. We have all been there—staring at a decision that feels impossible. Should I stay or go? Speak or stay silent? Wait or move forward? Whether we are facing uncertainty, confusion, or a major decision, the question is not whether we need wisdom—but where we are seeking it.
     
 James wrote to believers facing trials and pressures. God's answer was not merely strength to endure, but wisdom to navigate. Notice the promise: God does not withhold wisdom from His children who sincerely ask.
@@ -33,8 +31,8 @@ Christ Himself is the fullness of wisdom. "In whom are hid all the treasures of 
 
 What decision has been weighing heavily on your heart? Where have you been relying more on your own understanding than God's direction? You don't need Christ merely to help you make better choices—you need Him because He is Wisdom itself. Ask God today. The One who never errs delights to guide His children.`,
     prayer: `Heavenly Father, thank You that You never leave us to navigate life alone. We are grateful that You generously give wisdom to those who ask. Forgive us for trusting our own understanding more than Your wisdom. Teach us to seek You first, submit to Your Word, and depend upon Christ in every decision. Give us wisdom to walk faithfully and courage to obey what You reveal. In Jesus' Name. Amen.`,
-    image: '/devotions/03.Jul.2026 -  Ignited By Promises.jpg',
-    facebookLink: 'https://www.facebook.com/share/p/18q948pjfL/'
+    image: '/devotions/Devotion-1.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
   },
   // Add more devotions here
 ];

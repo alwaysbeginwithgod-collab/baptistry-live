@@ -12,17 +12,16 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   const [todayDevotion, setTodayDevotion] = useState<Devotion | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      // Find today's devotion or get the latest one
-      const today = new Date().toISOString().split('T')[0];
-      const devotion = devotions.find(d => d.id === today);
+    if (isOpen && devotions.length > 0) {
+      // Calculate which devotion to show based on the day of the year
+      const now = new Date();
+      const start = new Date(now.getFullYear(), 0, 0);
+      const diff = now.getTime() - start.getTime();
+      const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
       
-      // If no devotion for today, get the latest one
-      if (devotion) {
-        setTodayDevotion(devotion);
-      } else if (devotions.length > 0) {
-        setTodayDevotion(devotions[0]);
-      }
+      // Use the day of the year to pick a devotion (loops if you have fewer devotions)
+      const index = (dayOfYear - 1) % devotions.length;
+      setTodayDevotion(devotions[index]);
     }
   }, [isOpen]);
 
