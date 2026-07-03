@@ -72,13 +72,13 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
 
           {/* Scripture */}
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6 border-l-4 border-blue-500">
-            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
               📖 {scripture}
             </p>
           </div>
 
           {/* Content */}
-          <div className="prose prose-sm dark:prose-invert max-w-none mb-6">
+          <div className="prose prose-base dark:prose-invert max-w-none mb-6">
             {content.split('\n\n').map((paragraph, index) => (
               <p key={index} className="mb-3 leading-relaxed text-gray-700 dark:text-gray-300">
                 {paragraph}
@@ -101,7 +101,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
             <p className="text-sm text-gray-600 dark:text-gray-400 italic">
               "A dose of God's Word a day, will keep you going all day."
             </p>
-            <p className="text-xs text-blue-500 dark:text-blue-400 mt-1">
+            <p className="text-lg text-blue-500 dark:text-blue-400 mt-1">
               — ALWAYS BEGIN WITH GOD —
             </p>
           </div>
@@ -115,7 +115,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline"
               >
-                <span>📘</span> View on Facebook
+                <span> More on facebook
               </a>
             </div>
           )}

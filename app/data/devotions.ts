@@ -15,7 +15,7 @@ export const devotions: Devotion[] = [
   {
     id: 'Devotion-1',
     title: 'Ask and Receive',
-    tagline: '"When every road is dark and you don\'t know the way, \nAsk God for wisdom—His light will guide the way."',
+    tagline: 'When every road is dark and you don\'t know the way, \nAsk God for wisdom—His light will guide the way.',
     scripture: 'James 1:5 "If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him"',
     content: `Life is full of crossroads. It often confronts us with decisions bigger than our understanding. We have all been there—staring at a decision that feels impossible. Should I stay or go? Speak or stay silent? Wait or move forward? Whether we are facing uncertainty, confusion, or a major decision, the question is not whether we need wisdom—but where we are seeking it.
     
