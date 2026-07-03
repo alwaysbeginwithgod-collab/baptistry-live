@@ -106,7 +106,7 @@ What are you consistently listening to that is shaping your faith today? You can
 
   {
     id: 'Devotion-5',
-    title: 'God Never FailsGod Never Fails',
+    title: 'God Never Fails',
     tagline: `✍️ "God does not change, nor speak in vain, What He has promised—He will sustain."`,
     scripture: '**Numbers 23:19** "God is not a man, that he should lie; neither the son of man, that he should repent: hath he said, and shall he not do it? or hath he spoken, and shall he not make it good?"',
     content: `We know what it is to be disappointed by someone who looked sincere yet proved unreliable. We all carry memories of promises made—and broken. Whether we admit it or not, disappointment has trained us to hesitate and trust cautiously. The question is not whether people have failed us; but whether we truly believe that God never fails.
