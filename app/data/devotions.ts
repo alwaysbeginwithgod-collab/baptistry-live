@@ -16,7 +16,7 @@ export const devotions: Devotion[] = [
     id: 'Devotion-1',
     title: 'Ask and Receive',
     tagline: `✍️ "When every road is dark and you don't know the way, Ask God for wisdom—His light will guide the way."`,
-    scripture: 'James 1:5 "If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him"',
+    scripture: '**James 1:5** "If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him"',
     content: `Life is full of crossroads. It often confronts us with decisions bigger than our understanding. We have all been there—staring at a decision that feels impossible. Should I stay or go? Speak or stay silent? Wait or move forward? Whether we are facing uncertainty, confusion, or a major decision, the question is not whether we need wisdom—but where we are seeking it.
     
 James wrote to believers facing trials and pressures. God's answer was not merely strength to endure, but wisdom to navigate. Notice the promise: God does not withhold wisdom from His children who sincerely ask.
@@ -39,7 +39,7 @@ What decision has been weighing heavily on your heart? Where have you been relyi
     id: 'Devotion-2',
     title: 'Believe God Now',
     tagline: `✍️ "Without Faith we cannot please God. Without God we cannot have Faith."`,
-    scripture: 'Hebrews 11:6 "But without faith it is impossible to please him: for he that cometh to God must believe that he is, and that he is a rewarder of them that diligently seek him."',
+    scripture: '**Hebrews 11:6** "But without faith it is impossible to please him: for he that cometh to God must believe that he is, and that he is a rewarder of them that diligently seek him."',
     content: `We fill our lives with religious activity—services attended, verses memorized, offerings given—yet quietly wonder why God feels distant. We perform without trusting, pray without believing, and serve while our hearts drift. God is not impressed by our busyness; He is moved by our belief. The question is not whether we are doing enough for God, but whether we actually believe He is who He says He is.
 
 Hebrews 11:6 declares, "But without faith it is impossible to please him…" In a world full of rituals and routines, God sets the standard—faith, not form, pleases Him. "Impossible" means none of our best efforts can substitute for Faith. And Scripture reminds us that without God, it is impossible to have faith at all, for Christ is the "Author and Finisher of our faith" (Hebrews 12:2).
@@ -62,7 +62,7 @@ What is the one place where you are hesitating to trust God today? You cannot pl
     id: 'Devotion-3',
     title: 'Walking Beyond Sight',
     tagline: `✍️ "We walk not by what our eyes can explain,But by trusting the God who forever remains."`,
-    scripture: '2 Corinthians 5:7 “For we walk by faith, not by sight.”',
+    scripture: '**2 Corinthians 5:7** “For we walk by faith, not by sight.”',
     content: 'Oftentimes, we are addicted to visibility. We check the weather before we step outside, read reviews before we order, and demand a roadmap before we move. Whether we are navigating a career shift, a strained relationship, or a season of silence, the question is not whether we can see the whole path but whether we trust God enough to walk when we cannot see.
 
 2 Corinthians 5:7 declares, “For we walk by faith, not by sight.” Paul writes to believers navigating pressure and uncertainty, reminding them that the Christian life is not governed by visible realities, but by unseen truths. Sight reacts to circumstances—faith responds to God. One is temporal, the other eternal.
