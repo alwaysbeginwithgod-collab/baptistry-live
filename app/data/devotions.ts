@@ -33,7 +33,7 @@ Christ Himself is the fullness of wisdom. "In whom are hid all the treasures of 
 
 What decision has been weighing heavily on your heart? Where have you been relying more on your own understanding than God's direction? You don't need Christ merely to help you make better choices—you need Him because He is Wisdom itself. Ask God today. The One who never errs delights to guide His children.`,
     prayer: `Heavenly Father, thank You that You never leave us to navigate life alone. We are grateful that You generously give wisdom to those who ask. Forgive us for trusting our own understanding more than Your wisdom. Teach us to seek You first, submit to Your Word, and depend upon Christ in every decision. Give us wisdom to walk faithfully and courage to obey what You reveal. In Jesus' Name. Amen.`,
-    image: '03.Jul.2026 -  Ignited By Promises.jpg',
+    image: '/devotions/03.Jul.2026 -  Ignited By Promises.jpg',
     facebookLink: 'https://www.facebook.com/share/p/18q948pjfL/'
   },
   // Add more devotions here
