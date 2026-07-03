@@ -67,7 +67,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
 
           {/* Tagline */}
           <p className="text-lg italic text-blue-600 dark:text-blue-400 mb-4 whitespace-pre-line">
-             {tagline}
+            {tagline}
           </p>
 
           {/* Scripture */}
@@ -115,7 +115,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline"
               >
-                <span> More on facebook
+                <span>More on Facebook</span>
               </a>
             </div>
           )}
