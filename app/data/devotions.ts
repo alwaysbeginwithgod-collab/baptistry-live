@@ -34,6 +34,8 @@ What decision has been weighing heavily on your heart? Where have you been relyi
     image: '/devotions/Devotion-1.jpg',
     facebookLink: 'https://www.facebook.com/BeginWithGod/'
   },
+
+  {
     id: 'Devotion-2',
     title: 'Believe God Now',
     tagline: `✍️ "Without Faith we cannot please God. Without God we cannot have Faith."`,
