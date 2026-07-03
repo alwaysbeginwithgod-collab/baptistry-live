@@ -57,5 +57,27 @@ What is the one place where you are hesitating to trust God today? You cannot pl
     image: '/devotions/Devotion-2.jpg',
     facebookLink: 'https://www.facebook.com/BeginWithGod/'
   },
+
+  {
+    id: 'Devotion-3',
+    title: 'Walking Beyond Sight',
+    tagline: `✍️ "We walk not by what our eyes can explain,But by trusting the God who forever remains."`,
+    scripture: 'Oftentimes, we are addicted to visibility. We check the weather before we step outside, read reviews before we order, and demand a roadmap before we move. Whether we are navigating a career shift, a strained relationship, or a season of silence, the question is not whether we can see the whole path but whether we trust God enough to walk when we cannot see.
+
+2 Corinthians 5:7 declares, “For we walk by faith, not by sight.” Paul writes to believers navigating pressure and uncertainty, reminding them that the Christian life is not governed by visible realities, but by unseen truths. Sight reacts to circumstances—faith responds to God. One is temporal, the other eternal.
+
+Walking by faith is like traveling through dense fog with only a lamp for the next step. We may not see the destination, but we trust the direction. Faith does not require a full map—it follows the Master. The path may be hidden, but the Guide is never uncertain.
+
+The Scriptures consistently call us to this walk: “The just shall live by faith” (Romans 1:17). “We look not at the things which are seen, but at the things which are not seen” (2 Corinthians 4:18). Faith is anchored in God’s Word (Romans 10:17), even when circumstances argue otherwise.
+
+The Bible warns us not to lean on our own understanding (Proverbs 3:5), not to judge by appearance (John 7:24), and not to be shaken by what we see (Psalm 46:2–3). Do not live like a flashlight with dying batteries—bright for a moment, dim under pressure. Faith is not sustained by sight; it is strengthened by Scripture.
+
+Many say, “To see is to believe,” yet in Christ, “Just believe, and you will see.” He did not wait for sight—He endured the cross “for the joy that was set before him” (Hebrews 12:2), trusting the Father beyond what was visible. He walked the road before us—through Gethsemane, through the cross, through the grave—and came out victorious. “Looking unto Jesus the author and finisher of our faith” (Hebrews 12:2).
+
+Where are you waiting for sight before you obey? You cannot walk with God while demanding full visibility. You don’t need Christ just to guide your steps—you need Him to be your vision. Will you walk forward today, even when you cannot see the whole way?`,
+    prayer: `Heavenly Father, forgive us for trusting what we see more than trusting You. Teach us to walk by faith and not by sight. Strengthen our hearts to follow You in uncertainty and anchor us in Your Word. Help us trust Christ fully, step by step. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-3.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
   // Add more devotions here
 ];
