@@ -66,7 +66,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
           </h1>
 
           {/* Tagline */}
-          <p className="text-lg italic text-blue-600 dark:text-blue-400 mb-4 whitespace-pre-line">
+          <p className="text-sm italic text-blue-600 dark:text-blue-400 mb-4 whitespace-pre-line">
             {tagline}
           </p>
 
