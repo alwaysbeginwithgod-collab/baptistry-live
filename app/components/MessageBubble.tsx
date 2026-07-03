@@ -171,9 +171,12 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                             const reference = decodeURIComponent(href.replace('bible://', ''));
                             return (
                               <button
-                                onClick={() => handleScriptureClick(reference)}
-                                className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 font-medium cursor-pointer transition-colors"
-                                title={`Click to look up ${reference} in the Bible`}
+                                onClick={(e) => {
+				  e.preventDefault(); // ← IMPORTANT: prevent any navigation
+		                  handleScriptureClick(reference);
+			        }}                      
+			        className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 font-medium cursor-pointer transition-colors"
+        title={`Click to look up ${reference} in the Bible`}
                               >
                                 {children}
                               </button>

@@ -109,31 +109,29 @@ export default function RightSidebar() {
   // ============================================================
   // SCRIPTURE REFERENCE LISTENER
   // ============================================================
-  useEffect(() => {
-    const handleBibleLookup = (event: CustomEvent) => {
-      const reference = event.detail.reference;
-      console.log('📖 RightSidebar received scripture:', reference);
-      
-      if (!reference) {
-        console.log('❌ No reference provided in event');
-        return;
-      }
-      
-      // Open Bible Lookup tab
-      setActiveTool('bible');
-      
-      // Set the query
-      setBibleQuery(reference);
-      
-      // Clear previous results
-      setBibleResult('');
-      
-      // Search after a small delay to ensure UI updates
-      setTimeout(() => {
-        console.log('🔍 Triggering search for:', reference);
-        searchBible();
-      }, 300);
-    };
+// Listen for scripture reference clicks from MessageBubble
+useEffect(() => {
+  const handleBibleLookup = (event: CustomEvent) => {
+    const reference = event.detail.reference;
+    console.log('📖 RightSidebar received scripture:', reference);
+    
+    if (!reference) return;
+    
+    // Open Bible Lookup tab
+    setActiveTool('bible');
+    setBibleQuery(reference);
+    setBibleResult('');
+    
+    setTimeout(() => {
+      searchBible();
+    }, 200);
+  };
+
+  window.addEventListener('bibleLookup' as any, handleBibleLookup);
+  return () => {
+    window.removeEventListener('bibleLookup' as any, handleBibleLookup);
+  };
+}, [searchBible]);
 
     console.log('📖 RightSidebar: Adding bibleLookup event listener');
     window.addEventListener('bibleLookup' as any, handleBibleLookup);
