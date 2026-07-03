@@ -104,7 +104,7 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
       number: 4,
       title: "Ignited By Faith",
       cover: "/books/ignited-4-faith.jpg",
-      flipbookLink: "#",
+      flipbookLink: "https://online.fliphtml5.com/xmsuz/Book-3---Ignited-By-Prayer/",
       amazonLink: "https://www.amazon.com/dp/6210660819",
       tagline: "Walk boldly with God, and never doubt His promises again.",
       description: "Cultivate bold, active faith that moves mountains and pleases God."
