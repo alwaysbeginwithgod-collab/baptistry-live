@@ -62,7 +62,8 @@ What is the one place where you are hesitating to trust God today? You cannot pl
     id: 'Devotion-3',
     title: 'Walking Beyond Sight',
     tagline: `✍️ "We walk not by what our eyes can explain,But by trusting the God who forever remains."`,
-    scripture: 'Oftentimes, we are addicted to visibility. We check the weather before we step outside, read reviews before we order, and demand a roadmap before we move. Whether we are navigating a career shift, a strained relationship, or a season of silence, the question is not whether we can see the whole path but whether we trust God enough to walk when we cannot see.
+    scripture: '2 Corinthians 5:7 “For we walk by faith, not by sight.”',
+    content: 'Oftentimes, we are addicted to visibility. We check the weather before we step outside, read reviews before we order, and demand a roadmap before we move. Whether we are navigating a career shift, a strained relationship, or a season of silence, the question is not whether we can see the whole path but whether we trust God enough to walk when we cannot see.
 
 2 Corinthians 5:7 declares, “For we walk by faith, not by sight.” Paul writes to believers navigating pressure and uncertainty, reminding them that the Christian life is not governed by visible realities, but by unseen truths. Sight reacts to circumstances—faith responds to God. One is temporal, the other eternal.
 
