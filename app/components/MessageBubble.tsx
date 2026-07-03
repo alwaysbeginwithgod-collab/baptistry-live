@@ -75,36 +75,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const isHelpfulSelected = feedbackStatus === 'helpful';
   const isUnhelpfulSelected = feedbackStatus === 'unhelpful';
 
-  // ============================================================
-  // SCRIPTURE REFERENCE HANDLER
-  // ============================================================
-  const handleScriptureClick = (reference: string) => {
-    console.log('📖 Scripture clicked:', reference);
-    const event = new CustomEvent('bibleLookup', {
-      detail: { reference: reference }
-    });
-    window.dispatchEvent(event);
-  };
-
-  // ============================================================
-  // CONVERT SCRIPTURE REFERENCES TO CLICKABLE MARKDOWN LINKS
-  // ============================================================
-  const convertScriptureToMarkdown = (text: string) => {
-    // Match scripture references like:
-    // Acts 2:38, John 3:16, 1 Corinthians 13:4-7, etc.
-    const scripturePattern = /\b(\d?\s*[A-Za-z]+\s+\d+:\d+(-\d+)?)\b/g;
-    
-    // Replace each scripture reference with a Markdown link
-    // The link will be rendered as a clickable button by our custom component
-    return text.replace(scripturePattern, (match) => {
-      // Use a special URL format that we'll detect in the custom component
-      return `[${match}](bible://${match.replace(/\s/g, '%20')})`;
-    });
-  };
-
-  // Convert scripture references to Markdown links
-  const contentWithLinks = convertScriptureToMarkdown(cleanedContent);
-
   return (
     <div id={message.id} className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
       {!isUser && (
@@ -164,32 +134,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
-                        // Custom link component to detect bible:// links
-                        a: ({ href, children }) => {
-                          // Check if it's a bible:// link (scripture reference)
-                          if (href && href.startsWith('bible://')) {
-                            const reference = decodeURIComponent(href.replace('bible://', ''));
-                            return (
-                              <button
-                                onClick={(e) => {
-				  e.preventDefault(); // ← IMPORTANT: prevent any navigation
-		                  handleScriptureClick(reference);
-			        }}                      
-			        className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 font-medium cursor-pointer transition-colors"
-        title={`Click to look up ${reference} in the Bible`}
-                              >
-                                {children}
-                              </button>
-                            );
-                          }
-                          // Regular link
-                          return (
-                            <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                              {children}
-                            </a>
-                          );
-                        },
-                        // Preserve all other Markdown components
                         table: ({node, ...props}) => (
                           <div className="overflow-x-auto my-4">
                             <table className="w-full border-collapse border border-gray-300 dark:border-gray-700 text-sm" {...props} />
@@ -222,9 +166,10 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                         em: ({node, ...props}) => <em className="italic" {...props} />,
                         hr: ({node, ...props}) => <hr className="my-4 border-gray-300 dark:border-gray-700" {...props} />,
                         blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-400 pl-4 italic my-3" {...props} />,
+                        a: ({node, ...props}) => <a className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
                       }}
                     >
-                      {contentWithLinks}
+                      {cleanedContent}
                     </ReactMarkdown>
                   </div>
 
@@ -235,7 +180,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                   </div>
 
                   <div className="mt-2 flex justify-start gap-3">
-                    {/* Copy Button */}
                     <div className="relative">
                       <button
                         onClick={handleCopy}
@@ -253,7 +197,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       )}
                     </div>
 
-                    {/* Regenerate Button */}
                     <button
                       onClick={handleRegenerate}
                       className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 p-1 rounded transition-colors"
@@ -264,7 +207,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       </svg>
                     </button>
 
-                    {/* Thumbs Up */}
                     <button
                       onClick={() => handleFeedback('helpful')}
                       className={`p-1 rounded transition-all ${
@@ -279,7 +221,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                       </svg>
                     </button>
 
-                    {/* Thumbs Down */}
                     <button
                       onClick={() => handleFeedback('unhelpful')}
                       className={`p-1 rounded transition-all ${
@@ -299,7 +240,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
             </>
           )}
 
-          {/* Timestamp and action buttons for user messages */}
           <div className={`text-xs mt-1 text-left ${isUser ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
             <span>
               {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
