@@ -13,13 +13,8 @@ export default function RightSidebar() {
   const [dictionaryResult, setDictionaryResult] = useState('');
   const toolPanelRef = useRef<HTMLDivElement>(null);
 
-  // ============================================================
-  // BIBLE SEARCH FUNCTION
-  // ============================================================
   const searchBible = async () => {
     if (!bibleQuery.trim()) return;
-    console.log('🔍 searchBible called with:', bibleQuery);
-    
     setIsLoading(true);
     setBibleResult('Searching...');
 
@@ -53,9 +48,6 @@ export default function RightSidebar() {
     setIsLoading(false);
   };
 
-  // ============================================================
-  // DICTIONARY SEARCH FUNCTION
-  // ============================================================
   const searchDictionary = async () => {
     if (!dictionaryWord.trim()) return;
     setIsLoading(true);
@@ -80,9 +72,6 @@ export default function RightSidebar() {
     setIsLoading(false);
   };
 
-  // ============================================================
-  // CLOSE TOOL
-  // ============================================================
   const closeTool = () => {
     setActiveTool(null);
     setBibleResult('');
@@ -90,9 +79,6 @@ export default function RightSidebar() {
     setDictionaryResult('');
   };
 
-  // ============================================================
-  // CLICK OUTSIDE HANDLER
-  // ============================================================
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (toolPanelRef.current && !toolPanelRef.current.contains(event.target as Node)) {
@@ -106,48 +92,33 @@ export default function RightSidebar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ============================================================
-  // SCRIPTURE REFERENCE LISTENER
-  // ============================================================
-// Listen for scripture reference clicks from MessageBubble
-useEffect(() => {
-  const handleBibleLookup = (event: CustomEvent) => {
-    const reference = event.detail.reference;
-    console.log('📖 RightSidebar received scripture:', reference);
-    
-    if (!reference) return;
-    
-    // Open Bible Lookup tab
-    setActiveTool('bible');
-    setBibleQuery(reference);
-    setBibleResult('');
-    
-    setTimeout(() => {
-      searchBible();
-    }, 200);
-  };
+  // Listen for scripture reference clicks from MessageBubble
+  useEffect(() => {
+    const handleBibleLookup = (event: CustomEvent) => {
+      const reference = event.detail.reference;
+      console.log('📖 RightSidebar received scripture:', reference);
+      
+      if (!reference) return;
+      
+      setActiveTool('bible');
+      setBibleQuery(reference);
+      setBibleResult('');
+      
+      setTimeout(() => {
+        searchBible();
+      }, 200);
+    };
 
-  window.addEventListener('bibleLookup' as any, handleBibleLookup);
-  return () => {
-    window.removeEventListener('bibleLookup' as any, handleBibleLookup);
-  };
-}, [searchBible]);
-
-    console.log('📖 RightSidebar: Adding bibleLookup event listener');
     window.addEventListener('bibleLookup' as any, handleBibleLookup);
-
     return () => {
-      console.log('📖 RightSidebar: Removing bibleLookup event listener');
       window.removeEventListener('bibleLookup' as any, handleBibleLookup);
     };
-  }, []); // Empty dependency array - only runs once
+  }, []);
 
   return (
     <>
-      {/* Icon Bar - Fixed on right edge */}
       <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-30">
         <div className="flex flex-col items-center gap-4 py-6 px-2 bg-white dark:bg-gray-800 rounded-l-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          {/* Bible Icon */}
           <button
             onClick={() => setActiveTool(activeTool === 'bible' ? null : 'bible')}
             className={`tool-icon-button p-2 rounded-lg transition-colors ${
@@ -162,7 +133,6 @@ useEffect(() => {
             </svg>
           </button>
 
-          {/* Dictionary Icon */}
           <button
             onClick={() => setActiveTool(activeTool === 'dictionary' ? null : 'dictionary')}
             className={`tool-icon-button p-2 rounded-lg transition-colors ${
@@ -178,7 +148,6 @@ useEffect(() => {
             </svg>
           </button>
 
-          {/* Reference Library Icon */}
           <button
             onClick={() => setActiveTool(activeTool === 'reference' ? null : 'reference')}
             className={`tool-icon-button p-2 rounded-lg transition-colors ${
@@ -196,7 +165,6 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Tool Panel - Pop-up to the left of icons */}
       {activeTool && (
         <div
           ref={toolPanelRef}
@@ -277,61 +245,32 @@ useEffect(() => {
 
               {activeTool === 'reference' && (
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Resources for study and research.
-                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Resources for study and research.</p>
 
-                  {/* Doctrinal Defense */}
                   <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-800 dark:text-white mb-2 border-l-2 border-blue-500 pl-2">
-                      📖 Doctrinal Defense
-                    </h4>
+                    <h4 className="text-sm font-semibold text-gray-800 dark:text-white mb-2 border-l-2 border-blue-500 pl-2">📖 Doctrinal Defense</h4>
                     <div className="space-y-1 ml-2">
-                      <a href="https://www.wayoflife.org" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                        Way of Life Literature
-                      </a>
-                      <a href="https://www.independentbaptist.com" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                        Independent Baptist Portal
-                      </a>
+                      <a href="https://www.wayoflife.org" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">Way of Life Literature</a>
+                      <a href="https://www.independentbaptist.com" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">Independent Baptist Portal</a>
                     </div>
                   </div>
 
-                  {/* Word Studies */}
                   <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-800 dark:text-white mb-2 border-l-2 border-blue-500 pl-2">
-                      🔍 Word Studies
-                    </h4>
+                    <h4 className="text-sm font-semibold text-gray-800 dark:text-white mb-2 border-l-2 border-blue-500 pl-2">🔍 Word Studies</h4>
                     <div className="space-y-1 ml-2">
-                      <a href="https://www.theword.net" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                        The Word
-                      </a>
-                      <a href="https://blueletterbible.org" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                        Blue Letter Bible
-                      </a>
-                      <a href="https://kingjamesbibledictionary.com/Dictionary/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                        King James Bible Dictionary
-                      </a>
-                      <a href="https://webstersdictionary1828.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                        Websters 1828 Dictionary
-                      </a>
+                      <a href="https://www.theword.net" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">The Word</a>
+                      <a href="https://blueletterbible.org" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">Blue Letter Bible</a>
+                      <a href="https://kingjamesbibledictionary.com/Dictionary/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">King James Bible Dictionary</a>
+                      <a href="https://webstersdictionary1828.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">Websters 1828 Dictionary</a>
                     </div>
                   </div>
 
-                  {/* Commentaries & Sermons */}
                   <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-800 dark:text-white mb-2 border-l-2 border-blue-500 pl-2">
-                      ✝️ Commentaries & Sermons
-                    </h4>
+                    <h4 className="text-sm font-semibold text-gray-800 dark:text-white mb-2 border-l-2 border-blue-500 pl-2">✝️ Commentaries & Sermons</h4>
                     <div className="space-y-1 ml-2">
-                      <a href="https://spurgeongems.org" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                        Spurgeon Gems
-                      </a>
-                      <a href="https://www.sermonnotebook.org/ntsermons.htm" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                        Sermon Notebook
-                      </a>
-                      <a href="https://www.sermonindex.net" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                        Sermon Index Library
-                      </a>
+                      <a href="https://spurgeongems.org" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">Spurgeon Gems</a>
+                      <a href="https://www.sermonnotebook.org/ntsermons.htm" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">Sermon Notebook</a>
+                      <a href="https://www.sermonindex.net" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">Sermon Index Library</a>
                     </div>
                   </div>
                 </div>
