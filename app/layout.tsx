@@ -28,7 +28,7 @@ export default function RootLayout({
               <meta name="apple-mobile-web-app-capable" content="yes" />
               <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
               <link rel="apple-touch-icon" href="/baptistry-logo.png" />
-              <title>BAPTISTRY - Your Bible Stdy Tool</title>
+              <title>BAPTISTRY - Your Bible Study Tool</title>
               <meta name="description" content="Biblical teaching from the King James Version" />
               <link rel="icon" href="/baptistry-logo.png" />
             </head>
