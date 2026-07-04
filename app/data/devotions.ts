@@ -126,5 +126,120 @@ Is there a promise of God you have quietly stopped believing because someone in 
     image: '/devotions/Devotion-5.jpg',
     facebookLink: 'https://www.facebook.com/BeginWithGod/'
   },
+
+  {
+    id: 'Devotion-6',
+    title: 'Trust Beyond Feelings',
+    tagline: `✍️ "Feelings may falter, emotions may sway, but trusting God’s Word will never decay."`,
+    scripture: 'Proverbs 3:5 "Trust in the LORD with all thine heart; and lean not unto thine own understanding."',
+    content: `Feelings are powerful navigators, but they are unreliable ones. They shift with circumstance, bend under pressure, and when we have trusted the impression and leaned on what seemed reasonable, we have found ourselves further from God's path. The question is not whether our feelings are real, but whether we are wise enough to know they were never meant to lead.
+
+Proverbs 3:5 is one of the most memorized verses in Scripture—yet often one of the least obeyed: “Trust in the LORD with all thine heart; and lean not unto thine own understanding.” Solomon calls us to an all-in trust—one that does not depend on human reasoning. Our understanding is limited and often clouded by emotion, but God’s wisdom is perfect and unchanging.
+
+Trusting God is like standing on solid rock while waves crash around us. Feelings rise and fall like tides—unpredictable and shifting—but the foundation beneath does not move. Faith does not deny emotion; it refuses to be ruled by it. It stands firm on what God has said.
+
+The Scriptures remind us that our hearts can mislead: “The heart is deceitful above all things” (Jeremiah 17:9). Yet God’s Word remains sure: “Thy word is true from the beginning” (Psalm 119:160). “We walk by faith, not by sight” (2 Corinthians 5:7). “In all thy ways acknowledge him, and he shall direct thy paths” (Proverbs 3:6).
+
+Too often, we make decisions based on what feels right instead of what God has spoken. Feelings are like a broken GPS—confident in direction, yet constantly shifting. “There is a way that seemeth right unto a man, but the end thereof are the ways of death” (Proverbs 14:12). Let God’s Word, not your emotions, determine your steps. Faith stands when feelings stumble.
+
+Christ Himself trusted the Father beyond human emotion. In Gethsemane, He prayed, “not my will, but thine, be done” (Luke 22:42). Though sorrowful, He submitted fully. Through His finished work, we are given not only an example, but also a Saviour who enables us to trust beyond what we feel.
+
+Is there a decision you are currently navigating by feeling alone — leaning on what seems right rather than on what God has spoken? You don’t need Christ just to calm your emotions—you need Him to command your trust. Lay down your reasoning. Open His Word. Trust the One who knows the end from the beginning.`,
+    prayer: `Heavenly Father, forgive us for trusting our feelings more than Your truth. Teach us to trust You with all our hearts and not lean on our own understanding. Anchor us in Your Word and help us follow You beyond what we feel. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-6.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-7',
+    title: 'Take The First Step',
+    tagline: `✍️ "Courage is not born from what we see, but from trusting the God who walks with thee."`,
+    scripture: 'Joshua 1:9 "Have not I commanded thee? Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest."',
+    content: `Most of us are not waiting for permission to move—we are waiting to feel ready. We want certainty before surrender, confidence before commitment, and guarantees before movement. Yet life’s defining moments often begin with trembling steps. The question is not whether fear is present—but whether we trust God enough to move forward anyway.
+
+Joshua 1:9 declares, “Have not I commanded thee? Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest.” Joshua stood under overwhelming responsibility after Moses’ death. God did not remove the challenge—He promised His presence.
+
+Courage is like a soldier standing firm in battlefield chaos. Orders do not change because fear appears. The mission does not pause while emotions catch up. Courage is not the absence of fear—it is obedience in the presence of fear. Joshua’s strength was not in himself, but in this promise: “The LORD thy God is with thee whithersoever thou goest.”
+
+The Scriptures repeatedly anchor courage in God’s presence: “Fear thou not; for I am with thee” (Isaiah 41:10). “I will never leave thee, nor forsake thee” (Hebrews 13:5). “If God be for us, who can be against us?” (Romans 8:31). “I can do all things through Christ which strengtheneth me” (Philippians 4:13). We are never called to walk alone.
+
+Too often, we remain frozen at the starting line—waiting for perfect conditions before obeying God. But delayed obedience is still disobedience. Do not live like a ship anchored permanently at shore—safe, but never fulfilling its purpose. Faith moves forward not because the path is easy, but because God is faithful. 
+
+Christ Himself trusted the Father beyond human emotion. In Gethsemane, He prayed, “not my will, but thine, be done” (Luke 22:42). Though sorrowful, He submitted fully. Through His finished work, we are given not only an example, but also a Saviour who enables us to trust beyond what we feel.
+
+What step has God been calling you to take that fear keeps delaying? You don’t need Christ merely to make you feel brave—you need Him to be your courage. He has not called you to feel ready. He has called you to follow. Will you trust His presence and take the first step today?`,
+    prayer: `Heavenly Father, forgive us for waiting to feel brave when You have already promised Your presence. Teach us to be strong and courageous—not in ourselves, but in You. Go before us today and give us the faith to take the first step. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-7.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-8',
+    title: 'Refined or Ruined',
+    tagline: `✍️ "The fire was not sent to make us fall apart, but to burn what is false and refine the heart."`,
+    scripture: '1 Peter 1:7 "That the trial of your faith, being much more precious than of gold that perisheth, though it be tried with fire, might be found unto praise and honour and glory at the appearing of Jesus Christ:"',
+    content: `Trials do not leave us the same. They either refine us or ruin us. None of us naturally welcomes them. We pray for peace, stability, and comfort, yet when the trial comes, we treat it as an interruption rather than a solution. Whether a job loss, a diagnosis, or a broken relationship, some come out bitter, while others come out better. The question is not whether the fire is painful—but whether it is refining us or ruining us.
+
+1 Peter 1:7 declares, “That the trial of your faith, being much more precious than of gold that perisheth, though it be tried with fire…” Peter wrote to believers scattered through persecution and suffering. God was not abandoning them in affliction—He was refining them through it. Faith tested by fire becomes faith proven genuine.
+
+A refiner’s fire does not destroy gold—it separates it from impurity. The hotter the flame, the clearer the purity. In the same way, trials expose what we truly trust. Easy seasons may decorate faith, but difficult seasons reveal it. Fire does not create fake faith—it uncovers real faith.
+
+The Scriptures consistently connect suffering with spiritual growth: “We glory in tribulations also: knowing that tribulation worketh patience” (Romans 5:3). “Whom the Lord loveth he chasteneth” (Hebrews 12:6). “When he hath tried me, I shall come forth as gold” (Job 23:10). God never wastes pain in the life of His children.
+
+Too often, we interpret hardship as God’s absence, yet this is His refining work: “When thou walkest through the fire, thou shalt not be burned” (Isaiah 43:2). “Knowing this, that the trying of your faith worketh patience” (James 1:3). Do not live like fragile glass that shatters under pressure. Genuine faith is strengthened in the furnace. The fire may be intense, but the Refiner never loses control of the flame.
+
+Christ Himself walked through the greatest fire. He was “a man of sorrows, and acquainted with grief” (Isaiah 53:3). His agony, betrayal, sorrow, and the full weight of sin—these are woven into His victory. On the cross, He endured the wrath we deserved so that our trials would never be castigation, but preparation. Through His finished work, suffering is not meaningless—it is sanctifying.
+
+What trial are you currently enduring that you’ve been treating as an obstacle rather than an instrument of God? You don’t need Christ just to remove the fire—you need Him to refine you through it. Stop fighting the refining. Trust the Refiner to do His until His reflection appears in us. We are refined, not ruined. Don’t live as a victim; live as His student. Ask Him, “Lord, what can I learn from this?”`,
+    prayer: `Heavenly Father, when trials come, keep us from becoming hardened, fearful, or bitter. Refine our faith through every hardship and teach us to trust You in the fire. Strengthen us through Your Word and remind us that Christ walks with us through every trial. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-8.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-9',
+    title: 'Don’t Quit Yet',
+    tagline: `✍️ "The trial was never meant to make us quit, but to build a faith that refuses to split."`,
+    scripture: 'James 1:3 "Knowing this, that the trying of your faith worketh patience."',
+    content: `We all have a quitting point from battles nobody else can see—a threshold where pressure outlasts patience. They don’t break us suddenly—they wear us down slowly. Delays. Disappointments. Dead ends. It’s not always the fire that scares us—it’s the length of it. And sometimes quitting feels easier than enduring. The question is not whether we feel like quitting but whether we will quit before patience finishes her work.
+
+James 1:3 declares, “Knowing this, that the trying of your faith worketh patience.” James does not say trials might produce patience—he guarantees they do. Testing is not random; it is refining. The trial did not come to break us, but to build us. The pressure is not pointless—it is purposeful. Patience in Scripture is not passive waiting; it is steadfast perseverance under pressure.
+
+Endurance is not built in comfort—it is forged in resistance. Like a muscle strengthened by tension, faith grows through the weight it carries. Remove the weight, and strength never forms. Keep enduring under the weight, and spiritual strength begins to rise. God allows pressure not to crush us, but to condition us.
+
+The Scriptures affirm this process: “Tribulation worketh patience” (Romans 5:3). “Let patience have her perfect work” (James 1:4). “Be not weary in well doing” (Galatians 6:9). “When he hath tried me, I shall come forth as gold” (Job 23:10). The fire may be intense, but the Refiner never loses control of the flame. God is shaping in His children a faith that lasts—not a faith that quits.
+
+Too often, we interpret hardship as God’s absence, when it may actually be evidence of His refining work. “When thou walkest through the fire, thou shalt not be burned” (Isaiah 43:2). Many people quit praying right before the answer, stop trusting right before clarity, and walk away right before a breakthrough. Do not live like a runner stopping one step before the finish line. The trial is not a wall—it is a workout.
+
+Christ Himself endured the ultimate testing. He faced betrayal, exhaustion, sorrow, rejection, and the full weight of the cross. Yet He pressed forward, “for the joy that was set before him” (Hebrews 12:2). He did not quit. And because He endured, we can endure. His strength is not merely our example—it is our supply. 
+
+Where are you closest to giving up right now? And have you asked God what He is building in you through this trial? You don’t need Christ merely to help you survive—you need Him to sustain and mature your faith. Do not walk away from what God has not yet finished. Stay faithful. Don’t quit yet.”`,
+    prayer: `Heavenly Father, when trials weary our hearts, help us not to give up. Use every hardship to strengthen our faith and produce endurance within us. Teach us to trust You through pressure, and help us remain steadfast in Christ. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-9.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-10',
+    title: 'Fear Loses Here',
+    tagline: `✍️ "Fear may whisper, threaten, and appear, but faith rises when God draws near."`,
+    scripture: 'Isaiah 41:10 "Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee; yea, I will uphold thee with the right hand of my righteousness."',
+    content: `Fear has a way of speaking louder in times of trouble. A doctor’s report, a financial burden, an uncertain future, or a painful loss can quietly begin dictating our decisions. We smile outwardly while battling anxiety, worry, and dread inwardly. Fear magnifies problems, paralyzes faith, and minimizes God. The question is not whether fear will appear but whether we will trust God’s presence when it does.
+
+Isaiah 41:10 declares, “Fear thou not; for I am with thee: be not dismayed; for I am thy God…” God spoke these words to trembling Israel in weakness and uncertainty, reminding them that His presence was greater than their fears. The command “fear thou not” comes with a reason: stop fearing because God is with you.
+
+Fear is like standing in a storm at night, hearing thunder while unable to see clearly. Yet even in darkness, the lighthouse remains steady. God’s presence is that lighthouse. Fear thrives when we focus on the waves, but faith rises when we remember who stands with us in the storm.
+
+The Scriptures repeatedly connect courage with God’s nearness: “The LORD is my light and my salvation; whom shall I fear?” (Psalm 27:1). “What time I am afraid, I will trust in thee” (Psalm 56:3). “God is our refuge and strength, a very present help in trouble” (Psalm 46:1). “There is no fear in love; but perfect love casteth out fear” (1 John 4:18). Fear weakens when faith feeds on God’s promises.
+
+Living under the control of fear is not the will of God: “For God hath not given us the spirit of fear” (2 Timothy 1:7). Too often, we treat fear as master instead of messenger. It dictates obedience, alters decisions, and shrinks faith. Do not live like a prisoner trapped behind unlocked doors. Faith is not the absence of fear—it is the refusal to bow to it.
+
+Christ has already conquered the darkest thing fear could threaten—death itself. “And he laid his right hand upon me, saying unto me, Fear not; I am the first and the last: I am he that liveth, and was dead; and, behold, I am alive for evermore” (Revelation 1:17–18). The hand that holds us is the same hand that conquered the grave. Fear loses here—because Christ is here.
+
+What fear has been controlling your thoughts more than God’s truth? You don’t need Christ merely to calm your fears—you need Him to overcome them. Stop magnifying what threatens you and start magnifying the God who is with you. Call on Him today—not after the fear subsides, but right in the middle of it. Step forward. Trust His presence. Let faith silence fear.”`,
+    prayer: `Heavenly Father, thank You that Your presence is greater than our fear. Forgive us for letting shadows intimidate us when You have promised to uphold us. Strengthen our hearts, silence our doubts, and help us walk boldly in faith. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-9.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
   // Add more devotions here
 ];
