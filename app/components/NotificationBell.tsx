@@ -24,54 +24,65 @@ export default function NotificationBell() {
   // ============================================================
   const loadNotifications = () => {
     const today = new Date().toDateString();
-    const savedNotifications = localStorage.getItem('baptistry_notifications');
-    const lastEncouragementDate = localStorage.getItem('last_encouragement_date');
-    const lastDevotionDate = localStorage.getItem('last_devotion_date');
     const encouragement = getDailyEncouragement();
     
+    // Get existing notifications from localStorage
+    const savedNotifications = localStorage.getItem('baptistry_notifications');
     let allNotifications: Notification[] = [];
     
-    // Load saved notifications (filter out old daily ones)
     if (savedNotifications) {
       const parsed = JSON.parse(savedNotifications);
-      // Keep only non-daily notifications (updates)
+      // Keep only non-daily notifications (updates) and existing daily ones
+      // We'll rebuild daily ones fresh
       const updates = parsed.filter((n: any) => 
         !n.id.startsWith('daily-enc-') && !n.id.startsWith('daily-devotion-')
       );
       allNotifications = updates.map((n: any) => ({ ...n, date: new Date(n.date) }));
     }
     
-    // Add daily encouragement if not yet shown today
-    if (lastEncouragementDate !== today) {
-      allNotifications.push({
-        id: `daily-enc-${Date.now()}`,
-        title: '☀️ Daily Encouragement',
-        message: encouragement.message,
-        type: 'encouragement',
-        link: '#',
-        date: new Date(),
-        read: false,
-      });
-      localStorage.setItem('last_encouragement_date', today);
+    // --- ALWAYS ADD DAILY ENCOURAGEMENT ---
+    allNotifications.push({
+      id: `daily-enc-${today}`,
+      title: '☀️ Daily Encouragement',
+      message: encouragement.message,
+      type: 'encouragement',
+      link: '#',
+      date: new Date(),
+      read: false,
+    });
+    
+    // --- ALWAYS ADD DAILY DEVOTION ---
+    allNotifications.push({
+      id: `daily-devotion-${today}`,
+      title: '📖 Daily Devotion',
+      message: 'A new daily devotion is ready! Tap to read.',
+      type: 'devotion',
+      link: '#',
+      date: new Date(),
+      read: false,
+    });
+    
+    // --- Remove duplicate daily notifications (keep only today's) ---
+    const uniqueNotifications: Notification[] = [];
+    const seenIds = new Set();
+    
+    for (const notif of allNotifications) {
+      // For daily notifications, keep only the latest (today's)
+      if (notif.id.startsWith('daily-enc-') || notif.id.startsWith('daily-devotion-')) {
+        const key = notif.id.startsWith('daily-enc-') ? 'daily-enc' : 'daily-devotion';
+        if (!seenIds.has(key)) {
+          seenIds.add(key);
+          uniqueNotifications.push(notif);
+        }
+      } else {
+        uniqueNotifications.push(notif);
+      }
     }
     
-    // Add daily devotion if not yet shown today
-    if (lastDevotionDate !== today) {
-      allNotifications.push({
-        id: `daily-devotion-${Date.now()}`,
-        title: '📖 Daily Devotion',
-        message: 'A new daily devotion is ready! Tap to read.',
-        type: 'devotion',
-        link: '#',
-        date: new Date(),
-        read: false,
-      });
-      localStorage.setItem('last_devotion_date', today);
-    }
-    
-    // If no saved notifications and no daily ones, add sample updates
-    if (allNotifications.length === 0 && !savedNotifications) {
-      allNotifications = [
+    // If no update notifications exist, add sample ones (only once)
+    const hasUpdates = uniqueNotifications.some(n => n.type === 'update');
+    if (!hasUpdates) {
+      const sampleUpdates = [
         {
           id: '1',
           title: '🚀 Books Showroom Launched',
@@ -100,14 +111,15 @@ export default function NotificationBell() {
           read: true,
         },
       ];
+      uniqueNotifications.push(...sampleUpdates);
     }
     
     // Sort by date (newest first)
-    allNotifications.sort((a, b) => b.date.getTime() - a.date.getTime());
+    uniqueNotifications.sort((a, b) => b.date.getTime() - a.date.getTime());
     
-    setNotifications(allNotifications);
-    setUnreadCount(allNotifications.filter(n => !n.read).length);
-    localStorage.setItem('baptistry_notifications', JSON.stringify(allNotifications));
+    setNotifications(uniqueNotifications);
+    setUnreadCount(uniqueNotifications.filter(n => !n.read).length);
+    localStorage.setItem('baptistry_notifications', JSON.stringify(uniqueNotifications));
   };
 
   // Load notifications on mount
