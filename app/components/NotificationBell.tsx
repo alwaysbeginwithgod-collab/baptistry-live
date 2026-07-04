@@ -7,7 +7,7 @@ interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'update' | 'encouragement';
+  type: 'update' | 'encouragement' | 'devotion';
   link?: string;
   date: Date;
   read: boolean;
@@ -92,6 +92,35 @@ export default function NotificationBell() {
     }
   }, [notifications]);
 
+  // ============================================================
+  // DAILY DEVOTION NOTIFICATION
+  // ============================================================
+  useEffect(() => {
+    const today = new Date().toDateString();
+    const lastDevotionDate = localStorage.getItem('last_devotion_date');
+
+    if (lastDevotionDate !== today) {
+      // Remove any previous daily devotion to avoid duplicates
+      const filtered = notifications.filter(n => !n.id.startsWith('daily-devotion-'));
+
+      const newDevotion: Notification = {
+        id: `daily-devotion-${Date.now()}`,
+        title: '📖 Daily Devotion',
+        message: 'A new daily devotion is ready! Tap to read.',
+        type: 'devotion',
+        link: '#',
+        date: new Date(),
+        read: false,
+      };
+
+      const updated = [newDevotion, ...filtered];
+      setNotifications(updated);
+      setUnreadCount(updated.filter(n => !n.read).length);
+      localStorage.setItem('baptistry_notifications', JSON.stringify(updated));
+      localStorage.setItem('last_devotion_date', today);
+    }
+  }, [notifications]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -121,7 +150,11 @@ export default function NotificationBell() {
 
   const handleNotificationClick = (notif: Notification) => {
     markAsRead(notif.id);
-    if (notif.link && notif.link !== '#') {
+    
+    // If it's a devotion notification, open the devotion modal
+    if (notif.type === 'devotion') {
+      window.dispatchEvent(new CustomEvent('openDevotion'));
+    } else if (notif.link && notif.link !== '#') {
       window.open(notif.link, '_blank');
     }
     setIsOpen(false);
@@ -163,6 +196,7 @@ export default function NotificationBell() {
 
   const getIcon = (type: string) => {
     if (type === 'encouragement') return '☀️';
+    if (type === 'devotion') return '📖';
     return '🚀';
   };
 

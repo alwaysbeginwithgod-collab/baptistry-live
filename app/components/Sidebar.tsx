@@ -51,6 +51,15 @@ export default function Sidebar({
     setBibleVerse(getDailyVerse());
   }, []);
 
+// Listen for "openDevotion" event from NotificationBell
+useEffect(() => {
+  const handleOpenDevotion = () => {
+    setIsDevotionOpen(true);
+  };
+  window.addEventListener('openDevotion' as any, handleOpenDevotion);
+  return () => window.removeEventListener('openDevotion' as any, handleOpenDevotion);
+}, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && menuOpenId) {
