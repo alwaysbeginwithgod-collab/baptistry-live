@@ -17,6 +17,7 @@ export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Load notifications from localStorage
@@ -28,6 +29,7 @@ export default function NotificationBell() {
       setNotifications(withDates);
       setUnreadCount(withDates.filter((n: Notification) => !n.read).length);
     } else {
+      // Sample notifications (only if no saved data)
       const sampleNotifications: Notification[] = [
         {
           id: '1',
@@ -61,12 +63,15 @@ export default function NotificationBell() {
       setUnreadCount(sampleNotifications.filter(n => !n.read).length);
       localStorage.setItem('baptistry_notifications', JSON.stringify(sampleNotifications));
     }
+    setIsLoaded(true);
   }, []);
 
   // ============================================================
-  // DAILY NOTIFICATIONS: Encouragement + Devotion (combined)
+  // DAILY NOTIFICATIONS: Encouragement + Devotion (ALWAYS ADD)
   // ============================================================
   useEffect(() => {
+    if (!isLoaded) return; // Wait for initial load
+    
     const today = new Date().toDateString();
     const lastEncouragementDate = localStorage.getItem('last_encouragement_date');
     const lastDevotionDate = localStorage.getItem('last_devotion_date');
@@ -113,7 +118,7 @@ export default function NotificationBell() {
       setUnreadCount(newNotifications.filter(n => !n.read).length);
       localStorage.setItem('baptistry_notifications', JSON.stringify(newNotifications));
     }
-  }, [notifications]);
+  }, [isLoaded, notifications]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
