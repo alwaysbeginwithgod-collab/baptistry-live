@@ -206,7 +206,7 @@ useEffect(() => {
   <span className="text-sm font-medium">Daily Devotion</span>
 </button>
 
-          <div className="mt-4 text-center">
+          <div className="mt-2 text-center">
             <button
               onClick={() => setIsSupportOpen(true)}
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm w-full justify-center"
