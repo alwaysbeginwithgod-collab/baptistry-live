@@ -82,7 +82,7 @@ export default function NotificationBell() {
     // If no update notifications exist, add sample ones (only once)
     const hasUpdates = uniqueNotifications.some(n => n.type === 'update');
     if (!hasUpdates) {
-      const sampleUpdates = [
+      const sampleUpdates: Notification[] = [
         {
           id: '1',
           title: '🚀 Books Showroom Launched',
