@@ -238,7 +238,76 @@ Christ has already conquered the darkest thing fear could threaten—death itsel
 
 What fear has been controlling your thoughts more than God’s truth? You don’t need Christ merely to calm your fears—you need Him to overcome them. Stop magnifying what threatens you and start magnifying the God who is with you. Call on Him today—not after the fear subsides, but right in the middle of it. Step forward. Trust His presence. Let faith silence fear.”`,
     prayer: `Heavenly Father, thank You that Your presence is greater than our fear. Forgive us for letting shadows intimidate us when You have promised to uphold us. Strengthen our hearts, silence our doubts, and help us walk boldly in faith. In Jesus’ Name. Amen.`,
-    image: '/devotions/Devotion-9.jpg',
+    image: '/devotions/Devotion-10.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-11',
+    title: 'Don’t Rush God',
+    tagline: `✍️ "We rush ahead and miss what God prepared, the fruit of waiting belongs to those who dared."`,
+    scripture: 'Psalm 27:14 "Wait on the LORD: be of good courage, and he shall strengthen thine heart: wait, I say, on the LORD."',
+    content: `Waiting is one of the hardest tests of faith in an age addicted to instant results—hasty deliveries, immediate answers, real-time updates, and quick solutions. That speed has quietly reshaped our patience for everything, including God. We often mistake waiting for denial. The question is not whether waiting is difficult—it is whether we have the faith to wait without rushing Him.
+
+Psalm 27:14 declares, “Wait on the LORD: be of good courage, and he shall strengthen thine heart: wait, I say, on the LORD.” David wrote these words while surrounded by trouble and uncertainty. He understood the ache of delay—years of fleeing Saul, longing for justice, crying out for deliverance. Yet he discovered that waiting was not wasted. It was where courage was formed and strength was renewed.
+
+Waiting is like a seed buried beneath the soil. For a long season, nothing appears visible, yet hidden growth is taking place underneath. Roots deepen before harvest comes. That is what waiting looks like. We do not stop trusting simply because we cannot yet see progress. God develops deep faith in seasons where visible results are absent.
+
+The Scriptures repeatedly connect waiting with spiritual strength: “They that wait upon the LORD shall renew their strength” (Isaiah 40:31). “My soul, wait thou only upon God” (Psalm 62:5). “The LORD is good unto them that wait for him” (Lamentations 3:25). Waiting stretches faith beyond feelings and teaches dependence upon God. Time would never be wasted if we could just wait upon the Lord.
+
+Too often, we rush ahead because silence makes us uncomfortable. We treat waiting as wasted time rather than preparation time. But impatience has ruined many things that trust would have preserved. “Rest in the LORD, and wait patiently for him” (Psalm 37:7). Do not live like a farmer digging up seeds to check their growth. Faith waits because faith trusts God’s timing even when the clock feels painfully slow.
+
+Christ Himself waited. He said, “My time is not yet come” (John 7:6). He waited through agony in Gethsemane, endured the cross in obedience, and trusted the Father’s timing for resurrection. And because He waited faithfully, we are redeemed completely. His waiting was not wasted—it was victorious. Through His finished work, we learn that God’s timing is never late, careless, or wrong.
+
+What answer have you been trying to force because the waiting feels longer than expected? You don't need Christ just to make the waiting more bearable—you need Him to make your heart teachable. Don’t rush God. Wait on Him with courage, not complaint. The fruit of waiting belongs to those who dare to trust Him.”`,
+    prayer: `Heavenly Father, forgive us for rushing ahead when You are teaching us to trust. Strengthen our hearts in seasons of waiting and help us rest in Your perfect timing. Teach us to remain faithful even when we cannot yet see what You are doing. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-11.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-12',
+    title: 'Step Anyway',
+    tagline: `✍️ "Though uncertainty clouds the road ahead; Trust God anyway and move forward instead."`,
+    scripture: 'Hebrews 11:8 "By faith Abraham, when he was called to go out into a place which he should after receive for an inheritance, obeyed; and he went out, not knowing whither he went."',
+    content: `Most of us are willing to obey God—as long as we know where the road ends. We want details before decisions, explanations before obedience, and certainty before surrender. Yet faith rarely receives the full picture upfront. God often calls us forward while leaving parts of the path unseen. The question is not whether the road feels uncertain—but whether we trust God enough to step anyway.
+
+Hebrews 11:8 declares, “By faith Abraham, when he was called to go out into a place which he should after receive for an inheritance, obeyed; and he went out, not knowing whither he went.” Abraham obeyed without full clarity. God gave him a promise, not a map. His obedience was built on confidence in the God who called him. He left his country, his family, and every earthly guarantee—and he stepped anyway.
+
+We know what it is to demand the map before we move. You may not see the end, but you trust the guide. That is the essence of faith. It is not reckless—it is reliant. It is not blind—it is anchored in God. The power of faith is not found in seeing the entire road—it is found in trusting the One who leads our road.
+
+The Scriptures connect obedience with trust: “Trust in the LORD with all thine heart” (Proverbs 3:5). “For we walk by faith, not by sight” (2 Corinthians 5:7). “To obey is better than sacrifice” (1 Samuel 15:22). Faith does not demand complete understanding before it moves. It’s not only about believing—it's obeying.
+
+Too often, we delay obedience while waiting for perfect clarity. But delayed obedience is still disobedience. “If ye love me, keep my commandments” (John 14:15). “Blessed are they that hear the word of God, and keep it” (Luke 11:28). Obedience is not optional—it is evidence of genuine faith. Do not live like a parked car with the engine running but never leaving the driveway. Faith moves when God says go.
+
+Christ Himself obeyed perfectly. “He humbled himself, and became obedient unto death, even the death of the cross” (Philippians 2:8). He did not wait for comfort or clarity—He obeyed the Father completely. And through His obedience, we are saved. We do not obey in order to be saved; we obey because we have been saved through Him.
+
+What has God been calling you to do that you keep postponing until life feels more certain? You don’t need Christ merely to explain the whole journey—you need Him to lead your next step. Stop waiting for the full map. God gave Abraham direction, not details—and it was enough. Step anyway. The road often becomes clear only after faith begins to walk it.”`,
+    prayer: `Heavenly Father, forgive us for delaying obedience while waiting for certainty. Teach us to trust You even when we cannot see the whole path ahead. Strengthen our faith to follow Your voice completely and help us step forward with confidence in Christ. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-12.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-13',
+    title: 'Hold The Line',
+    tagline: `✍️ "What falls is not the faith that’s tried and pressed, What falls is faith that never stood the test."`,
+    scripture: '1 Corinthians 16:13 "Watch ye, stand fast in the faith, quit you like men, be strong."',
+    content: `We are living in a generation pressured to compromise. Truth is mocked, conviction is softened, and faithfulness is fading. The pressure to blend in is relentless—at work, online, in relationships, and even inside churches. Many are not abandoning the faith all at once; they are drifting one compromise at a time. The question is not whether pressure will come—but whether our faith can still stand when it does.
+
+1 Corinthians 16:13 declares, “Watch ye, stand fast in the faith, quit you like men, be strong.” Paul closes his letter with urgent commands because spiritual pressure is real. “Stand fast” means to remain fixed, steady, and unwavering. Faith is not only about moving forward—it is about standing firm when everything pushes against you. The battle is real, and it arises not always to make us run, but to make us fall.
+
+Standing firm is like a soldier holding the line in battle while everything around him shakes. The pressure intensifies, the opposition advances, and fear whispers to retreat. Yet he stands because surrender would cost more than resistance. In the same way, faith holds the line not because pressure is absent, but because truth is worth holding. Every believer who stands firm is a soldier who refuses to release that line.
+
+The Scriptures repeatedly call believers to spiritual steadfastness: “Be ye steadfast, unmoveable, always abounding in the work of the Lord” (1 Corinthians 15:58). “Resist the devil, and he will flee from you” (James 4:7). “Put on the whole armour of God, that ye may be able to stand against the wiles of the devil” (Ephesians 6:11). God never called us to blend in with darkness, but to stand against it.
+
+Too often, believers collapse under pressures they were never meant to surrender to. Culture shifts, opinions change, and emotions fluctuate—but truth remains. “Be sober, be vigilant; because your adversary the devil, as a roaring lion” (1 Peter 5:8). Stand down believers, don’t live like a trembling elephant surrounded by lions. The enemy does not fear our weakness—he fears our steadfastness.
+
+Christ held the line when religious leaders mocked Him. He held the line when Pilate washed his hands. He held the line when the nails pierced His flesh. And on the cross He cried, “It is finished” (John 19:30)—not “I give up,” but “The work is complete.” He did not compromise truth to escape suffering. He remained faithful unto death for our salvation. And now His strength enables us to stand firm.
+
+Where have you been tempted to compromise because the pressure feels overwhelming? You don’t need Christ merely to help you survive the pressure—you need Him to steady your faith within it. Stand fast. “Watch ye” therefore. Be strong. Hold the line. Truth is still truth even when the world abandons it.”`,
+    prayer: `Heavenly Father, forgive us for the ground we have surrendered under pressure that was never ours to give away. Strengthen us to watch, to stand fast, and to hold firm — not in our own strength, but in the victory Christ has already won. Make us soldiers who refuse to break the line. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-13.jpg',
     facebookLink: 'https://www.facebook.com/BeginWithGod/'
   },
   // Add more devotions here
