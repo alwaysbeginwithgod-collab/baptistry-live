@@ -28,7 +28,6 @@ export default function NotificationBell() {
       setNotifications(withDates);
       setUnreadCount(withDates.filter((n: Notification) => !n.read).length);
     } else {
-      // Sample BAPTISTRY updates
       const sampleNotifications: Notification[] = [
         {
           id: '1',
@@ -64,17 +63,25 @@ export default function NotificationBell() {
     }
   }, []);
 
-  // Add daily encouragement notification (once per day)
+  // ============================================================
+  // DAILY NOTIFICATIONS: Encouragement + Devotion (combined)
+  // ============================================================
   useEffect(() => {
     const today = new Date().toDateString();
     const lastEncouragementDate = localStorage.getItem('last_encouragement_date');
+    const lastDevotionDate = localStorage.getItem('last_devotion_date');
     const encouragement = getDailyEncouragement();
     
+    // Remove previous daily notifications (both types)
+    const filtered = notifications.filter(n => 
+      !n.id.startsWith('daily-enc-') && !n.id.startsWith('daily-devotion-')
+    );
+    
+    const newNotifications: Notification[] = [...filtered];
+    
+    // Add daily encouragement if not yet shown today
     if (lastEncouragementDate !== today) {
-      // Remove any previous daily encouragement to avoid duplicates
-      const filtered = notifications.filter(n => !n.id.startsWith('daily-enc-'));
-      
-      const newEncouragement: Notification = {
+      newNotifications.push({
         id: `daily-enc-${Date.now()}`,
         title: '☀️ Daily Encouragement',
         message: encouragement.message,
@@ -82,28 +89,13 @@ export default function NotificationBell() {
         link: '#',
         date: new Date(),
         read: false,
-      };
-      
-      const updated = [newEncouragement, ...filtered];
-      setNotifications(updated);
-      setUnreadCount(updated.filter(n => !n.read).length);
-      localStorage.setItem('baptistry_notifications', JSON.stringify(updated));
+      });
       localStorage.setItem('last_encouragement_date', today);
     }
-  }, [notifications]);
-
-  // ============================================================
-  // DAILY DEVOTION NOTIFICATION
-  // ============================================================
-  useEffect(() => {
-    const today = new Date().toDateString();
-    const lastDevotionDate = localStorage.getItem('last_devotion_date');
-
+    
+    // Add daily devotion if not yet shown today
     if (lastDevotionDate !== today) {
-      // Remove any previous daily devotion to avoid duplicates
-      const filtered = notifications.filter(n => !n.id.startsWith('daily-devotion-'));
-
-      const newDevotion: Notification = {
+      newNotifications.push({
         id: `daily-devotion-${Date.now()}`,
         title: '📖 Daily Devotion',
         message: 'A new daily devotion is ready! Tap to read.',
@@ -111,13 +103,15 @@ export default function NotificationBell() {
         link: '#',
         date: new Date(),
         read: false,
-      };
-
-      const updated = [newDevotion, ...filtered];
-      setNotifications(updated);
-      setUnreadCount(updated.filter(n => !n.read).length);
-      localStorage.setItem('baptistry_notifications', JSON.stringify(updated));
+      });
       localStorage.setItem('last_devotion_date', today);
+    }
+    
+    // Only update if there are changes
+    if (newNotifications.length !== notifications.length) {
+      setNotifications(newNotifications);
+      setUnreadCount(newNotifications.filter(n => !n.read).length);
+      localStorage.setItem('baptistry_notifications', JSON.stringify(newNotifications));
     }
   }, [notifications]);
 
@@ -151,7 +145,6 @@ export default function NotificationBell() {
   const handleNotificationClick = (notif: Notification) => {
     markAsRead(notif.id);
     
-    // If it's a devotion notification, open the devotion modal
     if (notif.type === 'devotion') {
       window.dispatchEvent(new CustomEvent('openDevotion'));
     } else if (notif.link && notif.link !== '#') {
@@ -160,7 +153,6 @@ export default function NotificationBell() {
     setIsOpen(false);
   };
 
-  // Function to add a new BAPTISTRY update notification
   const addUpdateNotification = (title: string, message: string, link?: string) => {
     const newNotification: Notification = {
       id: Date.now().toString(),
@@ -177,7 +169,6 @@ export default function NotificationBell() {
     localStorage.setItem('baptistry_notifications', JSON.stringify(updated));
   };
 
-  // Expose addUpdateNotification to window for admin page
   useEffect(() => {
     if (typeof window !== 'undefined') {
       (window as any).addBaptistryUpdate = addUpdateNotification;
@@ -202,7 +193,6 @@ export default function NotificationBell() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Bell Icon */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -218,7 +208,6 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
           <div className="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-700">
@@ -248,23 +237,13 @@ export default function NotificationBell() {
                   }`}
                 >
                   <div className="flex items-start gap-2">
-                    <span className="text-lg">
-                      {getIcon(notif.type)}
-                    </span>
+                    <span className="text-lg">{getIcon(notif.type)}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 dark:text-white">
-                        {notif.title}
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-                        {notif.message}
-                      </p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        {formatDate(new Date(notif.date))}
-                      </p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white">{notif.title}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{notif.message}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{formatDate(new Date(notif.date))}</p>
                     </div>
-                    {!notif.read && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    )}
+                    {!notif.read && <div className="w-2 h-2 bg-blue-500 rounded-full"></div>}
                   </div>
                 </div>
               ))
@@ -272,17 +251,8 @@ export default function NotificationBell() {
           </div>
           
           <div className="p-2 border-t border-gray-200 dark:border-gray-700 text-center space-y-1">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Stay tuned for future BAPTISTRY updates
-            </p>
-            <a
-              href="https://www.facebook.com/BeginWithGod"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-blue-600 hover:underline block"
-            >
-              Visit our Facebook Page →
-            </a>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Stay tuned for future BAPTISTRY updates</p>
+            <a href="https://www.facebook.com/BeginWithGod" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline block">Visit our Facebook Page →</a>
           </div>
         </div>
       )}
