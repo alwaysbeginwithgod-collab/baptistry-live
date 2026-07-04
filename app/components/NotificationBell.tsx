@@ -17,20 +17,61 @@ export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Load notifications from localStorage
-  useEffect(() => {
+  // ============================================================
+  // LOAD & GENERATE NOTIFICATIONS
+  // ============================================================
+  const loadNotifications = () => {
+    const today = new Date().toDateString();
     const savedNotifications = localStorage.getItem('baptistry_notifications');
+    const lastEncouragementDate = localStorage.getItem('last_encouragement_date');
+    const lastDevotionDate = localStorage.getItem('last_devotion_date');
+    const encouragement = getDailyEncouragement();
+    
+    let allNotifications: Notification[] = [];
+    
+    // Load saved notifications (filter out old daily ones)
     if (savedNotifications) {
       const parsed = JSON.parse(savedNotifications);
-      const withDates = parsed.map((n: any) => ({ ...n, date: new Date(n.date) }));
-      setNotifications(withDates);
-      setUnreadCount(withDates.filter((n: Notification) => !n.read).length);
-    } else {
-      // Sample notifications (only if no saved data)
-      const sampleNotifications: Notification[] = [
+      // Keep only non-daily notifications (updates)
+      const updates = parsed.filter((n: any) => 
+        !n.id.startsWith('daily-enc-') && !n.id.startsWith('daily-devotion-')
+      );
+      allNotifications = updates.map((n: any) => ({ ...n, date: new Date(n.date) }));
+    }
+    
+    // Add daily encouragement if not yet shown today
+    if (lastEncouragementDate !== today) {
+      allNotifications.push({
+        id: `daily-enc-${Date.now()}`,
+        title: '☀️ Daily Encouragement',
+        message: encouragement.message,
+        type: 'encouragement',
+        link: '#',
+        date: new Date(),
+        read: false,
+      });
+      localStorage.setItem('last_encouragement_date', today);
+    }
+    
+    // Add daily devotion if not yet shown today
+    if (lastDevotionDate !== today) {
+      allNotifications.push({
+        id: `daily-devotion-${Date.now()}`,
+        title: '📖 Daily Devotion',
+        message: 'A new daily devotion is ready! Tap to read.',
+        type: 'devotion',
+        link: '#',
+        date: new Date(),
+        read: false,
+      });
+      localStorage.setItem('last_devotion_date', today);
+    }
+    
+    // If no saved notifications and no daily ones, add sample updates
+    if (allNotifications.length === 0 && !savedNotifications) {
+      allNotifications = [
         {
           id: '1',
           title: '🚀 Books Showroom Launched',
@@ -59,66 +100,20 @@ export default function NotificationBell() {
           read: true,
         },
       ];
-      setNotifications(sampleNotifications);
-      setUnreadCount(sampleNotifications.filter(n => !n.read).length);
-      localStorage.setItem('baptistry_notifications', JSON.stringify(sampleNotifications));
     }
-    setIsLoaded(true);
-  }, []);
+    
+    // Sort by date (newest first)
+    allNotifications.sort((a, b) => b.date.getTime() - a.date.getTime());
+    
+    setNotifications(allNotifications);
+    setUnreadCount(allNotifications.filter(n => !n.read).length);
+    localStorage.setItem('baptistry_notifications', JSON.stringify(allNotifications));
+  };
 
-  // ============================================================
-  // DAILY NOTIFICATIONS: Encouragement + Devotion (ALWAYS ADD)
-  // ============================================================
+  // Load notifications on mount
   useEffect(() => {
-    if (!isLoaded) return; // Wait for initial load
-    
-    const today = new Date().toDateString();
-    const lastEncouragementDate = localStorage.getItem('last_encouragement_date');
-    const lastDevotionDate = localStorage.getItem('last_devotion_date');
-    const encouragement = getDailyEncouragement();
-    
-    // Remove previous daily notifications (both types)
-    const filtered = notifications.filter(n => 
-      !n.id.startsWith('daily-enc-') && !n.id.startsWith('daily-devotion-')
-    );
-    
-    const newNotifications: Notification[] = [...filtered];
-    
-    // Add daily encouragement if not yet shown today
-    if (lastEncouragementDate !== today) {
-      newNotifications.push({
-        id: `daily-enc-${Date.now()}`,
-        title: '☀️ Daily Encouragement',
-        message: encouragement.message,
-        type: 'encouragement',
-        link: '#',
-        date: new Date(),
-        read: false,
-      });
-      localStorage.setItem('last_encouragement_date', today);
-    }
-    
-    // Add daily devotion if not yet shown today
-    if (lastDevotionDate !== today) {
-      newNotifications.push({
-        id: `daily-devotion-${Date.now()}`,
-        title: '📖 Daily Devotion',
-        message: 'A new daily devotion is ready! Tap to read.',
-        type: 'devotion',
-        link: '#',
-        date: new Date(),
-        read: false,
-      });
-      localStorage.setItem('last_devotion_date', today);
-    }
-    
-    // Only update if there are changes
-    if (newNotifications.length !== notifications.length) {
-      setNotifications(newNotifications);
-      setUnreadCount(newNotifications.filter(n => !n.read).length);
-      localStorage.setItem('baptistry_notifications', JSON.stringify(newNotifications));
-    }
-  }, [isLoaded, notifications]);
+    loadNotifications();
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
