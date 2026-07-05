@@ -21,14 +21,14 @@ export const theme = {
       primary: '#e5e7eb',
       secondary: '#d1d5db',
     },
-    brand: {
-      primary: '#1e3a5f',
-      secondary: '#2563eb',
-      accent: '#c5a059',      // Keeping this as accent
-      yellow: '#FFCC00',      // Traffic yellow for BAPTISTRY branding
-      yellowHover: '#FFD740', // Lighter yellow for hover states
-      yellowGlow: 'rgba(255, 204, 0, 0.3)', // Glow effect
-    },
+  brand: {
+    primary: '#1e3a5f',
+    secondary: '#2563eb',
+    accent: '#c5a059',
+    yellow: '#F28E00',  // Changed from '#FFCC00' to '#F28E00'
+    yellowHover: '#FFA726', // Changed from '#FFD740'
+    yellowGlow: 'rgba(242, 142, 0, 0.3)', // Changed from 'rgba(255, 204, 0, 0.3)'
+  },
     feedback: {
       helpful: '#22c55e',
       unhelpful: '#ef4444',
@@ -54,14 +54,14 @@ export const theme = {
       primary: '#374151',
       secondary: '#4b5563',
     },
-    brand: {
-      primary: '#3b6ea0',
-      secondary: '#60a5fa',
-      accent: '#e0c080',
-      yellow: '#FFD740',      // Brighter yellow for dark mode
-      yellowHover: '#FFE57F', // Lighter hover for dark mode
-      yellowGlow: 'rgba(255, 215, 64, 0.3)', // Glow effect for dark mode
-    },
+  brand: {
+    primary: '#3b6ea0',
+    secondary: '#60a5fa',
+    accent: '#e0c080',
+    yellow: '#F28E00',  // Changed from '#FFD740'
+    yellowHover: '#FFA726', // Changed from '#FFE57F'
+    yellowGlow: 'rgba(242, 142, 0, 0.3)', // Changed from 'rgba(255, 215, 64, 0.3)'
+  },
     feedback: {
       helpful: '#4ade80',
       unhelpful: '#f87171',
