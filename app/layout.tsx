@@ -24,15 +24,18 @@ export default function RootLayout({
           <html lang="en">
             <head>
               <link rel="manifest" href="/manifest.json" />
-              <meta name="theme-color" content="#1e3a5f" />
+              <meta name="theme-color" content="#0a1628" /> {/* Updated to dark navy */}
               <meta name="apple-mobile-web-app-capable" content="yes" />
               <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
               <link rel="apple-touch-icon" href="/baptistry-logo.png" />
               <title>BAPTISTRY - Your Bible Study Tool</title>
               <meta name="description" content="Biblical teaching from the King James Version" />
               <link rel="icon" href="/baptistry-logo.png" />
+              {/* Golden-yellow brand color for browser UI */}
+              <meta name="theme-color" content="#D4A017" media="(prefers-color-scheme: light)" />
+              <meta name="theme-color" content="#0a1628" media="(prefers-color-scheme: dark)" />
             </head>
-            <body>
+            <body className="app-container">
               <Script 
                 src="https://www.paypal.com/sdk/js?client-id=BAAdMBwnGSRahrsJy5-2A9wIqaqgZOjVM0jLL0kauYAny-raGaAZh8Xozwou1oAL4n07BEVdl2ex6WUdVM&components=hosted-buttons&disable-funding=venmo&currency=USD"
                 strategy="afterInteractive"

@@ -528,3 +528,85 @@ body {
 .text-muted {
   @apply text-gray-500 dark:text-gray-400;
 }
+
+/* ============================================ */
+/* PROFESSIONAL DARK NAVY GRADIENT BACKGROUND    */
+/* ============================================ */
+
+/* Light mode - keep as is */
+.bg-professional {
+  background: #f5f7fa;
+}
+
+/* Dark mode - professional navy to black gradient like BATASnatin */
+.dark .bg-professional {
+  background: linear-gradient(180deg, #0a1628 0%, #0d1b2a 30%, #0f1f2e 60%, #000000 100%);
+}
+
+/* Alternative: If you want it on the main app container */
+.app-container {
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+.dark .app-container {
+  background: linear-gradient(180deg, #0a1628 0%, #0d1b2a 30%, #0f1f2e 60%, #000000 100%);
+  min-height: 100vh;
+}
+
+/* Sidebar in dark mode - matches the gradient */
+.dark .sidebar-professional {
+  background: rgba(10, 22, 40, 0.95) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Header in dark mode - glass effect */
+.dark .header-professional {
+  background: rgba(10, 22, 40, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Right sidebar in dark mode */
+.dark .right-sidebar-professional {
+  background: rgba(10, 22, 40, 0.95) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ============================================ */
+/* GOLDEN-YELLOW BRAND COLOR (like BATASnatin)  */
+/* ============================================ */
+
+/* Professional golden-yellow (#D4A017) */
+.brand-gold {
+  color: #D4A017;
+}
+
+.brand-gold-hover:hover {
+  color: #E8B830;
+}
+
+.brand-gold-bg {
+  background-color: #D4A017;
+}
+
+.brand-gold-bg-hover:hover {
+  background-color: #E8B830;
+}
+
+.brand-gold-border {
+  border-color: #D4A017;
+}
+
+.brand-gold-glow {
+  text-shadow: 0 0 20px rgba(212, 160, 23, 0.3);
+}
+
+/* Dark mode golden-yellow is slightly brighter */
+.dark .brand-gold {
+  color: #D4A017;
+}
+
+.dark .brand-gold-glow {
+  text-shadow: 0 0 30px rgba(212, 160, 23, 0.4), 0 0 60px rgba(212, 160, 23, 0.1);
+}
