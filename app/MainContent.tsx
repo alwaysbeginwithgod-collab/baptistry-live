@@ -27,18 +27,18 @@ type Conversation = {
   pinned?: boolean;
 };
 
-// Expanded list of dynamic suggestions
+// Expanded list of dynamic suggestions with your new questions
 const SUGGESTIONS = [
   { text: "What do you believe about salvation?" },
   { text: "Give me a devotion about grace" },
   { text: "Create a preaching about sin" },
   { text: "Explain John 3:16" },
-  { text: "Does the Bible forbids us to pray to Mary?" },
-  { text: "Explain the biblical concept of the unpardonable sin." },
+  { text: "Does the Bible forbid us to pray to Mary?" },
+  { text: "What is the unpardonable sin?" },
   { text: "Who was created first, Satan or Adam?" },
   { text: "What is the fruit of the Spirit?" },
   { text: "Give me a devotion about forgiveness" },
-  { text: "What does the Bible teach about prayer?" },
+  { text: "Does the Bible forbid us to drink alcohol?" },
   { text: "Explain the book of Revelation" },
   { text: "What is the Gospel according to Paul?" },
   { text: "Give me a preaching about love" },
@@ -47,8 +47,8 @@ const SUGGESTIONS = [
   { text: "Give me a devotion about hope" },
   { text: "What is the meaning of baptism?" },
   { text: "Explain the Lord's Prayer" },
-  { text: "Give me a preaching about anger" },
-  { text: "What does the Bible teach about the Holy Spirit?" },
+  { text: "What is the 'Mark of the Beast' in Revelation?" },
+  { text: "Is speaking in tongues still meant for today?" },
 ];
 
 export default function MainContent() {
@@ -76,9 +76,10 @@ export default function MainContent() {
   const stopRequested = useRef(false);
   
   // ============================================================
-  // DYNAMIC SUGGESTIONS STATE
+  // DYNAMIC SUGGESTIONS STATE - Staggered updates
   // ============================================================
   const [currentSuggestions, setCurrentSuggestions] = useState<string[]>([]);
+  const [staggeredUpdateIndex, setStaggeredUpdateIndex] = useState<number | null>(null);
   const suggestionIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // ============================================================
@@ -117,24 +118,54 @@ export default function MainContent() {
   };
 
   // ============================================================
-  // DYNAMIC SUGGESTIONS - Update every 3 seconds
+  // DYNAMIC SUGGESTIONS - Staggered updates one at a time
   // ============================================================
-  const updateSuggestions = () => {
-    // Get 4 random suggestions from the pool
+  const updateSingleSuggestion = () => {
+    if (currentSuggestions.length === 0) {
+      // Initialize with 4 random suggestions
+      const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 4).map(s => s.text);
+      setCurrentSuggestions(selected);
+      setStaggeredUpdateIndex(0);
+      return;
+    }
+
+    // Get a new random suggestion to replace one position
+    let newSuggestion = '';
     const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 4).map(s => s.text);
-    setCurrentSuggestions(selected);
+    // Find a suggestion not currently in the list
+    for (const s of shuffled) {
+      if (!currentSuggestions.includes(s.text)) {
+        newSuggestion = s.text;
+        break;
+      }
+    }
+    // If all suggestions are already in the list, just pick a random one
+    if (!newSuggestion) {
+      newSuggestion = shuffled[0].text;
+    }
+
+    // Update the suggestion at the staggeredUpdateIndex position
+    const newSuggestions = [...currentSuggestions];
+    newSuggestions[staggeredUpdateIndex || 0] = newSuggestion;
+    setCurrentSuggestions(newSuggestions);
+
+    // Move to the next position (0, 1, 2, 3, then back to 0)
+    setStaggeredUpdateIndex(prev => (prev === null || prev >= 3) ? 0 : prev + 1);
   };
 
   // Start cycling suggestions when on welcome screen
   useEffect(() => {
     // Only run when there are no messages (welcome screen)
     if (messages.length === 0 && !isGenerating) {
-      // Initial set
-      updateSuggestions();
+      // Initialize with 4 random suggestions
+      const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 4).map(s => s.text);
+      setCurrentSuggestions(selected);
+      setStaggeredUpdateIndex(0);
       
-      // Set up interval to change every 3 seconds
-      suggestionIntervalRef.current = setInterval(updateSuggestions, 3000);
+      // Set up interval to update one suggestion every 3 seconds
+      suggestionIntervalRef.current = setInterval(updateSingleSuggestion, 3000);
     } else {
       // Clear interval when not on welcome screen
       if (suggestionIntervalRef.current) {
