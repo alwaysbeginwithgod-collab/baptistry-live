@@ -25,9 +25,9 @@ export const theme = {
       primary: '#1e3a5f',
       secondary: '#2563eb',
       accent: '#c5a059',
-      yellow: '#eab308',      // Yellow-500 from Tailwind (sun icon color)
-      yellowHover: '#facc15', // Yellow-400 for hover
-      yellowGlow: 'rgba(234, 179, 8, 0.3)',
+      yellow: '#D4A017',      // Professional golden-yellow (like BATASnatin)
+      yellowHover: '#E8B830', // Brighter gold for hover
+      yellowGlow: 'rgba(212, 160, 23, 0.3)', // Subtle glow
     },
     feedback: {
       helpful: '#22c55e',
@@ -58,9 +58,9 @@ export const theme = {
       primary: '#3b6ea0',
       secondary: '#60a5fa',
       accent: '#e0c080',
-      yellow: '#eab308',      // Same yellow for dark mode
-      yellowHover: '#facc15',
-      yellowGlow: 'rgba(234, 179, 8, 0.3)',
+      yellow: '#D4A017',      // Same golden-yellow for dark mode
+      yellowHover: '#E8B830',
+      yellowGlow: 'rgba(212, 160, 23, 0.3)',
     },
     feedback: {
       helpful: '#4ade80',

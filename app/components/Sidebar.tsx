@@ -48,8 +48,8 @@ export default function Sidebar({
   const { darkMode } = useTheme();
   
   // Define colors based on dark mode
-  const yellowColor = darkMode ? '#FFD740' : '#FFCC00';
-  const yellowGlow = darkMode ? 'rgba(255, 215, 64, 0.3)' : 'rgba(255, 204, 0, 0.3)';
+  const yellowColor = darkMode ? '#D4A017' : '#D4A017'; // Golden-yellow
+  const yellowGlow = darkMode ? 'rgba(212, 160, 23, 0.3)' : 'rgba(212, 160, 23, 0.3)';
 
   // UNIFORM button class - matching header buttons
   const buttonBaseClass = "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
@@ -174,7 +174,7 @@ useEffect(() => {
               <h1 
                 className="text-2xl font-bold transition-colors"
                 style={{ 
-                  color: '#F28E00',
+                  color: yellowColor,
                   textShadow: `0 0 20px ${yellowGlow}`
                 }}
               >
