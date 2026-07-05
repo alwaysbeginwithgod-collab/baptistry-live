@@ -1,7 +1,7 @@
 'use client';
 
 import RightSidebar from './components/RightSidebar';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MessageBubble from './components/MessageBubble';
@@ -27,7 +27,7 @@ type Conversation = {
   pinned?: boolean;
 };
 
-// Expanded list of dynamic suggestions with your new questions
+// Expanded list of dynamic suggestions
 const SUGGESTIONS = [
   { text: "What do you believe about salvation?" },
   { text: "Give me a devotion about grace" },
@@ -79,9 +79,8 @@ export default function MainContent() {
   // DYNAMIC SUGGESTIONS STATE - Staggered updates
   // ============================================================
   const [currentSuggestions, setCurrentSuggestions] = useState<string[]>([]);
-  const [staggeredUpdateIndex, setStaggeredUpdateIndex] = useState<number>(0);
-  const suggestionIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isInitializedRef = useRef<boolean>(false);
+  const [updateIndex, setUpdateIndex] = useState<number>(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // ============================================================
   // NAME MODAL STATE
@@ -122,81 +121,76 @@ export default function MainContent() {
   // DYNAMIC SUGGESTIONS - Staggered updates one at a time
   // ============================================================
   
-  // Initialize with 4 random suggestions
-  const initializeSuggestions = () => {
+  // Get 4 random suggestions
+  const getRandomSuggestions = useCallback(() => {
     const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 4).map(s => s.text);
-    setCurrentSuggestions(selected);
-    setStaggeredUpdateIndex(0);
-    isInitializedRef.current = true;
-  };
+    return shuffled.slice(0, 4).map(s => s.text);
+  }, []);
 
   // Update a single suggestion at the current index
-  const updateSingleSuggestion = () => {
-    if (currentSuggestions.length === 0) {
-      initializeSuggestions();
-      return;
-    }
-
-    // Get a new random suggestion
-    const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
-    let newSuggestion = '';
-    
-    // Find a suggestion not currently in the list
-    for (const s of shuffled) {
-      if (!currentSuggestions.includes(s.text)) {
-        newSuggestion = s.text;
-        break;
+  const updateSingleSuggestion = useCallback(() => {
+    setCurrentSuggestions(prev => {
+      if (prev.length === 0) {
+        return getRandomSuggestions();
       }
-    }
-    // If all suggestions are already in the list, just pick a random one
-    if (!newSuggestion) {
-      newSuggestion = shuffled[0].text;
-    }
-
-    // Update only the suggestion at the staggeredUpdateIndex position
-    const newSuggestions = [...currentSuggestions];
-    newSuggestions[staggeredUpdateIndex] = newSuggestion;
-    setCurrentSuggestions(newSuggestions);
-
+      
+      // Get a new random suggestion not currently in the list
+      const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
+      let newSuggestion = '';
+      
+      for (const s of shuffled) {
+        if (!prev.includes(s.text)) {
+          newSuggestion = s.text;
+          break;
+        }
+      }
+      
+      if (!newSuggestion) {
+        newSuggestion = shuffled[0].text;
+      }
+      
+      // Create new array with only the current index updated
+      const newSuggestions = [...prev];
+      newSuggestions[updateIndex] = newSuggestion;
+      
+      return newSuggestions;
+    });
+    
     // Move to the next position (0, 1, 2, 3, then back to 0)
-    setStaggeredUpdateIndex(prev => (prev >= 3) ? 0 : prev + 1);
-  };
+    setUpdateIndex(prev => (prev + 1) % 4);
+  }, [updateIndex, getRandomSuggestions]);
 
-  // Start cycling suggestions when on welcome screen
+  // Initialize and start cycling suggestions
   useEffect(() => {
     // Only run when there are no messages (welcome screen)
     if (messages.length === 0 && !isGenerating) {
-      // Only initialize if not already initialized
-      if (!isInitializedRef.current) {
-        initializeSuggestions();
+      // Set initial suggestions
+      if (currentSuggestions.length === 0) {
+        setCurrentSuggestions(getRandomSuggestions());
       }
       
       // Clear any existing interval
-      if (suggestionIntervalRef.current) {
-        clearInterval(suggestionIntervalRef.current);
-        suggestionIntervalRef.current = null;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
       }
       
-      // Set up interval to update one suggestion every 3 seconds
-      suggestionIntervalRef.current = setInterval(updateSingleSuggestion, 3000);
+      // Set up interval to update ONE suggestion every 3 seconds
+      intervalRef.current = setInterval(updateSingleSuggestion, 3000);
     } else {
       // Clear interval when not on welcome screen
-      if (suggestionIntervalRef.current) {
-        clearInterval(suggestionIntervalRef.current);
-        suggestionIntervalRef.current = null;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
-      // Reset initialized flag when leaving welcome screen
-      isInitializedRef.current = false;
     }
 
     return () => {
-      if (suggestionIntervalRef.current) {
-        clearInterval(suggestionIntervalRef.current);
-        suggestionIntervalRef.current = null;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [messages.length, isGenerating]);
+  }, [messages.length, isGenerating, currentSuggestions.length, getRandomSuggestions, updateSingleSuggestion]);
 
   // ============================================================
   // LOAD USER NAME FROM LOCALSTORAGE
@@ -207,7 +201,6 @@ export default function MainContent() {
       if (savedName) {
         setUserName(savedName);
       } else {
-        // First time sign-in - ask for name
         setShowNameModal(true);
       }
     }
@@ -255,7 +248,6 @@ export default function MainContent() {
       return;
     }
     
-    // Fallback to localStorage
     const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
     if (savedConversations) {
       try {
@@ -271,7 +263,6 @@ export default function MainContent() {
           })),
         }));
         setConversations(withDates);
-        // Backup to cloud
         saveConversationsToCloud({ userId, conversations: withDates })
           .then(() => console.log('✅ Cloud backup successful'))
           .catch((err) => console.error('❌ Cloud backup failed:', err));

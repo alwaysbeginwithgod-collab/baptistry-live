@@ -21,14 +21,14 @@ export const theme = {
       primary: '#e5e7eb',
       secondary: '#d1d5db',
     },
-  brand: {
-    primary: '#1e3a5f',
-    secondary: '#2563eb',
-    accent: '#c5a059',
-    yellow: '#F28E00',  // Changed from '#FFCC00' to '#F28E00'
-    yellowHover: '#FFA726', // Changed from '#FFD740'
-    yellowGlow: 'rgba(242, 142, 0, 0.3)', // Changed from 'rgba(255, 204, 0, 0.3)'
-  },
+    brand: {
+      primary: '#1e3a5f',
+      secondary: '#2563eb',
+      accent: '#c5a059',
+      yellow: '#eab308',      // Yellow-500 from Tailwind (sun icon color)
+      yellowHover: '#facc15', // Yellow-400 for hover
+      yellowGlow: 'rgba(234, 179, 8, 0.3)',
+    },
     feedback: {
       helpful: '#22c55e',
       unhelpful: '#ef4444',
@@ -54,14 +54,14 @@ export const theme = {
       primary: '#374151',
       secondary: '#4b5563',
     },
-  brand: {
-    primary: '#3b6ea0',
-    secondary: '#60a5fa',
-    accent: '#e0c080',
-    yellow: '#F28E00',  // Changed from '#FFD740'
-    yellowHover: '#FFA726', // Changed from '#FFE57F'
-    yellowGlow: 'rgba(242, 142, 0, 0.3)', // Changed from 'rgba(255, 215, 64, 0.3)'
-  },
+    brand: {
+      primary: '#3b6ea0',
+      secondary: '#60a5fa',
+      accent: '#e0c080',
+      yellow: '#eab308',      // Same yellow for dark mode
+      yellowHover: '#facc15',
+      yellowGlow: 'rgba(234, 179, 8, 0.3)',
+    },
     feedback: {
       helpful: '#4ade80',
       unhelpful: '#f87171',
