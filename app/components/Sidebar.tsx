@@ -45,8 +45,8 @@ export default function Sidebar({
   const [bibleVerse, setBibleVerse] = useState({ reference: '', text: '' });
   const [isDevotionOpen, setIsDevotionOpen] = useState(false);
 
-  // Get theme for styling - FIXED: useTheme returns the theme value directly
-  const theme = useTheme();
+  // Get theme for styling - FIXED: handle the theme context properly
+  const { theme } = useTheme();
   const mode = theme === 'dark' ? 'dark' : 'light';
   const colors = getTheme(mode);
 
