@@ -159,7 +159,7 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
                 e.stopPropagation();
                 setIsHistoryOpen(!isHistoryOpen);
               }}
-              className={messageButtonClass}
+              className={`${messageButtonClass} inline-flex items-center whitespace-nowrap`}
             >
               <span>{messageCount} {messageCount === 1 ? 'message' : 'messages'}</span>
               <svg className={`w-3 h-3 ml-1 transition-transform ${isHistoryOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
