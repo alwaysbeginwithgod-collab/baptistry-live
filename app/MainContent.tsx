@@ -9,7 +9,7 @@ import { useUser, SignInButton } from '@clerk/nextjs';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import NameModal from './components/NameModal';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from './context/ThemeContext';
 
 type Message = {
   id: string;
