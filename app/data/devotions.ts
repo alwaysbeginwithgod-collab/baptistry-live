@@ -356,5 +356,143 @@ What have your words been revealing about your faith lately? You don’t need Ch
     image: '/devotions/Devotion-15.jpg',
     facebookLink: 'https://www.facebook.com/BeginWithGod/'
   },
+
+  {
+    id: 'Devotion-16',
+    title: 'Leave The Boat',
+    tagline: `✍️ "Faith is not proven by staying afloat; It is proven when you risk the boat."`,
+    scripture: 'Mark 14:29 "And he said, Come. And when Peter was come down out of the ship, he walked on the water, to go to Jesus."',
+    content: `Most of us admire bold faith until it requires personal risk. Comfort is one of the most dangerous places a believer can settle. We want safety before surrender, guarantees before obedience, and calm waters before stepping out. Yet the greatest moments of faith often happen in the middle of storms. The question is not whether we feel safe in the boat but whether we trust Christ enough to leave it anyway.
+
+Matthew 14:29 records one of the boldest moments in Scripture: “And he said, Come. And when Peter was come down out of the ship, he walked on the water, to go to Jesus.” The storm was still raging. The wind had not stopped. Yet Peter stepped out because Christ called him. Eleven men stayed in the boat. One man walked on water. The difference was not ability—it was willingness to leave.
+
+Leaving the boat is like stepping into uncertainty with confidence in Christ. The waves are real, the wind is strong, and fear is present. Yet the safest place is not always where things feel secure—it is wherever Christ is. Peter’s step was not reckless—it was reliant. He trusted the Lord Jesus more than the storm around him.
+
+Every hero in Hebrews 11 left something behind to follow God into the unknown. Noah risked public ridicule and built an ark on dry ground (Hebrews 11:7). Abraham left the security of his homeland (Hebrews 11:8). Moses forsook the treasures of Egypt (Hebrews 11:24–26). They understood that comfort can quietly become captivity. What feels safest may actually keep us farthest from obedience.
+
+Too often, we remain trapped in comfortable boats while praying for miraculous lives. But comfort zones rarely become faith zones. Peter was the only disciple—willing to leave the ship. He sank, but Jesus saved. Faith that risks may stumble, but it is always met by Christ’s hand. The risk is never greater than His rescue. Do not live like a boat permanently tied to the dock. Faith risks because Christ is worth trusting.
+
+Jesus Himself left the “boat” of heaven’s glory. He stepped into our broken world and risked everything—endured rejection, faced the cross, and bore our sin. “Christ also hath once suffered for sins” (1 Peter 3:18). Through His finished work, we are not only forgiven—we are invited to trust Him beyond our fears. The hand that caught Peter is the same hand pierced for our salvation.
+
+What boat have you been sitting in because fear feels safer than obedience? You don’t need Christ merely to make life comfortable—you need Him to call you beyond comfort. Stop staring at the wind. Stop staying in comfort zones. He’s not asking you to walk on water perfectly—He’s asking you to risk the boat. And even if your faith trembles mid‑step, His hand is still strong enough and faster than the waves to catch you.`,
+    prayer: `Heavenly Father, forgive us for clinging to comfort more than trusting Your call. Strengthen our faith to step beyond fear and follow You wherever You lead. Thank You that when our faith trembles, Christ still holds us securely. Help us leave the boat and trust You completely. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-16.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-17',
+    title: 'Release Your Grip',
+    tagline: `✍️ "The hand that grips too tight will never know. The harvest God reserves for those who let it go."`,
+    scripture: '2 Corinthians 9:7 "Every man according as he purposeth in his heart, so let him give; not grudgingly, or of necessity: for God loveth a cheerful giver."',
+    content: `We live in a world trained to hold tightly—money, security, possessions, opportunities, and authority. Fear tells us that if we release too much, we may not have enough left for ourselves. So we calculate, protect, and preserve. Yet God often tests our faith not by what we receive, but by what we are willing to release. The question is not whether we have resources—but whether we trust the Source of them all.
+
+2 Corinthians 9:7 declares, “Every man according as he purposeth in his heart, so let him give; not grudgingly, or of necessity: for God loveth a cheerful giver.” Paul was not merely collecting an offering—he was teaching believers that biblical giving is not forced; it is joyful. God is the Source, everything else is just a resource. He is rich and not interested in our treasures, but willing hearts that trust Him fully.
+
+“Not grudgingly, or of necessity” means giving under pressure of obligation rather than giving cheerfully. Picture an open hand beneath a fountain. Cupped palms try to hoard the water, yet lose it through trembling fingers. Open hands receive the steady flow, trusting the Source to supply what is truly needed. Faith gives open‑handed because it trusts the Giver more than the gift.
+
+The Scriptures repeatedly connect generosity with trust in God: “Honour the LORD with thy substance” (Proverbs 3:9). “It is more blessed to give than to receive” (Acts 20:35). “My God shall supply all your need” (Philippians 4:19). “Give, and it shall be given unto you” (Luke 6:38). Faith understands that everything we possess already belongs to God.
+
+Too often, we cling to temporary things as though our security depends upon them. But fear hoards while faith releases. “Lay not up for yourselves treasures upon earth” (Matthew 6:19). Do not live like a clenched fist that can neither give nor receive. Tight hands often reveal tight trust. Faith opens its hands because it knows God’s supply never runs dry.
+
+Christ Himself is the greatest Giver of all. “For ye know the grace of our Lord Jesus Christ, that, though he was rich, yet for your sakes he became poor” (2 Corinthians 8:9). He gave not merely possessions, but Himself. At the cross, He withheld nothing for our salvation. Through His finished work, we learn that true giving flows from hearts transformed by grace.
+
+What are you holding so tightly that God calls you to release—time, talent, treasure? You don’t need Christ merely to bless what you keep—you need Him to multiply what you release. Stop clinging to resources as if they are yours. Trust Him. Release your grip. Because the open hand is the hand that receives.`,
+    prayer: `Heavenly Father, forgive us for trusting possessions more than trusting You. Teach us to give with willing hearts and confident faith. Remind us that all we have comes from Your hand. Help us reflect the generosity of Christ in all we do. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-17.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-18',
+    title: 'Love Does More',
+    tagline: `✍️ "Faith is not loud in words alone; It is loudest when love is shown."`,
+    scripture: 'Galatians 5:6 "For in Jesus Christ neither circumcision availeth any thing, nor uncircumcision; but faith which worketh by love."',
+    content: `We often measure faith by how much we know, how much we pray, or how strongly we believe. But Scripture reveals a deeper truth: faith is proven by love in action. Real faith does not sit still—it serves. The question is not whether we claim to have faith—it is whether our faith expresses love.
+
+Galatians 5:6 declares, “For in Jesus Christ neither circumcision availeth any thing, nor uncircumcision; but faith which worketh by love.” Paul reminds believers that outward religious identity means nothing before God. Rituals may impress people, but only transformed faith produces genuine love. Love is the engine that drives obedience, compassion, and sacrifice.
+
+Faith working through love is like roots beneath a healthy tree. The roots remain unseen, yet they produce visible fruit. In the same way, genuine faith hidden in the heart eventually reveals itself through action. Love is not the replacement of faith—it is the evidence that faith is alive.
+
+In scriptures, faith and loving are inseparable: “Let us not love in word, neither in tongue; but in deed and in truth” (1 John 3:18). “By love serve one another” (Galatians 5:13). “Faith without works is dead” (James 2:20). “Bear ye one another’s burdens” (Galatians 6:2). Faith that serves is faith that reflects Christ.
+
+Too often, we say we love God yet avoid practical love. We sing passionately yet serve reluctantly. We speak truth but with little compassion. “Though I have all faith… and have not charity, I am nothing” (1 Corinthians 13:2). Do not live like a believer whose faith is loud in speech but silent in service. Faith without love becomes cold. Love without action becomes empty. But faith working through love becomes powerful.
+
+Jesus Himself showed us what serving love looks like. He washed feet, touched lepers, fed the hungry, welcomed sinners, wept with the grieving, and ultimately gave His life upon the cross. “The Son of man came not to be ministered unto, but to minister” (Matthew 20:28). Through His finished work, we are not only saved by love—we are transformed to serve through love.
+
+Who around you needs more than your words right now—someone who needs your service, compassion, and Christlike love? You don’t need Christ merely to make you religious—you need Him to make you loving. Stop measuring faith only by what you know. Let your faith “worketh by love,” because love does more.`,
+    prayer: `Heavenly Father, forgive us for faith that speaks loudly but loves weakly. Fill our hearts with the love of Christ and teach us to serve others with humility and compassion. Let our faith become visible through actions that honor You. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-18.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-19',
+    title: 'Sent Not Silent',
+    tagline: `✍️ "Faith is not proven by staying still; It is proven when we obey His will."`,
+    scripture: 'Matthew 28:19 "Go ye therefore, and teach all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Ghost:"',
+    content: `We live in a generation that talks endlessly but tells nothing of eternity. We repost opinions, share stories, and speak about everything—yet often stay silent about Christ. Fear of rejection, awkwardness, criticism, or inconvenience keeps many believers spiritually motionless. The question is not whether the world needs the Gospel—but whether we are willing to be sent rather than remain silent.
+
+In Matthew 28:19, the risen Christ issues a decree to every believer: “Go ye therefore, and teach all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Ghost.” This Great Commission is an authoritative, corporate mandate. We were never designed to remain hidden within our church walls.
+
+The Great Commission is like carrying light into a darkened city. Light does not argue with darkness—it simply shines. In the same way, the Gospel enters broken places, hopeless hearts, and blinded lives with the truth of Christ. The world does not need polished performances. It needs faithful witnesses willing to go.
+
+The Scriptures repeatedly call God’s people to proclaim Him boldly: “How shall they hear without a preacher?” (Romans 10:14). “Ye shall be witnesses unto me” (Acts 1:8). “Preach the word” (2 Timothy 4:2). “The field is the world” (Matthew 13:38). The opposition is real, but the mission is clear. We are not called merely to admire the mission—we are called to participate in it because we are Christ’s spokesperson.
+
+Too often, we remain silent while claiming we are sent. Do not live like a believer who has been given water in a desert yet refuses to share the cup. “Ye are the light of the world” (Matthew 5:14). Light does not apologize for shining. Salt does not ask permission to savor. “Lift up your eyes, and look on the fields; for they are white already to harvest” (John 4:35). You are sent, not silent. 
+
+Our ultimate pattern is the Lord Jesus Christ, “for the Son of man is come to seek and to save that which was lost” (Luke 19:10). He did not remain silent in heaven; He descended to Calvary, bearing our condemnation. Through His finished work, salvation is now proclaimed to all nations. The risen Christ, who commands us to go, also promises, “I am with you alway” (Matthew 28:20).
+
+Who in your life has never heard the Gospel because you have remained silent? A neighbor? A coworker? A family member? You do not need Christ merely to save you—you need Him to send you. Share the gospel of Christ. The world is waiting. You are sent, not silent. Go without fear, because Christ goes with you.`,
+    prayer: `Heavenly Father, forgive us for remaining silent when You have called us to go. Break our fear and fill our hearts with courage, compassion, and urgency for souls. Help us share the Gospel faithfully and trust Christ to work through our obedience. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-19.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-20',
+    title: 'Tomorrow Can Wait',
+    tagline: `✍️ "Tomorrow's burdens are not yours to borrow. Trust God for today, and leave the rest for tomorrow."`,
+    scripture: 'Matthew 6:34 "Take therefore no thought for the morrow: for the morrow shall take thought for the things of itself. Sufficient unto the day is the evil thereof."',
+    content: `We are a generation of chronic overthinkers, wrestling with shadows before tomorrow even arrives. Anxiety carries the burden of next day’s bills, next month’s inflation, next year’s decisions, and the next decade’s options—forgetting we were never designed to carry a future we do not own. The question is not whether we will survive tomorrow but whether we trust God enough to live faithfully today.
+
+Matthew 6:34 declares, “Take therefore no thought for the morrow: for the morrow shall take thought for the things of itself. Sufficient unto the day is the evil thereof.” Jesus reminds us that faith is not about stockpiling certainty—it is about daily dependence. Tomorrow is not promised, but today is provided. Faith lives in the present, trusting God moment by moment.
+
+Faith gathers daily bread like Israel in the wilderness. Storing manna bred rot, yet trusting God’s morning provision sustained them (Exodus 16:19–20). In the same way, God calls us to trust Him daily, not hoard grace for emergencies. We receive His mercy as heaven provides it—fresh and sufficient each day (Lamentations 3:22–23).
+
+The Scriptures call us to daily trust: “Give us this day our daily bread” (Matthew 6:11). “As thy days, so shall thy strength be” (Deuteronomy 33:25). “The just shall live by faith” (Romans 1:17). Faith is not merely a future hope—it is a present walk. It does not wait for tomorrow’s answers before obeying today.
+
+Too often, we live in tomorrow’s anxiety instead of today’s assurance. We rehearse future disasters instead of resting in present grace. “Casting all your care upon him; for he careth for you” (1 Peter 5:7). Do not live like a traveler dragging tomorrow’s luggage through today’s journey. Worry predicts the future without God. Faith walks with God one day at a time.
+
+Christ secured this daily trust through His finished work. “I am the bread of life: he that cometh to me shall never hunger” (John 6:35). He did not merely promise grace—He gave us Himself. We do not trust a distant God with an uncertain future; we trust a present Saviour whose blood has already secured every tomorrow we will ever face.
+
+What tomorrow has been stealing your peace today? You do not need Christ merely to help you survive the future—you need Him to lead you through today. Stop borrowing fear from tomorrow. God’s grace has not failed you yet, and it will not fail you next. Tomorrow can wait. Will you trust Him today?`,
+    prayer: `Heavenly Father, forgive us for carrying worries You never asked us to bear. Teach us to trust You one day at a time and rest in Your faithful care. Help us walk by faith today, knowing Christ already holds our tomorrow. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-20.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-21',
+    title: 'Unseen But Certain',
+    tagline: `✍️ "Faith does not wait for proof to appear. It trusts God’s voice when the path is unclear."`,
+    scripture: 'Hebrews 11:1 "Now faith is the substance of things hoped for, the evidence of things not seen."',
+    content: `We all crave certainty. We want answers before decisions, contracts before investment, guarantees before commitment, and evidence before engagement. We have mistaken caution for wisdom. We fear what we cannot see, then wonder why our faith feels more like a transaction than a transformation. The question is not whether uncertainty exists but whether our faith can remain steady when clarity does not.
+
+Hebrews 11:1 declares, “Now faith is the substance of things hoped for, the evidence of things not seen.” Faith is confidence in the unseen, assurance in the unknown, and trust in the God who sees the end from the beginning. If all we see is what is visible, we may miss what God is trying to show us. Faith does not eliminate uncertainty—it overcomes it through confidence in God.
+
+Faith is like an anchor dropped beneath dark waters. The storm above may rage, the winds may howl, and the surface may feel unstable, yet the anchor holds because it is fastened to something deeper than what can be seen. In the same way, faith holds steady because it is anchored in God Himself.
+
+The Scriptures repeatedly call us to trust beyond visible certainty: “For we walk by faith, not by sight” (2 Corinthians 5:7). “Trust in the LORD with all thine heart” (Proverbs 3:5). “Thy word is a lamp unto my feet” (Psalm 119:105). Faith is not certainty about circumstances—it is certainty about God.
+
+Too often, we panic when God seems silent, fear when the path is unclear, and hesitate when the future is hidden. Yet uncertainty is not the enemy of faith—it is the environment where faith grows. “Blessed are they that have not seen, and yet have believed” (John 20:29). Do not live like a believer who must see everything before trusting anything. Faith is unseen—but certain.
+
+Abraham walked toward a land he had never seen. Noah built an ark before rain ever fell. Moses stepped toward the sea before the waters fully parted. But above all, Christ walked toward the cross knowing the suffering before Him. “Who hath delivered us from the power of darkness” (Colossians 1:13). Through His finished work, we learn that even when we cannot trace God’s hand, we can still trust His heart.
+
+What uncertainty are you facing today—direction, provision, decisions, relationships, or the future? You do not need Christ merely to remove the unknown—you need Him to lead you through it. Stop waiting for perfect clarity. Trust the God who already stands in your tomorrow. The future may be unseen to you, but it has never been unseen to Him.`,
+    prayer: `Heavenly Father, forgive us for doubting You whenever life feels uncertain. Teach us to trust Your promises even when we cannot see the outcome. Strengthen our faith to walk confidently with Christ, knowing that You are faithful in every unseen moment. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-21.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
   // Add more devotions here
 ];
