@@ -174,7 +174,7 @@ useEffect(() => {
               <h1 
                 className="text-2xl font-bold transition-colors"
                 style={{ 
-                  color: yellowColor,
+                  color: #F28E00,
                   textShadow: `0 0 20px ${yellowGlow}`
                 }}
               >

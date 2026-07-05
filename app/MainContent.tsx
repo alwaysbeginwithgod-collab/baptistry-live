@@ -79,8 +79,9 @@ export default function MainContent() {
   // DYNAMIC SUGGESTIONS STATE - Staggered updates
   // ============================================================
   const [currentSuggestions, setCurrentSuggestions] = useState<string[]>([]);
-  const [staggeredUpdateIndex, setStaggeredUpdateIndex] = useState<number | null>(null);
+  const [staggeredUpdateIndex, setStaggeredUpdateIndex] = useState<number>(0);
   const suggestionIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitializedRef = useRef<boolean>(false);
 
   // ============================================================
   // NAME MODAL STATE
@@ -120,19 +121,27 @@ export default function MainContent() {
   // ============================================================
   // DYNAMIC SUGGESTIONS - Staggered updates one at a time
   // ============================================================
+  
+  // Initialize with 4 random suggestions
+  const initializeSuggestions = () => {
+    const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 4).map(s => s.text);
+    setCurrentSuggestions(selected);
+    setStaggeredUpdateIndex(0);
+    isInitializedRef.current = true;
+  };
+
+  // Update a single suggestion at the current index
   const updateSingleSuggestion = () => {
     if (currentSuggestions.length === 0) {
-      // Initialize with 4 random suggestions
-      const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
-      const selected = shuffled.slice(0, 4).map(s => s.text);
-      setCurrentSuggestions(selected);
-      setStaggeredUpdateIndex(0);
+      initializeSuggestions();
       return;
     }
 
-    // Get a new random suggestion to replace one position
-    let newSuggestion = '';
+    // Get a new random suggestion
     const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
+    let newSuggestion = '';
+    
     // Find a suggestion not currently in the list
     for (const s of shuffled) {
       if (!currentSuggestions.includes(s.text)) {
@@ -145,24 +154,29 @@ export default function MainContent() {
       newSuggestion = shuffled[0].text;
     }
 
-    // Update the suggestion at the staggeredUpdateIndex position
+    // Update only the suggestion at the staggeredUpdateIndex position
     const newSuggestions = [...currentSuggestions];
-    newSuggestions[staggeredUpdateIndex || 0] = newSuggestion;
+    newSuggestions[staggeredUpdateIndex] = newSuggestion;
     setCurrentSuggestions(newSuggestions);
 
     // Move to the next position (0, 1, 2, 3, then back to 0)
-    setStaggeredUpdateIndex(prev => (prev === null || prev >= 3) ? 0 : prev + 1);
+    setStaggeredUpdateIndex(prev => (prev >= 3) ? 0 : prev + 1);
   };
 
   // Start cycling suggestions when on welcome screen
   useEffect(() => {
     // Only run when there are no messages (welcome screen)
     if (messages.length === 0 && !isGenerating) {
-      // Initialize with 4 random suggestions
-      const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
-      const selected = shuffled.slice(0, 4).map(s => s.text);
-      setCurrentSuggestions(selected);
-      setStaggeredUpdateIndex(0);
+      // Only initialize if not already initialized
+      if (!isInitializedRef.current) {
+        initializeSuggestions();
+      }
+      
+      // Clear any existing interval
+      if (suggestionIntervalRef.current) {
+        clearInterval(suggestionIntervalRef.current);
+        suggestionIntervalRef.current = null;
+      }
       
       // Set up interval to update one suggestion every 3 seconds
       suggestionIntervalRef.current = setInterval(updateSingleSuggestion, 3000);
@@ -172,6 +186,8 @@ export default function MainContent() {
         clearInterval(suggestionIntervalRef.current);
         suggestionIntervalRef.current = null;
       }
+      // Reset initialized flag when leaving welcome screen
+      isInitializedRef.current = false;
     }
 
     return () => {
