@@ -7,7 +7,6 @@ import SupportModal from './SupportModal';
 import AboutModal from './AboutModal';
 import DevotionModal from './DevotionModal';
 import { useTheme } from '../context/ThemeContext';
-import { getTheme } from '../styles/theme';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -45,10 +44,12 @@ export default function Sidebar({
   const [bibleVerse, setBibleVerse] = useState({ reference: '', text: '' });
   const [isDevotionOpen, setIsDevotionOpen] = useState(false);
 
-  // Get theme for styling - FIXED: handle the theme context properly
-  const { theme } = useTheme();
-  const mode = theme === 'dark' ? 'dark' : 'light';
-  const colors = getTheme(mode);
+  // Get theme - FIXED: useTheme returns { darkMode, toggleDarkMode }
+  const { darkMode } = useTheme();
+  
+  // Define colors based on dark mode
+  const yellowColor = darkMode ? '#FFD740' : '#FFCC00';
+  const yellowGlow = darkMode ? 'rgba(255, 215, 64, 0.3)' : 'rgba(255, 204, 0, 0.3)';
 
   const filteredConversations = conversations.filter(conv =>
     conv.content.toLowerCase().includes(searchQuery.toLowerCase())
@@ -164,8 +165,8 @@ useEffect(() => {
               <h1 
                 className="text-xl font-bold transition-colors"
                 style={{ 
-                  color: colors.brand.yellow,
-                  textShadow: `0 0 20px ${colors.brand.yellowGlow}`
+                  color: yellowColor,
+                  textShadow: `0 0 20px ${yellowGlow}`
                 }}
               >
                 BAPTISTRY
