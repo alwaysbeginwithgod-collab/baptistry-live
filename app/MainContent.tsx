@@ -76,7 +76,7 @@ export default function MainContent() {
   const stopRequested = useRef(false);
   
   // ============================================================
-  // DYNAMIC SUGGESTIONS STATE - Staggered updates
+  // DYNAMIC SUGGESTIONS STATE - Staggered updates with fade
   // ============================================================
   const [currentSuggestions, setCurrentSuggestions] = useState<string[]>([]);
   const [updateIndex, setUpdateIndex] = useState<number>(0);
@@ -119,7 +119,7 @@ export default function MainContent() {
   };
 
   // ============================================================
-  // DYNAMIC SUGGESTIONS - Staggered updates one at a time with fade
+  // DYNAMIC SUGGESTIONS - Staggered updates with smooth fade
   // ============================================================
   
   // Get 4 random suggestions
@@ -130,10 +130,10 @@ export default function MainContent() {
 
   // Update a single suggestion at the current index with fade effect
   const updateSingleSuggestion = useCallback(() => {
-    // First, trigger fade out on the current index
+    // Start fade out
     setFadingIndex(updateIndex);
     
-    // After a short delay, update the text and trigger fade in
+    // After fade out, update the text and fade in
     setTimeout(() => {
       setCurrentSuggestions(prev => {
         if (prev.length === 0) {
@@ -162,9 +162,9 @@ export default function MainContent() {
         return newSuggestions;
       });
       
-      // Clear the fading index after text update
+      // End fade effect
       setFadingIndex(null);
-    }, 300); // Half the duration of the CSS transition
+    }, 200);
     
     // Move to the next position (0, 1, 2, 3, then back to 0)
     setUpdateIndex(prev => (prev + 1) % 4);
@@ -172,26 +172,22 @@ export default function MainContent() {
 
   // Initialize and start cycling suggestions
   useEffect(() => {
-    // Only run when there are no messages (welcome screen)
     if (messages.length === 0 && !isGenerating) {
-      // Set initial suggestions
       if (currentSuggestions.length === 0) {
         setCurrentSuggestions(getRandomSuggestions());
       }
       
-      // Clear any existing interval
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
       
-      // Set up interval to update ONE suggestion every 3 seconds
-      intervalRef.current = setInterval(updateSingleSuggestion, 3000);
+      intervalRef.current = setInterval(updateSingleSuggestion, 4000);
     } else {
-      // Clear interval when not on welcome screen
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+      setFadingIndex(null);
     }
 
     return () => {
@@ -202,17 +198,647 @@ export default function MainContent() {
     };
   }, [messages.length, isGenerating, currentSuggestions.length, getRandomSuggestions, updateSingleSuggestion]);
 
-  // ... (keep all your existing functions: load conversations, sendMessage, etc.)
+  // ============================================================
+  // LOAD USER NAME FROM LOCALSTORAGE
+  // ============================================================
+  useEffect(() => {
+    if (userId && isLoaded) {
+      const savedName = localStorage.getItem(`baptistry_user_name_${userId}`);
+      if (savedName) {
+        setUserName(savedName);
+      } else {
+        setShowNameModal(true);
+      }
+    }
+  }, [userId, isLoaded]);
 
-  // UNIFORM button class for "Try asking" buttons - matching header style with fade transition
-  const tryAskingButtonClass = (index: number) => {
-    const isFading = fadingIndex === index;
-    return `block w-full text-left text-sm text-blue-600 dark:text-blue-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-700 dark:hover:text-blue-300 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-      isFading ? 'opacity-0 transform scale-95' : 'opacity-100 transform scale-100'
-    }`;
+  // ============================================================
+  // SAVE USER NAME
+  // ============================================================
+  const handleNameSave = (name: string) => {
+    setUserName(name);
+    if (userId) {
+      localStorage.setItem(`baptistry_user_name_${userId}`, name);
+    }
+    setShowNameModal(false);
   };
 
-  // The return statement with the updated buttons
+  // Load conversations from Convex cloud (primary) or localStorage (backup)
+  useEffect(() => {
+    console.log('🔵 LOAD EFFECT - userId:', userId, 'isLoaded:', isLoaded);
+    
+    if (!isLoaded) {
+      console.log('⏳ Clerk still loading...');
+      return;
+    }
+    
+    if (!userId) {
+      console.log('⚠️ No userId found (user not signed in)');
+      setConversations([]);
+      return;
+    }
+    
+    if (loadConversationsFromCloud === undefined) {
+      console.log('⏳ Waiting for Convex cloud data...');
+      return;
+    }
+    
+    const isValidCloudData = (data: any): data is Conversation[] => {
+      return data !== null && data !== "skip" && Array.isArray(data);
+    };
+    
+    if (isValidCloudData(loadConversationsFromCloud) && loadConversationsFromCloud.length > 0) {
+      console.log('✅ LOADING FROM CONVEX CLOUD:', loadConversationsFromCloud.length);
+      setConversations(loadConversationsFromCloud);
+      localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(loadConversationsFromCloud));
+      return;
+    }
+    
+    const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
+    if (savedConversations) {
+      try {
+        console.log('💾 LOADING FROM LOCALSTORAGE (fallback)');
+        const parsed = JSON.parse(savedConversations);
+        const withDates = parsed.map((conv: any) => ({
+          ...conv,
+          createdAt: new Date(conv.createdAt),
+          updatedAt: new Date(conv.updatedAt),
+          messages: conv.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          })),
+        }));
+        setConversations(withDates);
+        saveConversationsToCloud({ userId, conversations: withDates })
+          .then(() => console.log('✅ Cloud backup successful'))
+          .catch((err) => console.error('❌ Cloud backup failed:', err));
+      } catch (e) {
+        console.error('Failed to load conversations', e);
+      }
+    } else {
+      setConversations([]);
+    }
+  }, [userId, isLoaded, loadConversationsFromCloud]);
+
+  // Save conversations to Convex cloud AND localStorage
+  useEffect(() => {
+    console.log('🔵 SAVE EFFECT - conversations:', conversations.length, 'userId:', userId);
+    
+    if (!userId) {
+      console.log('⚠️ No userId, skipping save');
+      return;
+    }
+    
+    if (conversations.length === 0) {
+      console.log('⚠️ No conversations to save');
+      return;
+    }
+    
+    console.log('💾 SAVING to localStorage and Convex cloud:', conversations.length);
+    localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
+    saveConversationsToCloud({ userId, conversations })
+      .then(() => console.log('✅ Convex save successful'))
+      .catch((err) => console.error('❌ Convex save failed:', err));
+  }, [conversations, userId]);
+
+  const saveCurrentConversation = () => {
+    if (!currentConversationId) return;
+    
+    const title = messages[0]?.content?.substring(0, 40) || 'New Chat';
+    const updatedConversations = conversations.map(conv =>
+      conv.id === currentConversationId
+        ? { ...conv, title, messages: [...messages], updatedAt: new Date() }
+        : conv
+    );
+    setConversations(updatedConversations);
+  };
+
+  const startNewChat = () => {
+    if (messages.length > 0 && currentConversationId) {
+      saveCurrentConversation();
+    }
+    
+    const newConversation: Conversation = {
+      id: Date.now().toString(),
+      title: 'New Chat',
+      messages: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      pinned: false,
+    };
+    
+    setConversations(prev => {
+      const withNew = [newConversation, ...prev];
+      const sorted = [...withNew].sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      });
+      return sorted;
+    });
+    setCurrentConversationId(newConversation.id);
+    setMessages([]);
+    setInput('');
+    
+    setTimeout(autoResizeTextarea, 0);
+  };
+
+  const loadConversation = (conversationId: string) => {
+    console.log('🔵 loadConversation called for:', conversationId);
+    console.log('🔵 Current conversations count:', conversations.length);
+    console.log('🔵 Current conversations IDs:', conversations.map(c => c.id));
+    
+    if (messages.length > 0 && currentConversationId) {
+      saveCurrentConversation();
+    }
+    
+    let conversation = conversations.find(c => c.id === conversationId);
+    
+    if (!conversation && userId) {
+      console.log('🔵 Conversation not in state, trying localStorage...');
+      const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
+      if (savedConversations) {
+        try {
+          const parsed = JSON.parse(savedConversations);
+          const withDates = parsed.map((conv: any) => ({
+            ...conv,
+            createdAt: new Date(conv.createdAt),
+            updatedAt: new Date(conv.updatedAt),
+            messages: conv.messages.map((msg: any) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp),
+            })),
+          }));
+          setConversations(withDates);
+          conversation = withDates.find(c => c.id === conversationId);
+          console.log('🔵 Found in localStorage:', conversation ? 'Yes' : 'No');
+        } catch (e) {
+          console.error('Failed to load from localStorage', e);
+        }
+      }
+    }
+    
+    if (conversation) {
+      console.log('🔵 Loading conversation:', conversationId);
+      console.log('🔵 Messages count:', conversation.messages.length);
+      
+      if (conversation.messages && conversation.messages.length > 0) {
+        setConversations(prev => prev.map(conv =>
+          conv.id === conversationId
+            ? { ...conv, updatedAt: new Date() }
+            : conv
+        ));
+        setMessages(conversation.messages);
+        setCurrentConversationId(conversationId);
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            scrollToBottomImmediate();
+          }, 100);
+        });
+      } else {
+        console.log('⚠️ Conversation has no messages');
+        setMessages([]);
+        setCurrentConversationId(conversationId);
+      }
+    } else {
+      console.log('❌ Conversation not found anywhere:', conversationId);
+      if (userId) {
+        const saved = localStorage.getItem(`baptistry_conversations_${userId}`);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            const withDates = parsed.map((conv: any) => ({
+              ...conv,
+              createdAt: new Date(conv.createdAt),
+              updatedAt: new Date(conv.updatedAt),
+              messages: conv.messages.map((msg: any) => ({
+                ...msg,
+                timestamp: new Date(msg.timestamp),
+              })),
+            }));
+            setConversations(withDates);
+            const found = withDates.find(c => c.id === conversationId);
+            if (found) {
+              setMessages(found.messages);
+              setCurrentConversationId(conversationId);
+              console.log('✅ Found conversation after reload');
+            }
+          } catch (e) {
+            console.error('Failed to reload conversations', e);
+          }
+        }
+      }
+    }
+  };
+
+  const renameConversation = (conversationId: string, newTitle: string) => {
+    setConversations(prev => prev.map(conv =>
+      conv.id === conversationId
+        ? { ...conv, title: newTitle, updatedAt: new Date() }
+        : conv
+    ));
+  };
+
+  const deleteConversation = (conversationId: string) => {
+    const updatedConversations = conversations.filter(conv => conv.id !== conversationId);
+    setConversations(updatedConversations);
+    
+    if (currentConversationId === conversationId) {
+      setMessages([]);
+      setCurrentConversationId(null);
+      setInput('');
+      setTimeout(autoResizeTextarea, 0);
+    }
+  };
+
+  const pinConversation = (conversationId: string) => {
+    setConversations(prevConversations => {
+      const clickedConv = prevConversations.find(conv => conv.id === conversationId);
+      const isCurrentlyPinned = clickedConv?.pinned || false;
+      
+      let updated;
+      
+      if (isCurrentlyPinned) {
+        updated = prevConversations.map(conv =>
+          conv.id === conversationId ? { ...conv, pinned: false, updatedAt: new Date() } : conv
+        );
+      } else {
+        const unpinnedAll = prevConversations.map(conv => ({
+          ...conv,
+          pinned: false,
+          updatedAt: conv.updatedAt
+        }));
+        updated = unpinnedAll.map(conv =>
+          conv.id === conversationId ? { ...conv, pinned: true, updatedAt: new Date() } : conv
+        );
+      }
+      
+      const sorted = [...updated].sort((a, b) => {
+        if (a.pinned === b.pinned) {
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        }
+        return a.pinned ? -1 : 1;
+      });
+      
+      return sorted;
+    });
+  };
+
+  const scrollToMessage = (messageId: string) => {
+    setTimeout(() => {
+      const messageElement = document.getElementById(messageId);
+      if (messageElement) {
+        messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        messageElement.classList.add('bg-yellow-50', 'dark:bg-yellow-900/30', 'transition-colors', 'duration-500');
+        setTimeout(() => {
+          messageElement.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/30');
+        }, 2000);
+      } else {
+        console.log('Message element not found:', messageId);
+      }
+    }, 100);
+  };
+
+  const handleFeedback = (messageId: string, feedback: 'helpful' | 'unhelpful' | null) => {
+    setMessageFeedback(prev => ({ ...prev, [messageId]: feedback }));
+    
+    const savedFeedback = localStorage.getItem('baptistry_feedback');
+    const feedbackLog = savedFeedback ? JSON.parse(savedFeedback) : [];
+    
+    const existingIndex = feedbackLog.findIndex((item: any) => item.messageId === messageId);
+    if (feedback === null) {
+      if (existingIndex !== -1) {
+        feedbackLog.splice(existingIndex, 1);
+      }
+    } else {
+      if (existingIndex !== -1) {
+        feedbackLog[existingIndex] = {
+          messageId,
+          feedback,
+          timestamp: new Date().toISOString(),
+          conversationId: currentConversationId,
+        };
+      } else {
+        feedbackLog.push({
+          messageId,
+          feedback,
+          timestamp: new Date().toISOString(),
+          conversationId: currentConversationId,
+        });
+      }
+    }
+    localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
+  };
+
+  const editMessage = (messageId: string, newContent: string) => {
+    console.log('✏️ EDIT MESSAGE:', messageId, newContent);
+
+    const messageIndex = messages.findIndex(m => m.id === messageId);
+    if (messageIndex === -1) return;
+
+    const originalMessage = messages[messageIndex];
+    if (originalMessage.role !== 'user') return;
+
+    setIsGenerating(false);
+    setStreamingText('');
+    if (stopRequested.current) {
+      stopRequested.current = false;
+    }
+
+    const newMessages = messages.slice(0, messageIndex);
+    setMessages(newMessages);
+
+    const sendEditedMessage = async () => {
+      if (!newContent.trim()) return;
+
+      if (!currentConversationId) {
+        const newConversation: Conversation = {
+          id: Date.now().toString(),
+          title: newContent.substring(0, 40),
+          messages: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          pinned: false,
+        };
+        setConversations(prev => [newConversation, ...prev]);
+        setCurrentConversationId(newConversation.id);
+      }
+
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: newContent,
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, userMessage]);
+      setIsGenerating(true);
+      setStreamingText('');
+      stopRequested.current = false;
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message: newContent,
+            history: newMessages,
+            userName: userName || 'friend',
+          }),
+        });
+
+        const data = await response.json();
+        let fullResponse = data.response || 'I apologize, but I encountered an error.';
+        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+        const chunkSize = 15;
+        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+          if (stopRequested.current) {
+            setIsGenerating(false);
+            setStreamingText('');
+            return;
+          }
+          setStreamingText(fullResponse.substring(0, i));
+          await new Promise(resolve => setTimeout(resolve, 3));
+        }
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: fullResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+
+      } catch (error) {
+        console.error('Error:', error);
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'I apologize, but I am unable to respond at this moment.',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errorMessage]);
+        setIsGenerating(false);
+        setStreamingText('');
+      }
+    };
+
+    setTimeout(() => {
+      sendEditedMessage();
+    }, 50);
+  };
+
+  const regenerateMessage = async (assistantMessageId: string) => {
+    const assistantIndex = messages.findIndex(m => m.id === assistantMessageId);
+    if (assistantIndex === -1) return;
+    if (messages[assistantIndex].role !== 'assistant') return;
+    
+    let userMessageIndex = assistantIndex - 1;
+    while (userMessageIndex >= 0 && messages[userMessageIndex].role !== 'user') {
+      userMessageIndex--;
+    }
+    if (userMessageIndex < 0) return;
+    
+    const userMessageContent = messages[userMessageIndex].content;
+    const newMessages = messages.slice(0, assistantIndex);
+    setMessages(newMessages);
+    
+    setIsGenerating(true);
+    setStreamingText('');
+    stopRequested.current = false;
+    
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: userMessageContent, 
+          history: newMessages,
+          userName: userName || 'friend'
+        }),
+      });
+
+      const data = await response.json();
+      let fullResponse = data.response || 'I apologize, but I encountered an error.';
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+      const chunkSize = 5;
+      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+        if (stopRequested.current) {
+          setIsGenerating(false);
+          setStreamingText('');
+          return;
+        }
+        setStreamingText(fullResponse.substring(0, i));
+        await new Promise(resolve => setTimeout(resolve, 3));
+      }
+
+      const newAssistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: fullResponse,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, newAssistantMessage]);
+      setStreamingText('');
+      setIsGenerating(false);
+    } catch (error) {
+      console.error('Regeneration error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I apologize, but I am unable to respond at this moment.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setIsGenerating(false);
+      setStreamingText('');
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    if (isGenerating) return;
+
+    if (!currentConversationId) {
+      const newConversation: Conversation = {
+        id: Date.now().toString(),
+        title: input.substring(0, 40),
+        messages: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        pinned: false,
+      };
+      setConversations(prev => {
+        const withNew = [newConversation, ...prev];
+        const sorted = [...withNew].sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        });
+        return sorted;
+      });
+      setCurrentConversationId(newConversation.id);
+    }
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input,
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    const sentInput = input;
+    setInput('');
+    setIsGenerating(true);
+    setStreamingText('');
+    stopRequested.current = false;
+    
+    setTimeout(autoResizeTextarea, 0);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: sentInput, 
+          history: messages,
+          userName: userName || 'friend'
+        }),
+      });
+
+      const data = await response.json();
+      let fullResponse = data.response || 'I apologize, but I encountered an error.';
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+      const chunkSize = 5;
+      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+        if (stopRequested.current) {
+          setIsGenerating(false);
+          setStreamingText('');
+          return;
+        }
+        setStreamingText(fullResponse.substring(0, i));
+        await new Promise(resolve => setTimeout(resolve, 3));
+      }
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: fullResponse,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+      setStreamingText('');
+      setIsGenerating(false);
+
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I apologize, but I am unable to respond at this moment.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setIsGenerating(false);
+      setStreamingText('');
+    }
+  };
+
+  const stopResponse = () => {
+    stopRequested.current = true;
+    setIsGenerating(false);
+    setStreamingText('');
+    
+    const stopMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: "⏹️ You stopped me from responding. No worries! Feel free to **edit your message** and try again, or ask me something new. 🙏",
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, stopMessage]);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  const handleNewChat = () => {
+    startNewChat();
+  };
+
+  const handleReturnToWelcome = () => {
+    setMessages([]);
+    setInput('');
+    setTimeout(autoResizeTextarea, 0);
+  };
+
+  const fillInput = (text: string) => {
+    if (textareaRef.current) {
+      textareaRef.current.value = text;
+      setInput(text);
+      autoResizeTextarea();
+      textareaRef.current.focus();
+    }
+  };
+
+  const sidebarConversations = conversations.map(conv => ({
+    id: conv.id,
+    content: conv.title,
+    timestamp: conv.updatedAt,
+    pinned: conv.pinned || false,
+  }));
+
+  const tryAskingButtonClass = "block w-full text-left text-sm text-blue-600 dark:text-blue-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-700 dark:hover:text-blue-300 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
+
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar 
@@ -268,35 +894,41 @@ export default function MainContent() {
                         <button 
                           key={`${suggestion}-${index}`}
                           onClick={() => fillInput(suggestion)}
-                          className={tryAskingButtonClass(index)}
+                          className={`${tryAskingButtonClass} ${
+                            fadingIndex === index 
+                              ? 'opacity-0 scale-95' 
+                              : 'opacity-100 scale-100'
+                          }`}
+                          style={{
+                            transition: 'opacity 300ms ease-in-out, transform 300ms ease-in-out'
+                          }}
                         >
                           • "{suggestion}"
                         </button>
                       ))
                     ) : (
-                      // Fallback if suggestions haven't loaded yet
                       <>
                         <button 
                           onClick={() => fillInput("What do you believe about salvation?")}
-                          className="block w-full text-left text-sm text-blue-600 dark:text-blue-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-700 dark:hover:text-blue-300 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          className={tryAskingButtonClass}
                         >
                           • "What do you believe about salvation?"
                         </button>
                         <button 
                           onClick={() => fillInput("Give me a devotion about grace")}
-                          className="block w-full text-left text-sm text-blue-600 dark:text-blue-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-700 dark:hover:text-blue-300 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          className={tryAskingButtonClass}
                         >
                           • "Give me a devotion about grace"
                         </button>
                         <button 
                           onClick={() => fillInput("Create a preaching about sin")}
-                          className="block w-full text-left text-sm text-blue-600 dark:text-blue-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-700 dark:hover:text-blue-300 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          className={tryAskingButtonClass}
                         >
                           • "Create a preaching about sin"
                         </button>
                         <button 
                           onClick={() => fillInput("Explain John 3:16")}
-                          className="block w-full text-left text-sm text-blue-600 dark:text-blue-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-700 dark:hover:text-blue-300 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          className={tryAskingButtonClass}
                         >
                           • "Explain John 3:16"
                         </button>
@@ -307,14 +939,67 @@ export default function MainContent() {
               </div>
             </div>
           ) : (
-            // ... rest of your message display code
             <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
-              {/* Message display code */}
+              {messages.map((message) => (
+                <MessageBubble 
+                  key={message.id} 
+                  message={message} 
+                  onFeedback={handleFeedback}
+                  onEdit={editMessage}
+                  onRegenerate={message.role === 'assistant' ? regenerateMessage : undefined}
+                  feedbackStatus={messageFeedback[message.id] || null}
+                />
+              ))}
+              
+              {isGenerating && !streamingText && (
+                <div className="flex justify-start gap-2">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center">
+                      <img 
+                        src="/baptistry-logo.png" 
+                        alt="BAPTISTRY"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl rounded-bl-sm px-5 py-3 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      </div>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">BAPTISTRY is thinking...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {streamingText && (
+                <div className="flex justify-start gap-2">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center">
+                      <img 
+                        src="/baptistry-logo.png" 
+                        alt="BAPTISTRY"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl rounded-bl-sm px-5 py-3 shadow-sm max-w-3xl">
+                    <div className="text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
+                      {streamingText}
+                      <span className="inline-block w-0.5 h-4 bg-blue-500 ml-0.5 animate-pulse"></span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div ref={messagesEndRef} />
             </div>
           )}
         </div>
 
-        {/* Footer with input */}
         <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
           <div className="max-w-4xl mx-auto">
             <div className="flex gap-3 items-end">
