@@ -92,17 +92,6 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
   // Icon button (dark mode toggle, menu) - exactly the same border style
   const iconButtonClass = "p-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
 
-  // Tooltip for Sign In button
-  const SignInTooltip = () => (
-    <div className="absolute right-0 top-full mt-2 w-64 p-3 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg shadow-xl border border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-      <p className="font-semibold text-yellow-400 mb-1">✨ Save Your Chat History</p>
-      <p className="text-gray-300 leading-relaxed">
-        Sign in to keep your conversations and sync them across all your devices. It's free!
-      </p>
-      <div className="absolute -top-1 right-4 w-2 h-2 bg-gray-900 dark:bg-gray-800 rotate-45 border-l border-t border-gray-700"></div>
-    </div>
-  );
-
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-20 w-full shadow-sm overflow-visible">
       <div className="flex items-center justify-between px-4 py-2">
