@@ -752,15 +752,6 @@ const editMessage = (messageId: string, newContent: string) => {
     pinned: conv.pinned || false,
   }));
 
-  // Improved guest banner styling based on dark/light mode
-  const bannerBg = darkMode 
-    ? 'bg-gray-800/80 border-gray-700' 
-    : 'bg-gradient-to-r from-blue-50 via-white to-yellow-50/50 border-blue-100/50';
-  
-  const buttonBg = darkMode 
-    ? 'bg-yellow-500 hover:bg-yellow-600 text-gray-900' 
-    : 'bg-blue-600 hover:bg-blue-700 text-white';
-
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar 
@@ -900,41 +891,6 @@ const editMessage = (messageId: string, newContent: string) => {
             </div>
           )}
         </div>
-
-{/* GUEST BANNER - Informative, no redundant button */}
-{!userId && (
-  <div className="max-w-4xl mx-auto mb-4 px-4">
-    <div className={`
-      p-4 rounded-xl border backdrop-blur-sm shadow-sm
-      ${darkMode 
-        ? 'bg-gray-800/80 border-gray-700' 
-        : 'bg-gradient-to-r from-blue-50 via-white to-yellow-50/50 border-blue-100/50'
-      }
-    `}>
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <span className="text-xl">🔐</span>
-          <div>
-            <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
-              <span className="font-bold">Save Your Chat History</span>
-            </p>
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              Sign in to keep your conversations and sync them across all your devices. It's free!
-            </p>
-          </div>
-        </div>
-        <div className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 hidden sm:block">
-          <span className="inline-flex items-center gap-1">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-            </svg>
-            Sign in via header
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
 
         <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
           <div className="max-w-4xl mx-auto">
