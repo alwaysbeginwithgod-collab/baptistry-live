@@ -163,7 +163,7 @@ useEffect(() => {
             </div>
             <div>
               <h1 
-                className="text-xl font-bold transition-colors"
+                className="text-3xl font-bold transition-colors"
                 style={{ 
                   color: yellowColor,
                   textShadow: `0 0 20px ${yellowGlow}`
@@ -171,7 +171,7 @@ useEffect(() => {
               >
                 BAPTISTRY
               </h1>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Your Bible Study Tool</p>
+              <p className="text-lg text-gray-600 dark:text-gray-400">Your Bible Study Tool</p>
             </div>
           </div>
         </div>

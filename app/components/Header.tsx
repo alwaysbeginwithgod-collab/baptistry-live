@@ -77,19 +77,19 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
     alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
   };
 
-  // Uniform button classes with border - matching the dark mode toggle style
-  const buttonBaseClass = "h-10 px-4 text-sm font-medium rounded-lg transition-all duration-200 border focus:outline-none focus:ring-2 focus:ring-offset-2";
+  // UNIFORM button classes - ALL buttons now use the exact same border style
+  const buttonBaseClass = "h-10 px-4 text-sm font-medium rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
   
-  // Sign In button - blue border
-  const signInButtonClass = `${buttonBaseClass} text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 dark:hover:border-blue-500 focus:ring-blue-500`;
+  // Sign In button - same base but with blue text
+  const signInButtonClass = `${buttonBaseClass} text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300`;
   
-  // Install button - green border
-  const installButtonClass = `${buttonBaseClass} flex items-center gap-1.5 text-green-600 dark:text-green-400 border-green-300 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-400 dark:hover:border-green-500 focus:ring-green-500`;
+  // Install button - same base but with green text
+  const installButtonClass = `${buttonBaseClass} flex items-center gap-1.5 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300`;
   
-  // Message count button - gray border (matching dark mode toggle)
-  const messageButtonClass = `${buttonBaseClass} text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 focus:ring-blue-500`;
+  // Message count button - exactly the same as dark mode toggle
+  const messageButtonClass = buttonBaseClass;
   
-  // Icon button (dark mode toggle, menu) - matches the dark mode toggle exactly
+  // Icon button (dark mode toggle, menu) - exactly the same border style
   const iconButtonClass = "p-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
 
   // Tooltip for Sign In button
