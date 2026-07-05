@@ -901,13 +901,13 @@ export default function MainContent() {
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
                   Hi, I'm BAPTISTRY
                 </h2>
-
-		<p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed font-semibold text-lg">
-		  Scriptures | Doctrines | Preachings | Devotions
-		</p>
-		<p className="text-gray-600 dark:text-gray-300 leading-relaxed font-semibold">
-		  Ask Me Anything
-		</p>                
+                
+                <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed font-semibold">
+                  Scriptures | Doctrines | Preachings | Devotions
+                  <br />
+                  Ask Me Anything
+                </p>
+                                
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-5 text-left border border-gray-200 dark:border-gray-700">
                   <p className="text-sm text-gray-700 dark:text-gray-300 font-semibold mb-3">
                     Try asking:
