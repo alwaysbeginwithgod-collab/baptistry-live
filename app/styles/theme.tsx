@@ -24,7 +24,10 @@ export const theme = {
     brand: {
       primary: '#1e3a5f',
       secondary: '#2563eb',
-      accent: '#c5a059',
+      accent: '#c5a059',      // Keeping this as accent
+      yellow: '#FFCC00',      // Traffic yellow for BAPTISTRY branding
+      yellowHover: '#FFD740', // Lighter yellow for hover states
+      yellowGlow: 'rgba(255, 204, 0, 0.3)', // Glow effect
     },
     feedback: {
       helpful: '#22c55e',
@@ -55,6 +58,9 @@ export const theme = {
       primary: '#3b6ea0',
       secondary: '#60a5fa',
       accent: '#e0c080',
+      yellow: '#FFD740',      // Brighter yellow for dark mode
+      yellowHover: '#FFE57F', // Lighter hover for dark mode
+      yellowGlow: 'rgba(255, 215, 64, 0.3)', // Glow effect for dark mode
     },
     feedback: {
       helpful: '#4ade80',

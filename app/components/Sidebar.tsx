@@ -6,6 +6,8 @@ import BooksModal from './BooksModal';
 import SupportModal from './SupportModal';
 import AboutModal from './AboutModal';
 import DevotionModal from './DevotionModal';
+import { useTheme } from '../context/ThemeContext';
+import { getTheme } from '../styles/theme';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -42,6 +44,11 @@ export default function Sidebar({
   const menuRef = useRef<HTMLDivElement>(null);
   const [bibleVerse, setBibleVerse] = useState({ reference: '', text: '' });
   const [isDevotionOpen, setIsDevotionOpen] = useState(false);
+
+  // Get theme for styling
+  const { theme } = useTheme();
+  const mode = theme === 'dark' ? 'dark' : 'light';
+  const colors = getTheme(mode);
 
   const filteredConversations = conversations.filter(conv =>
     conv.content.toLowerCase().includes(searchQuery.toLowerCase())
@@ -154,7 +161,15 @@ useEffect(() => {
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">BAPTISTRY</h1>
+              <h1 
+                className="text-xl font-bold transition-colors"
+                style={{ 
+                  color: colors.brand.yellow,
+                  textShadow: `0 0 20px ${colors.brand.yellowGlow}`
+                }}
+              >
+                BAPTISTRY
+              </h1>
               <p className="text-xs text-gray-600 dark:text-gray-400">Your Bible Study Tool</p>
             </div>
           </div>
