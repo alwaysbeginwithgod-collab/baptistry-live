@@ -457,7 +457,7 @@ const editMessage = (messageId: string, newContent: string) => {
   setMessages(newMessages);
 
   // ========================================
-  // ✅ FIX: Send directly WITHOUT setting input
+  // ✅ Send directly WITHOUT setting input
   // ========================================
   const sendEditedMessage = async () => {
     if (!newContent.trim()) return;
@@ -493,9 +493,9 @@ const editMessage = (messageId: string, newContent: string) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          message: sentInput, 
-          history: messages,
-          userName: userName || 'friend', // ← Add this 
+          message: newContent,      // ← FIXED: use newContent, not sentInput
+          history: newMessages,     // ← FIXED: use the truncated history
+          userName: userName || 'friend',
         }),
       });
 
