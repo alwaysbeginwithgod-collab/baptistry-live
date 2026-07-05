@@ -154,7 +154,7 @@ useEffect(() => {
           className="p-6 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center">
               <img 
                 src="/baptistry-logo.png" 
                 alt="BAPTISTRY Logo" 
