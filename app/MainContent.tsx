@@ -752,6 +752,9 @@ const editMessage = (messageId: string, newContent: string) => {
     pinned: conv.pinned || false,
   }));
 
+  // UNIFORM button class for "Try asking" buttons - matching header style
+  const tryAskingButtonClass = "block w-full text-left text-sm text-blue-600 dark:text-blue-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-700 dark:hover:text-blue-300 px-3 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
+
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar 
@@ -797,32 +800,32 @@ const editMessage = (messageId: string, newContent: string) => {
                   Ask Me Anything
                 </p>
                 
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-5 text-left">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-5 text-left border border-gray-200 dark:border-gray-700">
                   <p className="text-sm text-gray-700 dark:text-gray-300 font-semibold mb-3">
                     Try asking:
                   </p>
                   <div className="space-y-2">
                     <button 
                       onClick={() => fillInput("What do you believe about salvation?")}
-                      className="block w-full text-left text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-3 py-2 rounded-lg transition-colors"
+                      className={tryAskingButtonClass}
                     >
                       • "What do you believe about salvation?"
                     </button>
                     <button 
                       onClick={() => fillInput("Give me a devotion about grace")}
-                      className="block w-full text-left text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-3 py-2 rounded-lg transition-colors"
+                      className={tryAskingButtonClass}
                     >
                       • "Give me a devotion about grace"
                     </button>
                     <button 
                       onClick={() => fillInput("Create a preaching about sin")}
-                      className="block w-full text-left text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-3 py-2 rounded-lg transition-colors"
+                      className={tryAskingButtonClass}
                     >
                       • "Create a preaching about sin"
                     </button>
                     <button 
                       onClick={() => fillInput("Explain John 3:16")}
-                      className="block w-full text-left text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-3 py-2 rounded-lg transition-colors"
+                      className={tryAskingButtonClass}
                     >
                       • "Explain John 3:16"
                     </button>
@@ -909,7 +912,7 @@ const editMessage = (messageId: string, newContent: string) => {
               {isGenerating ? (
                 <button
                   onClick={stopResponse}
-                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2"
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2 border border-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                 >
                   ⏹️ Stop
                 </button>
@@ -917,7 +920,7 @@ const editMessage = (messageId: string, newContent: string) => {
                 <button
                   onClick={sendMessage}
                   disabled={!input.trim()}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   Send
                 </button>

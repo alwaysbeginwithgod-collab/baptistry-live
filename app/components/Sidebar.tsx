@@ -51,6 +51,15 @@ export default function Sidebar({
   const yellowColor = darkMode ? '#FFD740' : '#FFCC00';
   const yellowGlow = darkMode ? 'rgba(255, 215, 64, 0.3)' : 'rgba(255, 204, 0, 0.3)';
 
+  // UNIFORM button class - matching header buttons
+  const buttonBaseClass = "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
+  
+  // Support button - special case with different styling
+  const supportButtonClass = "inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 border border-blue-600 dark:border-blue-500 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 w-full";
+  
+  // New Chat button
+  const newChatButtonClass = "w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
+
   const filteredConversations = conversations.filter(conv =>
     conv.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -180,52 +189,52 @@ useEffect(() => {
           <div className="space-y-1">
             <button
               onClick={() => window.open('https://kingjamesbibleonline.org', '_blank')}
-              className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className={buttonBaseClass}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
               </svg>
-              <span className="text-sm font-medium">Bible</span>
+              <span>Bible</span>
             </button>
 
             {/* About Button */}
             <button
               onClick={() => setIsAboutOpen(true)}
-              className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className={buttonBaseClass}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-sm font-medium">About</span>
+              <span>About</span>
             </button>
 
             <button
               onClick={() => setIsBooksOpen(true)}
-              className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className={buttonBaseClass}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8h7c3.5 0 6-2.5 6-6m0 0h2a2 2 0 012 2v8a2 2 0 01-2 2h-2m-6-8h7c3.5 0 6-2.5 6-6" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16h7c3.5 0 6 2.5 6 6m0 0h2a2 2 0 002-2v-8a2 2 0 00-2-2h-2" />
               </svg>
-              <span className="text-sm font-medium">My Books</span>
+              <span>My Books</span>
             </button>
           </div>
 
-{/* Daily Devotion Button */}
-<button
-  onClick={() => setIsDevotionOpen(true)}
-  className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors mt-1"
->
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-  </svg>
-  <span className="text-sm font-medium">Daily Devotion</span>
-</button>
+          {/* Daily Devotion Button */}
+          <button
+            onClick={() => setIsDevotionOpen(true)}
+            className={`${buttonBaseClass} mt-1`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+            </svg>
+            <span>Daily Devotion</span>
+          </button>
 
           <div className="mt-2 text-center">
             <button
               onClick={() => setIsSupportOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm w-full justify-center"
+              className={supportButtonClass}
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2L15 8.5L22 9.5L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9.5L9 8.5L12 2Z" />
@@ -236,14 +245,14 @@ useEffect(() => {
         </div>
 
         <div className="px-4 pb-4">
-          <button onClick={onNewChat} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-700 dark:text-gray-300 font-medium">
+          <button onClick={onNewChat} className={newChatButtonClass}>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             New Chat
           </button>
         </div>
 
         <div className="px-4 pb-4">
-          <input type="text" placeholder="Search conversations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input type="text" placeholder="Search conversations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-4">
@@ -312,7 +321,7 @@ useEffect(() => {
 
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           {bibleVerse.text && (
-            <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <p className="text-xs text-blue-600 dark:text-blue-400 text-center font-medium">📖 Daily Bible Promise</p>
               <p className="text-xs text-gray-600 dark:text-gray-400 text-center italic mt-1">"{bibleVerse.text}"</p>
               <p className="text-xs text-blue-500 dark:text-blue-500 text-center mt-1">— {bibleVerse.reference} (KJV)</p>
