@@ -77,14 +77,21 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
     alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
   };
 
+  // Define uniform button classes for consistency
+  const buttonBaseClass = "h-10 px-5 text-sm font-medium rounded-lg transition-all transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2";
+  
+  const signInButtonClass = `${buttonBaseClass} text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500`;
+  const installButtonClass = `${buttonBaseClass} flex items-center gap-1.5 text-white bg-green-600 hover:bg-green-700 focus:ring-green-500`;
+  const iconButtonClass = "p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
+
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-20 w-full shadow-sm overflow-visible">
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-4 py-2">
         {/* Left side */}
         <div className="flex items-center gap-3">
           <button
             onClick={onMenuClick}
-            className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label="Menu"
           >
             <svg className="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,14 +105,11 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {!isSignedIn ? (
             <>
               <SignInButton mode="modal">
-                <button 
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                  title="Sign in to save your chat history across all devices"
-                >
+                <button className={signInButtonClass}>
                   Sign In
                 </button>
               </SignInButton>
@@ -113,7 +117,7 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
               {/* 📱 Install Button - Only for guests (not signed in) */}
               <button
                 onClick={handleInstallClick}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium"
+                className={installButtonClass}
                 title="Install BAPTISTRY on your phone"
               >
                 <span>📲</span>
@@ -124,7 +128,7 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
             <UserMenu onHelpClick={() => setIsHelpOpen(true)} onFeedbackClick={() => setIsFeedbackOpen(true)} />
           )}
 
-          <div className="w-px h-5 bg-gray-300 dark:bg-gray-600"></div>
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
 
           {/* Message Count Dropdown */}
           <div className="relative" ref={historyDropdownRef}>
@@ -133,7 +137,7 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
                 e.stopPropagation();
                 setIsHistoryOpen(!isHistoryOpen);
               }}
-              className="text-sm text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer flex items-center gap-1"
+              className="h-10 px-3 text-sm text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer flex items-center gap-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <span>{messageCount} {messageCount === 1 ? 'message' : 'messages'}</span>
               <svg className={`w-3 h-3 transition-transform ${isHistoryOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +150,7 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
                 className="fixed right-4 top-auto mt-1 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto"
                 style={{
                   position: 'fixed',
-                  top: '60px',
+                  top: '64px',
                   right: '16px',
                 }}
               >
@@ -193,11 +197,15 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
             )}
           </div>
 
-          <div className="w-px h-5 bg-gray-300 dark:bg-gray-600"></div>
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
           <NotificationBell />
-          <div className="w-px h-5 bg-gray-300 dark:bg-gray-600"></div>
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
 
-          <button onClick={toggleDarkMode} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <button 
+            onClick={toggleDarkMode} 
+            className={iconButtonClass}
+            aria-label="Toggle dark mode"
+          >
             {darkMode ? (
               <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />

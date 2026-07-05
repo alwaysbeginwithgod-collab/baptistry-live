@@ -901,47 +901,40 @@ const editMessage = (messageId: string, newContent: string) => {
           )}
         </div>
 
-        {/* IMPROVED GUEST BANNER - Only shows when not signed in */}
-        {!userId && (
-          <div className="max-w-4xl mx-auto mb-4 px-4">
-            <div className={`
-              p-4 rounded-xl border backdrop-blur-sm shadow-sm transition-all hover:shadow-md
-              ${bannerBg}
-            `}>
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-center sm:text-left">
-                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
-                    ✨ <span className="font-bold">Save Your Chat History</span>
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-                    Sign in to keep your conversations and sync them across all your devices. It's free!
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <SignInButton mode="modal">
-                    <button className={`
-                      px-6 py-2.5 text-sm font-semibold rounded-lg shadow-sm 
-                      transition-all transform hover:scale-105 
-                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                      ${buttonBg}
-                    `}>
-                      Sign In
-                    </button>
-                  </SignInButton>
-                  <button 
-                    onClick={() => {
-                      // Optional: Show a tooltip or modal explaining benefits
-                      alert('✨ Benefits of signing in:\n\n• Save all your chat history\n• Sync across all devices\n• Access your conversations anywhere\n• It\'s completely free!');
-                    }}
-                    className="text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors underline-offset-2 hover:underline"
-                  >
-                    Why sign in?
-                  </button>
-                </div>
-              </div>
-            </div>
+{/* GUEST BANNER - Informative, no redundant button */}
+{!userId && (
+  <div className="max-w-4xl mx-auto mb-4 px-4">
+    <div className={`
+      p-4 rounded-xl border backdrop-blur-sm shadow-sm
+      ${darkMode 
+        ? 'bg-gray-800/80 border-gray-700' 
+        : 'bg-gradient-to-r from-blue-50 via-white to-yellow-50/50 border-blue-100/50'
+      }
+    `}>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span className="text-xl">🔐</span>
+          <div>
+            <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+              <span className="font-bold">Save Your Chat History</span>
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">
+              Sign in to keep your conversations and sync them across all your devices. It's free!
+            </p>
           </div>
-        )}
+        </div>
+        <div className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 hidden sm:block">
+          <span className="inline-flex items-center gap-1">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            Sign in via header
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
         <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
           <div className="max-w-4xl mx-auto">
