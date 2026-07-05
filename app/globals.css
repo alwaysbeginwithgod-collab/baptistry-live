@@ -610,3 +610,38 @@ body {
 .dark .brand-gold-glow {
   text-shadow: 0 0 30px rgba(212, 160, 23, 0.4), 0 0 60px rgba(212, 160, 23, 0.1);
 }
+
+/* ============================================ */
+/* WAVE ANIMATION - Left to Right Movement       */
+/* ============================================ */
+
+@keyframes waveLeftToRight {
+  0%, 100% {
+    transform: translateX(0px) scale(1);
+    color: var(--text-secondary);
+  }
+  25% {
+    transform: translateX(8px) scale(1.05);
+    color: var(--brand-secondary);
+  }
+  50% {
+    transform: translateX(0px) scale(1);
+    color: var(--text-secondary);
+  }
+  75% {
+    transform: translateX(-8px) scale(1.05);
+    color: var(--brand-secondary);
+  }
+}
+
+/* Dark mode support for the animation */
+.dark .wave-animation {
+  --text-secondary: #c0c0d0;
+  --brand-secondary: #60a5fa;
+}
+
+/* Light mode */
+.wave-animation {
+  --text-secondary: #374151;
+  --brand-secondary: #2563eb;
+}

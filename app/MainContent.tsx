@@ -901,10 +901,29 @@ export default function MainContent() {
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
                   Hi, I'm BAPTISTRY
                 </h2>
-                
-                <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed font-semibold">
-                  Scriptures | Doctrines | Preachings | Devotions
-                  <br />
+
+		{/* Wave Animation for Scripture topics */}
+		  <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed font-semibold text-lg">
+		    <span className="inline-block transition-all duration-300 hover:scale-110 hover:text-blue-600 dark:hover:text-blue-400" style={{ animation: 'waveLeftToRight 4s ease-in-out infinite' }}>
+		Scriptures
+		</span>
+		    <span className="mx-2 text-gray-400 dark:text-gray-500">|</span>
+		    <span className="inline-block transition-all duration-300 hover:scale-110 hover:text-blue-600 dark:hover:text-blue-400" style={{ animation: 'waveLeftToRight 4s ease-in-out infinite 0.3s' }}>
+		Doctrines
+		</span>
+		    <span className="mx-2 text-gray-400 dark:text-gray-500">|</span>
+		    <span className="inline-block transition-all duration-300 hover:scale-110 hover:text-blue-600 dark:hover:text-blue-400" style={{ animation: 'waveLeftToRight 4s ease-in-out infinite 0.6s' }}>
+	        Preachings
+	        </span>
+		    <span className="mx-2 text-gray-400 dark:text-gray-500">|</span>
+		    <span className="inline-block transition-all duration-300 hover:scale-110 hover:text-blue-600 dark:hover:text-blue-400" style={{ animation: 'waveLeftToRight 4s ease-in-out infinite 0.9s' }}>
+	        Devotions
+		</span>
+	       </p>
+  
+		  <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed font-semibold">
+
+
                   Ask Me Anything
                 </p>
                 
