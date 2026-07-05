@@ -27,6 +27,30 @@ type Conversation = {
   pinned?: boolean;
 };
 
+// Expanded list of dynamic suggestions
+const SUGGESTIONS = [
+  { text: "What do you believe about salvation?" },
+  { text: "Give me a devotion about grace" },
+  { text: "Create a preaching about sin" },
+  { text: "Explain John 3:16" },
+  { text: "Does the Bible forbids us to pray to Mary?" },
+  { text: "Explain the biblical concept of the unpardonable sin." },
+  { text: "Who was created first, Satan or Adam?" },
+  { text: "What is the fruit of the Spirit?" },
+  { text: "Give me a devotion about forgiveness" },
+  { text: "What does the Bible teach about prayer?" },
+  { text: "Explain the book of Revelation" },
+  { text: "What is the Gospel according to Paul?" },
+  { text: "Give me a preaching about love" },
+  { text: "What does the Bible say about suffering?" },
+  { text: "Explain the Trinity" },
+  { text: "Give me a devotion about hope" },
+  { text: "What is the meaning of baptism?" },
+  { text: "Explain the Lord's Prayer" },
+  { text: "Give me a preaching about anger" },
+  { text: "What does the Bible teach about the Holy Spirit?" },
+];
+
 export default function MainContent() {
   const { user, isLoaded } = useUser();
   const userId = user?.id;
@@ -51,6 +75,12 @@ export default function MainContent() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const stopRequested = useRef(false);
   
+  // ============================================================
+  // DYNAMIC SUGGESTIONS STATE
+  // ============================================================
+  const [currentSuggestions, setCurrentSuggestions] = useState<string[]>([]);
+  const suggestionIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   // ============================================================
   // NAME MODAL STATE
   // ============================================================
@@ -85,6 +115,41 @@ export default function MainContent() {
     setInput(e.target.value);
     autoResizeTextarea();
   };
+
+  // ============================================================
+  // DYNAMIC SUGGESTIONS - Update every 3 seconds
+  // ============================================================
+  const updateSuggestions = () => {
+    // Get 4 random suggestions from the pool
+    const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 4).map(s => s.text);
+    setCurrentSuggestions(selected);
+  };
+
+  // Start cycling suggestions when on welcome screen
+  useEffect(() => {
+    // Only run when there are no messages (welcome screen)
+    if (messages.length === 0 && !isGenerating) {
+      // Initial set
+      updateSuggestions();
+      
+      // Set up interval to change every 3 seconds
+      suggestionIntervalRef.current = setInterval(updateSuggestions, 3000);
+    } else {
+      // Clear interval when not on welcome screen
+      if (suggestionIntervalRef.current) {
+        clearInterval(suggestionIntervalRef.current);
+        suggestionIntervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (suggestionIntervalRef.current) {
+        clearInterval(suggestionIntervalRef.current);
+        suggestionIntervalRef.current = null;
+      }
+    };
+  }, [messages.length, isGenerating]);
 
   // ============================================================
   // LOAD USER NAME FROM LOCALSTORAGE
@@ -805,30 +870,45 @@ const editMessage = (messageId: string, newContent: string) => {
                     Try asking:
                   </p>
                   <div className="space-y-2">
-                    <button 
-                      onClick={() => fillInput("What do you believe about salvation?")}
-                      className={tryAskingButtonClass}
-                    >
-                      • "What do you believe about salvation?"
-                    </button>
-                    <button 
-                      onClick={() => fillInput("Give me a devotion about grace")}
-                      className={tryAskingButtonClass}
-                    >
-                      • "Give me a devotion about grace"
-                    </button>
-                    <button 
-                      onClick={() => fillInput("Create a preaching about sin")}
-                      className={tryAskingButtonClass}
-                    >
-                      • "Create a preaching about sin"
-                    </button>
-                    <button 
-                      onClick={() => fillInput("Explain John 3:16")}
-                      className={tryAskingButtonClass}
-                    >
-                      • "Explain John 3:16"
-                    </button>
+                    {currentSuggestions.length > 0 ? (
+                      currentSuggestions.map((suggestion, index) => (
+                        <button 
+                          key={`${suggestion}-${index}`}
+                          onClick={() => fillInput(suggestion)}
+                          className={tryAskingButtonClass}
+                        >
+                          • "{suggestion}"
+                        </button>
+                      ))
+                    ) : (
+                      // Fallback if suggestions haven't loaded yet
+                      <>
+                        <button 
+                          onClick={() => fillInput("What do you believe about salvation?")}
+                          className={tryAskingButtonClass}
+                        >
+                          • "What do you believe about salvation?"
+                        </button>
+                        <button 
+                          onClick={() => fillInput("Give me a devotion about grace")}
+                          className={tryAskingButtonClass}
+                        >
+                          • "Give me a devotion about grace"
+                        </button>
+                        <button 
+                          onClick={() => fillInput("Create a preaching about sin")}
+                          className={tryAskingButtonClass}
+                        >
+                          • "Create a preaching about sin"
+                        </button>
+                        <button 
+                          onClick={() => fillInput("Explain John 3:16")}
+                          className={tryAskingButtonClass}
+                        >
+                          • "Explain John 3:16"
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -904,46 +984,4 @@ const editMessage = (messageId: string, newContent: string) => {
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about Scripture, doctrine, or request a devotion..."
-                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
-                rows={1}
-                style={{ minHeight: '48px', maxHeight: '120px' }}
-                disabled={isGenerating}
-              />
-              {isGenerating ? (
-                <button
-                  onClick={stopResponse}
-                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2 border border-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                >
-                  ⏹️ Stop
-                </button>
-              ) : (
-                <button
-                  onClick={sendMessage}
-                  disabled={!input.trim()}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                  Send
-                </button>
-              )}
-            </div>
-            
-            <p className="text-xs text-gray-600 dark:text-gray-400 text-center italic mt-3">
-              "A dose of God's Word a day, will keep you going all day."
-            </p>
-            <p className="text-xs text-blue-500 dark:text-blue-400 text-center mt-1">
-              — ALWAYS BEGIN WITH GOD —
-            </p>
-          </div>
-        </div>
-      </div>
-      
-      <RightSidebar />
-      
-      {/* Name Modal - Shows on first sign-in */}
-      <NameModal 
-        isOpen={showNameModal} 
-        onSave={handleNameSave} 
-      />
-    </div>
-  );
-}
+                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-
