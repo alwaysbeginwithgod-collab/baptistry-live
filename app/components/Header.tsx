@@ -77,7 +77,7 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
     alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
   };
 
-  // UNIFORM button classes - ALL buttons now use the exact same border style
+  // UNIFORM button classes - ALL buttons use the exact same border style
   const buttonBaseClass = "h-10 px-4 text-sm font-medium rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
   
   // Sign In button - same base but with blue text
@@ -122,7 +122,14 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
                     Sign In
                   </button>
                 </SignInButton>
-                <SignInTooltip />
+                {/* Tooltip - appears on hover */}
+                <div className="absolute right-0 top-full mt-2 w-64 p-3 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg shadow-xl border border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                  <p className="font-semibold text-yellow-400 mb-1">✨ Save Your Chat History</p>
+                  <p className="text-gray-300 leading-relaxed">
+                    Sign in to keep your conversations and sync them across all your devices. It's free!
+                  </p>
+                  <div className="absolute -top-1 right-4 w-2 h-2 bg-gray-900 dark:bg-gray-800 rotate-45 border-l border-t border-gray-700"></div>
+                </div>
               </div>
 
               {/* 📱 Install Button */}
@@ -151,7 +158,7 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
               className={`${messageButtonClass} inline-flex items-center whitespace-nowrap`}
             >
               <span>{messageCount} {messageCount === 1 ? 'message' : 'messages'}</span>
-              <svg className={`w-3 h-3 ml-1 transition-transform ${isHistoryOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-3 h-3 ml-1 flex-shrink-0 transition-transform ${isHistoryOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
