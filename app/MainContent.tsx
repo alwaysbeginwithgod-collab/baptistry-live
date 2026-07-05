@@ -5,10 +5,11 @@ import { useState, useRef, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MessageBubble from './components/MessageBubble';
-import { useUser } from '@clerk/nextjs';
+import { useUser, SignInButton } from '@clerk/nextjs';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import NameModal from './components/NameModal';
+import { useTheme } from '../context/ThemeContext';
 
 type Message = {
   id: string;
@@ -29,6 +30,7 @@ type Conversation = {
 export default function MainContent() {
   const { user, isLoaded } = useUser();
   const userId = user?.id;
+  const { darkMode } = useTheme();
 
   // Convex hooks
   const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
@@ -750,6 +752,15 @@ const editMessage = (messageId: string, newContent: string) => {
     pinned: conv.pinned || false,
   }));
 
+  // Improved guest banner styling based on dark/light mode
+  const bannerBg = darkMode 
+    ? 'bg-gray-800/80 border-gray-700' 
+    : 'bg-gradient-to-r from-blue-50 via-white to-yellow-50/50 border-blue-100/50';
+  
+  const buttonBg = darkMode 
+    ? 'bg-yellow-500 hover:bg-yellow-600 text-gray-900' 
+    : 'bg-blue-600 hover:bg-blue-700 text-white';
+
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar 
@@ -890,16 +901,44 @@ const editMessage = (messageId: string, newContent: string) => {
           )}
         </div>
 
-        {/* Guest banner - only shows when not signed in */}
+        {/* IMPROVED GUEST BANNER - Only shows when not signed in */}
         {!userId && (
           <div className="max-w-4xl mx-auto mb-4 px-4">
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-center border border-blue-200 dark:border-blue-800">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                🔐 <strong>Sign in to save your chat history across all your devices.</strong>
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Your chats will be saved automatically when you sign in. It's free!
-              </p>
+            <div className={`
+              p-4 rounded-xl border backdrop-blur-sm shadow-sm transition-all hover:shadow-md
+              ${bannerBg}
+            `}>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-center sm:text-left">
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                    ✨ <span className="font-bold">Save Your Chat History</span>
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                    Sign in to keep your conversations and sync them across all your devices. It's free!
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <SignInButton mode="modal">
+                    <button className={`
+                      px-6 py-2.5 text-sm font-semibold rounded-lg shadow-sm 
+                      transition-all transform hover:scale-105 
+                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                      ${buttonBg}
+                    `}>
+                      Sign In
+                    </button>
+                  </SignInButton>
+                  <button 
+                    onClick={() => {
+                      // Optional: Show a tooltip or modal explaining benefits
+                      alert('✨ Benefits of signing in:\n\n• Save all your chat history\n• Sync across all devices\n• Access your conversations anywhere\n• It\'s completely free!');
+                    }}
+                    className="text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors underline-offset-2 hover:underline"
+                  >
+                    Why sign in?
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
