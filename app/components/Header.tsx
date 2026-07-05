@@ -78,11 +78,11 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
   };
 
   // Define uniform button classes for consistency
-  const buttonBaseClass = "h-10 px-5 text-sm font-medium rounded-lg transition-all transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2";
+  const buttonBaseClass = "h-10 px-5 text-sm font-medium rounded-lg transition-all transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 border";
   
-  const signInButtonClass = `${buttonBaseClass} text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500`;
-  const installButtonClass = `${buttonBaseClass} flex items-center gap-1.5 text-white bg-green-600 hover:bg-green-700 focus:ring-green-500`;
-  const iconButtonClass = "p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
+  const signInButtonClass = `${buttonBaseClass} text-white bg-blue-600 border-blue-700 hover:bg-blue-700 hover:border-blue-800 focus:ring-blue-500`;
+  const installButtonClass = `${buttonBaseClass} flex items-center gap-1.5 text-white bg-green-600 border-green-700 hover:bg-green-700 hover:border-green-800 focus:ring-green-500`;
+  const iconButtonClass = "p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 border border-gray-300 dark:border-gray-600";
 
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-20 w-full shadow-sm overflow-visible">
@@ -106,27 +106,38 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
 
         {/* Right side */}
         <div className="flex items-center gap-2">
-          {!isSignedIn ? (
-            <>
-              <SignInButton mode="modal">
-                <button className={signInButtonClass}>
-                  Sign In
-                </button>
-              </SignInButton>
+{!isSignedIn ? (
+  <>
+    <div className="relative group">
+      <SignInButton mode="modal">
+        <button className={signInButtonClass}>
+          Sign In
+        </button>
+      </SignInButton>
+      
+      {/* Tooltip - appears on hover */}
+      <div className="absolute right-0 top-full mt-2 w-64 p-3 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg shadow-xl border border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+        <p className="font-semibold text-yellow-400 mb-1">✨ Save Your Chat History</p>
+        <p className="text-gray-300 leading-relaxed">
+          Sign in to keep your conversations and sync them across all your devices. It's free!
+        </p>
+        <div className="absolute -top-1 right-4 w-2 h-2 bg-gray-900 dark:bg-gray-800 rotate-45 border-l border-t border-gray-700"></div>
+      </div>
+    </div>
 
-              {/* 📱 Install Button - Only for guests (not signed in) */}
-              <button
-                onClick={handleInstallClick}
-                className={installButtonClass}
-                title="Install BAPTISTRY on your phone"
-              >
-                <span>📲</span>
-                <span className="hidden sm:inline">Install</span>
-              </button>
-            </>
-          ) : (
-            <UserMenu onHelpClick={() => setIsHelpOpen(true)} onFeedbackClick={() => setIsFeedbackOpen(true)} />
-          )}
+    {/* 📱 Install Button */}
+    <button
+      onClick={handleInstallClick}
+      className={installButtonClass}
+      title="Install BAPTISTRY on your phone"
+    >
+      <span>📲</span>
+      <span className="hidden sm:inline">Install</span>
+    </button>
+  </>
+) : (
+  <UserMenu onHelpClick={() => setIsHelpOpen(true)} onFeedbackClick={() => setIsFeedbackOpen(true)} />
+)}
 
           <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
 
