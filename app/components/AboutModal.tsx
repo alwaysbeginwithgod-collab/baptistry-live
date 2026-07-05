@@ -120,6 +120,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                     <li className="flex items-start gap-2"><span className="text-blue-500">📚</span><span><strong>Access a built-in dictionary and reference library</strong> — Understand difficult words and explore historic Baptist resources</span></li>
                     <li className="flex items-start gap-2"><span className="text-blue-500">💡</span><span><strong>Explore doctrines, preachings, and daily devotions</strong> — Deepen your faith with sound teaching</span></li>
                     <li className="flex items-start gap-2"><span className="text-blue-500">💬</span><span><strong>Ask any Bible-related question</strong> — Get immediate, Scripture-based answers rooted in the KJV</span></li>
+                    <li className="flex items-start gap-2"><span className="text-blue-500">🙏</span><span><strong>Read Daily Devotion</strong> — Meditate God's Word though daily devotion posts</span></li>
                     <li className="flex items-start gap-2"><span className="text-blue-500">📖</span><span><strong>Preview free flipbooks</strong> — Sample written resources before reading more</span></li>
                   </ul>
                 </div>
