@@ -902,30 +902,52 @@ export default function MainContent() {
                   Hi, I'm BAPTISTRY
                 </h2>
 
-		{/* Wave Animation for Scripture topics */}
-		  <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed font-semibold text-lg">
-		    <span className="inline-block transition-all duration-300 hover:scale-110 hover:text-blue-600 dark:hover:text-blue-400" style={{ animation: 'waveLeftToRight 4s ease-in-out infinite' }}>
-		Scriptures
-		</span>
-		    <span className="mx-2 text-gray-400 dark:text-gray-500">|</span>
-		    <span className="inline-block transition-all duration-300 hover:scale-110 hover:text-blue-600 dark:hover:text-blue-400" style={{ animation: 'waveLeftToRight 4s ease-in-out infinite 0.3s' }}>
-		Doctrines
-		</span>
-		    <span className="mx-2 text-gray-400 dark:text-gray-500">|</span>
-		    <span className="inline-block transition-all duration-300 hover:scale-110 hover:text-blue-600 dark:hover:text-blue-400" style={{ animation: 'waveLeftToRight 4s ease-in-out infinite 0.6s' }}>
-	        Preachings
-	        </span>
-		    <span className="mx-2 text-gray-400 dark:text-gray-500">|</span>
-		    <span className="inline-block transition-all duration-300 hover:scale-110 hover:text-blue-600 dark:hover:text-blue-400" style={{ animation: 'waveLeftToRight 4s ease-in-out infinite 0.9s' }}>
-	        Devotions
-		</span>
-	       </p>
+  {/* Compress Animation - all in one row */}
+  <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed font-semibold text-lg whitespace-nowrap">
+    <span 
+      className="inline-block transition-all duration-300 hover:text-blue-600 dark:hover:text-blue-400"
+      style={{ 
+        animation: 'compressBounce 2.5s ease-in-out infinite',
+        display: 'inline-block'
+      }}
+    >
+      Scriptures
+    </span>
+    <span className="mx-2 text-gray-400 dark:text-gray-500">|</span>
+    <span 
+      className="inline-block transition-all duration-300 hover:text-blue-600 dark:hover:text-blue-400"
+      style={{ 
+        animation: 'compressBounce 2.5s ease-in-out infinite 0.3s',
+        display: 'inline-block'
+      }}
+    >
+      Doctrines
+    </span>
+    <span className="mx-2 text-gray-400 dark:text-gray-500">|</span>
+    <span 
+      className="inline-block transition-all duration-300 hover:text-blue-600 dark:hover:text-blue-400"
+      style={{ 
+        animation: 'compressBounce 2.5s ease-in-out infinite 0.6s',
+        display: 'inline-block'
+      }}
+    >
+      Preachings
+    </span>
+    <span className="mx-2 text-gray-400 dark:text-gray-500">|</span>
+    <span 
+      className="inline-block transition-all duration-300 hover:text-blue-600 dark:hover:text-blue-400"
+      style={{ 
+        animation: 'compressBounce 2.5s ease-in-out infinite 0.9s',
+        display: 'inline-block'
+      }}
+    >
+      Devotions
+    </span>
+  </p>
   
-		  <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed font-semibold">
-
-
-                  Ask Me Anything
-                </p>
+  <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed font-semibold">
+    Ask Me Anything
+  </p>
                 
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-5 text-left border border-gray-200 dark:border-gray-700">
                   <p className="text-sm text-gray-700 dark:text-gray-300 font-semibold mb-3">
