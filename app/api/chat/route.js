@@ -190,7 +190,7 @@ function buildDoctrinalResponse(doctrine, userQuery) {
 
 export async function POST(request) {
   try {
-    const { message, history } = await request.json();
+    const { message, history, userName } = await request.json();
 
     // ============================================================
     // STEP 0: Check for dictionary definition request
@@ -226,7 +226,7 @@ export async function POST(request) {
     }
 
     // ============================================================
-    // STEP 1: Call Dify with STREAMING mode and reduced history
+    // STEP 1: Call Dify with STREAMING mode, reduced history, and user name
     // ============================================================
     console.log('STEP 1: Trying Dify Knowledge Base for:', message);
 
@@ -241,9 +241,11 @@ export async function POST(request) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          inputs: {},
+          inputs: {
+            user_name: userName || 'friend', // ← Add user name here
+          },
           query: message,
-          response_mode: 'streaming',  // ← Streaming for faster perceived speed
+          response_mode: 'streaming',
           user: 'baptistry_user',
           conversation_history: recentHistory.map(msg => ({
             role: msg.role === 'user' ? 'user' : 'assistant',
@@ -278,7 +280,6 @@ export async function POST(request) {
               if (data.event === 'message' && data.answer) {
                 fullResponse += data.answer;
               }
-              // Handle end of stream
               if (data.event === 'message_end') {
                 break;
               }
@@ -297,11 +298,9 @@ export async function POST(request) {
         });
       } else {
         console.log('⚠️ No substantive response from Dify, falling back to doctrinal library');
-        // Fall through to doctrinal library
       }
     } catch (error) {
       console.error('Dify API error:', error);
-      // Fall through to doctrinal library
     }
 
     // ============================================================
@@ -309,7 +308,6 @@ export async function POST(request) {
     // ============================================================
     console.log('STEP 2: Using doctrinal library fallback for:', message);
 
-    // Special case: Statement of Faith
     if (isAskingForStatementOfFaith(message)) {
       return NextResponse.json({ 
         response: "Here is the Short Statement of Faith...", 
@@ -317,7 +315,6 @@ export async function POST(request) {
       });
     }
 
-    // Check if the question matches a doctrine in our library
     const detectedDoctrine = detectDoctrine(message);
     
     if (detectedDoctrine) {
@@ -329,9 +326,6 @@ export async function POST(request) {
       });
     }
 
-    // ============================================================
-    // STEP 3: Nothing worked
-    // ============================================================
     return NextResponse.json({ 
       response: "I could not find an answer in my knowledge base. Please try asking a different question or contact support for assistance.",
       source: 'dify-only'

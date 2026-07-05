@@ -310,5 +310,51 @@ Where have you been tempted to compromise because the pressure feels overwhelmin
     image: '/devotions/Devotion-13.jpg',
     facebookLink: 'https://www.facebook.com/BeginWithGod/'
   },
+
+  {
+    id: 'Devotion-14',
+    title: 'Step Out First',
+    tagline: `✍️ "God parts no sea for feet that never move. The miracle begins when faith steps out to prove."`,
+    scripture: 'Joshua 3:13 "And it shall come to pass, as soon as the soles of the feet of the priests that bear the ark of the LORD, the Lord of all the earth, shall rest in the waters of Jordan, that the waters of Jordan shall be cut off from the waters that come down from above; and they shall stand upon an heap."',
+    content: `Many of us keep waiting for God to move first before we obey. We want an introduction before a conclusion, confirmation before commitment, and proof before movement. Yet Scripture repeatedly shows that God often moves after His people move in faith. The question is not whether God is able to move, but whether we are willing to trust Him enough to step out first.
+
+Joshua 3:13 declares, “And it shall come to pass, as soon as the soles of the feet of the priests… shall rest in the waters of Jordan, that the waters of Jordan shall be cut off.” God did not part the river before they moved. The priests had to step into the waters first. God is not obligated to part rivers for people unwilling to move forward by faith.
+
+Faith is like stepping into a river before seeing a bridge appear. The current may look overwhelming, the risk may feel real, and fear may whisper "retreat." Yet the miracle often waits on the other side of obedience. If God orders, He provides. That is the rhythm of faith: God speaks, we step, and He makes the way.
+
+The Scriptures connect faith with action: “Faith without works is dead” (James 2:20). “For we walk by faith, not by sight” (2 Corinthians 5:7). “Launch out into the deep” (Luke 5:4). “Draw nigh to God, and he will draw nigh to you” (James 4:8). Not the other way around. Delayed obedience is still disobedience.
+
+Fill the waterpots first like the servants at Cana before Christ turns water into wine (John 2:7). “Be ye doers of the word, and not hearers only” (James 1:22). Do not live like a boat permanently tied to the dock, never fulfilling its purpose. Step out of the boat like Peter before he walked on the water (Matthew 14:29). God did not call us merely to admire faith, but to walk in it.
+
+Jesus did not wait for the world to become ready for Him. He stepped out of heaven’s glory into earth’s brokenness. “While we were yet sinners, Christ died for us” (Romans 5:8). He moved first in love, first in sacrifice, and first in grace. Through His finished work, we are not only forgiven—we are empowered to walk forward by faith.
+
+What river has been stopping you—fear, finances, failure, or just the unknown? You do not need Christ merely to remove the obstacle — you need Him to walk through it with you. Will you take one step into the water today? Stop standing at the edge of obedience. Step out first and trust Him with what happens next.`,
+    prayer: `Heavenly Father, forgive us for waiting in fear when You have already called us to move forward. Strengthen our faith to obey even when the path feels uncertain. Help us trust Your promises completely and walk boldly wherever Christ leads. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-14.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-15',
+    title: 'Say What Matters',
+    tagline: `✍️ "Fear speaks defeat before the battle is won. Faith speaks God’s Word and sees it's done."`,
+    scripture: 'Mark 11:23 "For verily I say unto you, That whosoever shall say unto this mountain, Be thou removed, and be thou cast into the sea; and shall not doubt in his heart, but shall believe that those things which he saith shall come to pass; he shall have whatsoever he saith."',
+    content: `Words reveal what the heart truly believes. We are an incredibly vocal generation, and in moments of pressure, fear often speaks first—complaining, doubting, arguing, and surrendering before the battle even begins. We live in a world filled with careless words, empty opinions, and constant negativity. The question is not whether we are speaking, but whether our words are agreeing with fear or with God’s truth.
+
+Mark 11:23 declares, “For verily I say unto you, That whosoever shall say unto this mountain… and shall not doubt in his heart, but shall believe that those things which he saith shall come to pass…” Jesus was teaching His disciples that genuine faith speaks with confidence in God’s power. We often speak to everyone about our mountains, but we rarely speak to our mountains.
+
+Faith-filled words are like a compass in a storm. The winds may rage, the waves may rise, and circumstances may feel unstable, yet the compass keeps pointing true north. In the same way, faith keeps speaking God’s truth even when emotions and circumstances try to pull the heart elsewhere.
+
+The Scriptures repeatedly show the power of godly speech: “Death and life are in the power of the tongue” (Proverbs 18:21). “Out of the abundance of the heart the mouth speaketh” (Matthew 12:34). “Let the weak say, I am strong” (Joel 3:10). Faith does not merely describe the problem—it responds to it through the truth of God’s Word. Faith does not deny reality; it declares that God is greater than it.
+
+Too often, we speak more about the mountain than to the mountain. We describe fear instead of declaring God’s promise. “Set a watch, O LORD, before my mouth” (Psalm 141:3).  Don’t live like a believer whose mouth contradicts their prayers. Faith does not whisper defeat—it declares victory in Christ.
+
+Jesus Himself spoke with perfect authority. He rebuked storms, cast out demons, healed the sick, and declared from the cross, “It is finished” (John 19:30). Through His finished work, we are not called to speak empty words, but to proclaim “all things” He has commanded with confidence in Him (Matthew 28:20). His Word—not our emotions—has the final authority in all matters of our faith and practices.
+
+What have your words been revealing about your faith lately? You don’t need Christ merely to improve your speech—you need Him to transform your heart. Stop feeding your fears; conquer them with God’s truth. Faith speaks God’s Word—and sees it done. Say what matters. Believe His promises. And let your words reflect that you truly have faith in Him.`,
+    prayer: `Heavenly Father, forgive us for words shaped more by fear than by faith. Guard our mouths and fill our hearts with Your truth. Teach us to speak in ways that honor You and reflect confidence in Your promises through Christ. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-15.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
   // Add more devotions here
 ];

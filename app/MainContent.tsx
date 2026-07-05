@@ -8,6 +8,7 @@ import MessageBubble from './components/MessageBubble';
 import { useUser } from '@clerk/nextjs';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
+import NameModal from './components/NameModal';
 
 type Message = {
   id: string;
@@ -47,6 +48,12 @@ export default function MainContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const stopRequested = useRef(false);
+  
+  // ============================================================
+  // NAME MODAL STATE
+  // ============================================================
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [userName, setUserName] = useState('');
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,6 +82,32 @@ export default function MainContent() {
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     autoResizeTextarea();
+  };
+
+  // ============================================================
+  // LOAD USER NAME FROM LOCALSTORAGE
+  // ============================================================
+  useEffect(() => {
+    if (userId && isLoaded) {
+      const savedName = localStorage.getItem(`baptistry_user_name_${userId}`);
+      if (savedName) {
+        setUserName(savedName);
+      } else {
+        // First time sign-in - ask for name
+        setShowNameModal(true);
+      }
+    }
+  }, [userId, isLoaded]);
+
+  // ============================================================
+  // SAVE USER NAME
+  // ============================================================
+  const handleNameSave = (name: string) => {
+    setUserName(name);
+    if (userId) {
+      localStorage.setItem(`baptistry_user_name_${userId}`, name);
+    }
+    setShowNameModal(false);
   };
 
   // Load conversations from Convex cloud (primary) or localStorage (backup)
@@ -459,7 +492,11 @@ const editMessage = (messageId: string, newContent: string) => {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: newContent, history: newMessages }),
+        body: JSON.stringify({ 
+          message: sentInput, 
+          history: messages,
+          userName: userName || 'friend', // ← Add this 
+        }),
       });
 
       const data = await response.json();
@@ -530,7 +567,11 @@ const editMessage = (messageId: string, newContent: string) => {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessageContent, history: newMessages }),
+        body: JSON.stringify({ 
+          message: userMessageContent, 
+          history: newMessages,
+          userName: userName || 'friend' // ← PASS USER NAME
+        }),
       });
 
       const data = await response.json();
@@ -616,7 +657,11 @@ const editMessage = (messageId: string, newContent: string) => {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: sentInput, history: messages }),
+        body: JSON.stringify({ 
+          message: sentInput, 
+          history: messages,
+          userName: userName || 'friend' // ← PASS USER NAME
+        }),
       });
 
       const data = await response.json();
@@ -845,6 +890,20 @@ const editMessage = (messageId: string, newContent: string) => {
           )}
         </div>
 
+        {/* Guest banner - only shows when not signed in */}
+        {!userId && (
+          <div className="max-w-4xl mx-auto mb-4 px-4">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-center border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                🔐 <strong>Sign in to save your chat history across all your devices.</strong>
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Your chats will be saved automatically when you sign in. It's free!
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
           <div className="max-w-4xl mx-auto">
             <div className="flex gap-3 items-end">
@@ -888,6 +947,12 @@ const editMessage = (messageId: string, newContent: string) => {
       </div>
       
       <RightSidebar />
+      
+      {/* Name Modal - Shows on first sign-in */}
+      <NameModal 
+        isOpen={showNameModal} 
+        onSave={handleNameSave} 
+      />
     </div>
   );
 }
