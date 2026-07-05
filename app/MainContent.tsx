@@ -76,11 +76,12 @@ export default function MainContent() {
   const stopRequested = useRef(false);
   
   // ============================================================
-  // DYNAMIC SUGGESTIONS STATE - Staggered updates with fade
+  // DYNAMIC SUGGESTIONS STATE - Staggered updates with slide-up
   // ============================================================
   const [currentSuggestions, setCurrentSuggestions] = useState<string[]>([]);
   const [updateIndex, setUpdateIndex] = useState<number>(0);
-  const [fadingIndex, setFadingIndex] = useState<number | null>(null);
+  const [slidingIndex, setSlidingIndex] = useState<number | null>(null);
+  const [textKeys, setTextKeys] = useState<string[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // ============================================================
@@ -119,62 +120,77 @@ export default function MainContent() {
   };
 
   // ============================================================
-  // DYNAMIC SUGGESTIONS - Staggered updates with smooth fade
+  // DYNAMIC SUGGESTIONS - Text slide-up animation
   // ============================================================
   
-  // Get 4 random suggestions
+  // Get 4 random suggestions with unique keys
   const getRandomSuggestions = useCallback(() => {
     const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 4).map(s => s.text);
+    const selected = shuffled.slice(0, 4).map(s => s.text);
+    return selected;
   }, []);
 
-  // Update a single suggestion at the current index with fade effect
+  // Initialize text keys for each position
+  const initializeTextKeys = useCallback((suggestions: string[]) => {
+    const keys = suggestions.map((_, index) => `suggestion-${index}-${Date.now()}-${Math.random()}`);
+    setTextKeys(keys);
+  }, []);
+
+  // Update a single suggestion with slide-up animation
   const updateSingleSuggestion = useCallback(() => {
-    // Start fade out
-    setFadingIndex(updateIndex);
-    
-    // After fade out, update the text and fade in
-    setTimeout(() => {
-      setCurrentSuggestions(prev => {
-        if (prev.length === 0) {
-          return getRandomSuggestions();
-        }
-        
-        // Get a new random suggestion not currently in the list
-        const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
-        let newSuggestion = '';
-        
-        for (const s of shuffled) {
-          if (!prev.includes(s.text)) {
-            newSuggestion = s.text;
-            break;
-          }
-        }
-        
-        if (!newSuggestion) {
-          newSuggestion = shuffled[0].text;
-        }
-        
-        // Create new array with only the current index updated
-        const newSuggestions = [...prev];
-        newSuggestions[updateIndex] = newSuggestion;
-        
+    setCurrentSuggestions(prev => {
+      if (prev.length === 0) {
+        const newSuggestions = getRandomSuggestions();
+        initializeTextKeys(newSuggestions);
         return newSuggestions;
+      }
+      
+      // Get a new random suggestion not currently in the list
+      const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
+      let newSuggestion = '';
+      
+      for (const s of shuffled) {
+        if (!prev.includes(s.text)) {
+          newSuggestion = s.text;
+          break;
+        }
+      }
+      
+      if (!newSuggestion) {
+        newSuggestion = shuffled[0].text;
+      }
+      
+      // Create new array with only the current index updated
+      const newSuggestions = [...prev];
+      newSuggestions[updateIndex] = newSuggestion;
+      
+      // Update the text key for this position to trigger animation
+      setTextKeys(prevKeys => {
+        const newKeys = [...prevKeys];
+        newKeys[updateIndex] = `suggestion-${updateIndex}-${Date.now()}-${Math.random()}`;
+        return newKeys;
       });
       
-      // End fade effect
-      setFadingIndex(null);
-    }, 200);
+      // Trigger slide-up animation
+      setSlidingIndex(updateIndex);
+      setTimeout(() => {
+        setSlidingIndex(null);
+      }, 350);
+      
+      return newSuggestions;
+    });
     
-    // Move to the next position (0, 1, 2, 3, then back to 0)
+    // Move to the next position
     setUpdateIndex(prev => (prev + 1) % 4);
-  }, [updateIndex, getRandomSuggestions]);
+  }, [updateIndex, getRandomSuggestions, initializeTextKeys]);
 
   // Initialize and start cycling suggestions
   useEffect(() => {
     if (messages.length === 0 && !isGenerating) {
       if (currentSuggestions.length === 0) {
-        setCurrentSuggestions(getRandomSuggestions());
+        const newSuggestions = getRandomSuggestions();
+        setCurrentSuggestions(newSuggestions);
+        initializeTextKeys(newSuggestions);
       }
       
       if (intervalRef.current) {
@@ -187,7 +203,7 @@ export default function MainContent() {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-      setFadingIndex(null);
+      setSlidingIndex(null);
     }
 
     return () => {
@@ -196,7 +212,7 @@ export default function MainContent() {
         intervalRef.current = null;
       }
     };
-  }, [messages.length, isGenerating, currentSuggestions.length, getRandomSuggestions, updateSingleSuggestion]);
+  }, [messages.length, isGenerating, currentSuggestions.length, getRandomSuggestions, initializeTextKeys, updateSingleSuggestion]);
 
   // ============================================================
   // LOAD USER NAME FROM LOCALSTORAGE
@@ -837,7 +853,15 @@ export default function MainContent() {
     pinned: conv.pinned || false,
   }));
 
-  const tryAskingButtonClass = "block w-full text-left text-sm text-blue-600 dark:text-blue-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-700 dark:hover:text-blue-300 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
+  const tryAskingButtonClass = "block w-full text-left text-sm text-blue-600 dark:text-blue-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-700 dark:hover:text-blue-300 px-3 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 overflow-hidden";
+
+  // Text animation class - slides up from bottom
+  const textContainerClass = "relative inline-block w-full overflow-hidden";
+  const textInnerClass = (isSliding: boolean) => `
+    inline-block w-full
+    transition-all duration-300 ease-in-out
+    ${isSliding ? 'translate-y-[-100%] opacity-0' : 'translate-y-0 opacity-100'}
+  `;
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
@@ -892,18 +916,15 @@ export default function MainContent() {
                     {currentSuggestions.length > 0 ? (
                       currentSuggestions.map((suggestion, index) => (
                         <button 
-                          key={`${suggestion}-${index}`}
+                          key={textKeys[index] || `suggestion-${index}-${Date.now()}`}
                           onClick={() => fillInput(suggestion)}
-                          className={`${tryAskingButtonClass} ${
-                            fadingIndex === index 
-                              ? 'opacity-0 scale-95' 
-                              : 'opacity-100 scale-100'
-                          }`}
-                          style={{
-                            transition: 'opacity 300ms ease-in-out, transform 300ms ease-in-out'
-                          }}
+                          className={tryAskingButtonClass}
                         >
-                          • "{suggestion}"
+                          <span className={textContainerClass}>
+                            <span className={textInnerClass(slidingIndex === index)}>
+                              • "{suggestion}"
+                            </span>
+                          </span>
                         </button>
                       ))
                     ) : (
