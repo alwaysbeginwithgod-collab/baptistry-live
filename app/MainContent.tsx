@@ -299,84 +299,27 @@ export default function MainContent() {
     setTimeout(autoResizeTextarea, 0);
   };
 
-const loadConversation = (conversationId: string) => {
-  console.log('🔵 loadConversation called for:', conversationId);
-  console.log('🔵 Current conversations count:', conversations.length);
-  console.log('🔵 Current conversations IDs:', conversations.map(c => c.id));
-  
-  // Save current conversation first if any
-  if (messages.length > 0 && currentConversationId) {
-    saveCurrentConversation();
-  }
-  
-  // Try to find the conversation in state
-  let conversation = conversations.find(c => c.id === conversationId);
-  
-  // If not found in state, try to load from localStorage directly
-  if (!conversation && userId) {
-    console.log('🔵 Conversation not in state, trying localStorage...');
-    const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
-    if (savedConversations) {
-      try {
-        const parsed = JSON.parse(savedConversations);
-        // Parse dates back to Date objects
-        const withDates = parsed.map((conv: any) => ({
-          ...conv,
-          createdAt: new Date(conv.createdAt),
-          updatedAt: new Date(conv.updatedAt),
-          messages: conv.messages.map((msg: any) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp),
-          })),
-        }));
-        // Update the conversations state
-        setConversations(withDates);
-        // Find the conversation in the loaded data
-        conversation = withDates.find(c => c.id === conversationId);
-        console.log('🔵 Found in localStorage:', conversation ? 'Yes' : 'No');
-      } catch (e) {
-        console.error('Failed to load from localStorage', e);
-      }
-    }
-  }
-  
-  if (conversation) {
-    console.log('🔵 Loading conversation:', conversationId);
-    console.log('🔵 Messages count:', conversation.messages.length);
-    console.log('🔵 First message preview:', conversation.messages[0]?.content?.substring(0, 50) || 'No messages');
+  const loadConversation = (conversationId: string) => {
+    console.log('🔵 loadConversation called for:', conversationId);
+    console.log('🔵 Current conversations count:', conversations.length);
+    console.log('🔵 Current conversations IDs:', conversations.map(c => c.id));
     
-    // Make sure we have messages to display
-    if (conversation.messages && conversation.messages.length > 0) {
-      // Update the updatedAt timestamp
-      setConversations(prev => prev.map(conv =>
-        conv.id === conversationId
-          ? { ...conv, updatedAt: new Date() }
-          : conv
-      ));
-      
-      // Set messages and current conversation ID
-      setMessages(conversation.messages);
-      setCurrentConversationId(conversationId);
-      
-      // Scroll to bottom after messages are rendered
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          scrollToBottomImmediate();
-        }, 100);
-      });
-    } else {
-      console.log('⚠️ Conversation has no messages');
-      setMessages([]);
-      setCurrentConversationId(conversationId);
+    // Save current conversation first if any
+    if (messages.length > 0 && currentConversationId) {
+      saveCurrentConversation();
     }
-  } else {
-    console.log('❌ Conversation not found anywhere:', conversationId);
-    // Try to reload conversations from localStorage
-    if (userId) {
-      const saved = localStorage.getItem(`baptistry_conversations_${userId}`);
-      if (saved) {
+    
+    // Try to find the conversation in state
+    let conversation = conversations.find(c => c.id === conversationId);
+    
+    // If not found in state, try to load from localStorage directly
+    if (!conversation && userId) {
+      console.log('🔵 Conversation not in state, trying localStorage...');
+      const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
+      if (savedConversations) {
         try {
-          const parsed = JSON.parse(saved);
+          const parsed = JSON.parse(savedConversations);
+          // Parse dates back to Date objects
           const withDates = parsed.map((conv: any) => ({
             ...conv,
             createdAt: new Date(conv.createdAt),
@@ -386,21 +329,78 @@ const loadConversation = (conversationId: string) => {
               timestamp: new Date(msg.timestamp),
             })),
           }));
+          // Update the conversations state
           setConversations(withDates);
-          // Try again to find the conversation
-          const found = withDates.find(c => c.id === conversationId);
-          if (found) {
-            setMessages(found.messages);
-            setCurrentConversationId(conversationId);
-            console.log('✅ Found conversation after reload');
-          }
+          // Find the conversation in the loaded data
+          conversation = withDates.find(c => c.id === conversationId);
+          console.log('🔵 Found in localStorage:', conversation ? 'Yes' : 'No');
         } catch (e) {
-          console.error('Failed to reload conversations', e);
+          console.error('Failed to load from localStorage', e);
         }
       }
     }
-  }
-};
+    
+    if (conversation) {
+      console.log('🔵 Loading conversation:', conversationId);
+      console.log('🔵 Messages count:', conversation.messages.length);
+      console.log('🔵 First message preview:', conversation.messages[0]?.content?.substring(0, 50) || 'No messages');
+      
+      // Make sure we have messages to display
+      if (conversation.messages && conversation.messages.length > 0) {
+        // Update the updatedAt timestamp
+        setConversations(prev => prev.map(conv =>
+          conv.id === conversationId
+            ? { ...conv, updatedAt: new Date() }
+            : conv
+        ));
+        
+        // Set messages and current conversation ID
+        setMessages(conversation.messages);
+        setCurrentConversationId(conversationId);
+        
+        // Scroll to bottom after messages are rendered
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            scrollToBottomImmediate();
+          }, 100);
+        });
+      } else {
+        console.log('⚠️ Conversation has no messages');
+        setMessages([]);
+        setCurrentConversationId(conversationId);
+      }
+    } else {
+      console.log('❌ Conversation not found anywhere:', conversationId);
+      // Try to reload conversations from localStorage
+      if (userId) {
+        const saved = localStorage.getItem(`baptistry_conversations_${userId}`);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            const withDates = parsed.map((conv: any) => ({
+              ...conv,
+              createdAt: new Date(conv.createdAt),
+              updatedAt: new Date(conv.updatedAt),
+              messages: conv.messages.map((msg: any) => ({
+                ...msg,
+                timestamp: new Date(msg.timestamp),
+              })),
+            }));
+            setConversations(withDates);
+            // Try again to find the conversation
+            const found = withDates.find(c => c.id === conversationId);
+            if (found) {
+              setMessages(found.messages);
+              setCurrentConversationId(conversationId);
+              console.log('✅ Found conversation after reload');
+            }
+          } catch (e) {
+            console.error('Failed to reload conversations', e);
+          }
+        }
+      }
+    }
+  };
 
   const renameConversation = (conversationId: string, newTitle: string) => {
     setConversations(prev => prev.map(conv =>
@@ -503,113 +503,113 @@ const loadConversation = (conversationId: string) => {
   };
 
   // EDIT MESSAGE FUNCTION - fixed with proper async
-const editMessage = (messageId: string, newContent: string) => {
-  console.log('✏️ EDIT MESSAGE:', messageId, newContent);
+  const editMessage = (messageId: string, newContent: string) => {
+    console.log('✏️ EDIT MESSAGE:', messageId, newContent);
 
-  const messageIndex = messages.findIndex(m => m.id === messageId);
-  if (messageIndex === -1) return;
+    const messageIndex = messages.findIndex(m => m.id === messageId);
+    if (messageIndex === -1) return;
 
-  const originalMessage = messages[messageIndex];
-  if (originalMessage.role !== 'user') return;
+    const originalMessage = messages[messageIndex];
+    if (originalMessage.role !== 'user') return;
 
-  // Force reset any ongoing generation
-  setIsGenerating(false);
-  setStreamingText('');
-  if (stopRequested.current) {
-    stopRequested.current = false;
-  }
-
-  // Remove this message and all messages after it
-  const newMessages = messages.slice(0, messageIndex);
-  setMessages(newMessages);
-
-  // ========================================
-  // ✅ Send directly WITHOUT setting input
-  // ========================================
-  const sendEditedMessage = async () => {
-    if (!newContent.trim()) return;
-
-    // Create a new conversation if needed
-    if (!currentConversationId) {
-      const newConversation: Conversation = {
-        id: Date.now().toString(),
-        title: newContent.substring(0, 40),
-        messages: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        pinned: false,
-      };
-      setConversations(prev => [newConversation, ...prev]);
-      setCurrentConversationId(newConversation.id);
+    // Force reset any ongoing generation
+    setIsGenerating(false);
+    setStreamingText('');
+    if (stopRequested.current) {
+      stopRequested.current = false;
     }
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: newContent,
-      timestamp: new Date(),
-    };
+    // Remove this message and all messages after it
+    const newMessages = messages.slice(0, messageIndex);
+    setMessages(newMessages);
 
-    setMessages(prev => [...prev, userMessage]);
-    setIsGenerating(true);
-    setStreamingText('');
-    stopRequested.current = false;
+    // ========================================
+    // ✅ Send directly WITHOUT setting input
+    // ========================================
+    const sendEditedMessage = async () => {
+      if (!newContent.trim()) return;
 
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: newContent,      // ← FIXED: use newContent, not sentInput
-          history: newMessages,     // ← FIXED: use the truncated history
-          userName: userName || 'friend',
-        }),
-      });
-
-      const data = await response.json();
-      let fullResponse = data.response || 'I apologize, but I encountered an error.';
-      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-      const chunkSize = 15;
-      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-        if (stopRequested.current) {
-          setIsGenerating(false);
-          setStreamingText('');
-          return;
-        }
-        setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 3));
+      // Create a new conversation if needed
+      if (!currentConversationId) {
+        const newConversation: Conversation = {
+          id: Date.now().toString(),
+          title: newContent.substring(0, 40),
+          messages: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          pinned: false,
+        };
+        setConversations(prev => [newConversation, ...prev]);
+        setCurrentConversationId(newConversation.id);
       }
 
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: fullResponse,
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: newContent,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, assistantMessage]);
-      setStreamingText('');
-      setIsGenerating(false);
 
-    } catch (error) {
-      console.error('Error:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'I apologize, but I am unable to respond at this moment.',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      setIsGenerating(false);
+      setMessages(prev => [...prev, userMessage]);
+      setIsGenerating(true);
       setStreamingText('');
-    }
+      stopRequested.current = false;
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message: newContent,
+            history: newMessages,
+            userName: userName || 'friend',
+          }),
+        });
+
+        const data = await response.json();
+        let fullResponse = data.response || 'I apologize, but I encountered an error.';
+        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+        const chunkSize = 15;
+        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+          if (stopRequested.current) {
+            setIsGenerating(false);
+            setStreamingText('');
+            return;
+          }
+          setStreamingText(fullResponse.substring(0, i));
+          await new Promise(resolve => setTimeout(resolve, 3));
+        }
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: fullResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+
+      } catch (error) {
+        console.error('Error:', error);
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'I apologize, but I am unable to respond at this moment.',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errorMessage]);
+        setIsGenerating(false);
+        setStreamingText('');
+      }
+    };
+
+    // Send immediately (no input change)
+    setTimeout(() => {
+      sendEditedMessage();
+    }, 50);
   };
-
-  // Send immediately (no input change)
-  setTimeout(() => {
-    sendEditedMessage();
-  }, 50);
-};
 
   const regenerateMessage = async (assistantMessageId: string) => {
     const assistantIndex = messages.findIndex(m => m.id === assistantMessageId);
@@ -637,7 +637,7 @@ const editMessage = (messageId: string, newContent: string) => {
         body: JSON.stringify({ 
           message: userMessageContent, 
           history: newMessages,
-          userName: userName || 'friend' // ← PASS USER NAME
+          userName: userName || 'friend'
         }),
       });
 
@@ -727,7 +727,7 @@ const editMessage = (messageId: string, newContent: string) => {
         body: JSON.stringify({ 
           message: sentInput, 
           history: messages,
-          userName: userName || 'friend' // ← PASS USER NAME
+          userName: userName || 'friend'
         }),
       });
 
@@ -984,4 +984,46 @@ const editMessage = (messageId: string, newContent: string) => {
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about Scripture, doctrine, or request a devotion..."
-                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-
+                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
+                rows={1}
+                style={{ minHeight: '48px', maxHeight: '120px' }}
+                disabled={isGenerating}
+              />
+              {isGenerating ? (
+                <button
+                  onClick={stopResponse}
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2 border border-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                >
+                  ⏹️ Stop
+                </button>
+              ) : (
+                <button
+                  onClick={sendMessage}
+                  disabled={!input.trim()}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Send
+                </button>
+              )}
+            </div>
+            
+            <p className="text-xs text-gray-600 dark:text-gray-400 text-center italic mt-3">
+              "A dose of God's Word a day, will keep you going all day."
+            </p>
+            <p className="text-xs text-blue-500 dark:text-blue-400 text-center mt-1">
+              — ALWAYS BEGIN WITH GOD —
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <RightSidebar />
+      
+      {/* Name Modal - Shows on first sign-in */}
+      <NameModal 
+        isOpen={showNameModal} 
+        onSave={handleNameSave} 
+      />
+    </div>
+  );
+}
