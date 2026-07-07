@@ -38,85 +38,153 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   const { title, tagline, scripture, content, prayer, image, facebookLink } = todayDevotion;
 
   // ============================================================
-  // FUNCTION: Format content with bold scripture references
+  // FORMAT TAGLINE - Handle \n line breaks properly
+  // ============================================================
+  const formatTagline = (text: string) => {
+    if (!text) return null;
+    // Split by \n and render each line
+    const lines = text.split('\n');
+    return lines.map((line, index) => (
+      <span key={index}>
+        {line}
+        {index < lines.length - 1 && <br />}
+      </span>
+    ));
+  };
+
+  // ============================================================
+  // FORMAT SCRIPTURE - Bold reference, italic quotes
+  // ============================================================
+  const formatScripture = (text: string) => {
+    // Match pattern: "Book Chapter:Verse" followed by quoted text
+    const match = text.match(/^([^:]+:\s*)(.+)$/);
+    if (match) {
+      const reference = match[1].trim();
+      const verse = match[2].trim();
+      return (
+        <>
+          <strong className="text-blue-600 dark:text-blue-400 font-bold">{reference}</strong>
+          <span className="italic"> "{verse}"</span>
+        </>
+      );
+    }
+    return <span className="italic">"{text}"</span>;
+  };
+
+  // ============================================================
+  // FORMAT CONTENT - Bold scripture references, italic quotes
   // ============================================================
   const formatContent = (text: string) => {
-    // Split content into paragraphs
+    // Split content into paragraphs by double newlines
     const paragraphs = text.split('\n\n');
     
     return paragraphs.map((paragraph, index) => {
-      // Check if paragraph is a scene break (starts with "---" or "***")
-      if (paragraph.trim().startsWith('---') || paragraph.trim().startsWith('***')) {
+      const trimmed = paragraph.trim();
+      
+      // Check if paragraph is a scene break (--- or ***)
+      if (trimmed === '---' || trimmed === '***' || trimmed === '—' || trimmed === '— — —') {
         return (
-          <div key={index} className="text-center text-gray-400 dark:text-gray-500 text-xl my-6">
-            <span className="inline-block w-8 h-0.5 bg-gray-300 dark:bg-gray-600 mx-2"></span>
-            <span className="mx-2">✦</span>
-            <span className="inline-block w-8 h-0.5 bg-gray-300 dark:bg-gray-600 mx-2"></span>
+          <div key={index} className="text-center text-gray-400 dark:text-gray-500 my-8">
+            <span className="inline-block w-12 h-px bg-gray-300 dark:bg-gray-600 mx-3"></span>
+            <span className="text-gray-400 dark:text-gray-500 text-sm mx-2">✦</span>
+            <span className="inline-block w-12 h-px bg-gray-300 dark:bg-gray-600 mx-3"></span>
           </div>
         );
       }
       
-      // Format scripture references within the paragraph
-      const formattedText = formatScriptureReferences(paragraph);
+      // Format scripture references in the paragraph
+      const formattedParagraph = formatScriptureReferences(trimmed);
       
       return (
         <p key={index} className="mb-4 leading-relaxed text-gray-700 dark:text-gray-300">
-          {formattedText}
+          {formattedParagraph}
         </p>
       );
     });
   };
 
   // ============================================================
-  // FUNCTION: Bold scripture references (Book Chapter:Verse)
+  // FORMAT SCRIPTURE REFERENCES - Bold reference, italic quotes
   // ============================================================
   const formatScriptureReferences = (text: string) => {
     // Match patterns like "John 3:16", "1 Corinthians 13:2", "Galatians 5:6", etc.
     const scripturePattern = /\b((?:[1-3]?\s?[A-Za-z]+)\s+\d+:\d+(?:-\d+)?)\b/g;
     
-    // Split text by scripture references
     const parts = [];
     let lastIndex = 0;
     let match;
     
-    // Create a regex that matches scripture references
-    const regex = new RegExp(scripturePattern);
+    // Clone the text to work with
+    let remainingText = text;
     
-    while ((match = regex.exec(text)) !== null) {
+    // Find all scripture references
+    while ((match = scripturePattern.exec(text)) !== null) {
       // Add text before the scripture reference
       if (match.index > lastIndex) {
         parts.push(text.substring(lastIndex, match.index));
       }
       
-      // Add the scripture reference with bold styling
-      const scriptureRef = match[0];
-      // Check if the scripture reference is part of a larger quote
-      const fullMatch = match[0];
-      
-      // Check if there's a quote before or after
+      const fullReference = match[0];
       const beforeChar = text[match.index - 1] || '';
-      const afterChar = text[regex.lastIndex] || '';
+      const afterChar = text[scripturePattern.lastIndex] || '';
       
-      let styledRef = `<strong class="text-blue-600 dark:text-blue-400 font-bold">${fullMatch}</strong>`;
+      // Check if this reference is part of a quoted scripture
+      // Look for quotes around the reference
+      let isQuoted = false;
       
-      // If the scripture reference is part of a quote (has quotes around it)
-      if (beforeChar === '"' && afterChar === '"') {
-        // The reference is inside quotes, keep it styled but don't add extra quotes
-        parts.push(styledRef);
-      } else if (afterChar === ' ' || afterChar === '.' || afterChar === ',' || afterChar === ';' || afterChar === '') {
-        // Check if this scripture reference has a preceding quote
-        const quoteMatch = text.substring(0, match.index).match(/"([^"]*)$/);
-        if (quoteMatch) {
-          // The scripture is part of a quoted passage
-          parts.push(styledRef);
-        } else {
-          parts.push(styledRef);
+      // Check if the reference is within quotes
+      const beforeText = text.substring(0, match.index);
+      const afterText = text.substring(scripturePattern.lastIndex);
+      
+      // Check if there's an opening quote before this reference that isn't closed
+      const openQuoteIndex = beforeText.lastIndexOf('"');
+      const closeQuoteIndex = afterText.indexOf('"');
+      
+      if (openQuoteIndex !== -1 && closeQuoteIndex !== -1) {
+        // Check if the reference is within these quotes
+        const textBetweenQuotes = text.substring(openQuoteIndex + 1, scripturePattern.lastIndex + closeQuoteIndex);
+        if (textBetweenQuotes.includes(fullReference)) {
+          isQuoted = true;
         }
-      } else {
-        parts.push(styledRef);
       }
       
-      lastIndex = regex.lastIndex;
+      // Check for single quote as well
+      const openSingleQuoteIndex = beforeText.lastIndexOf("'");
+      const closeSingleQuoteIndex = afterText.indexOf("'");
+      
+      if (openSingleQuoteIndex !== -1 && closeSingleQuoteIndex !== -1) {
+        const textBetweenSingleQuotes = text.substring(openSingleQuoteIndex + 1, scripturePattern.lastIndex + closeSingleQuoteIndex);
+        if (textBetweenSingleQuotes.includes(fullReference)) {
+          isQuoted = true;
+        }
+      }
+      
+      // Build the styled scripture reference
+      let styledRef;
+      
+      // Check if this is a standalone scripture reference (like in the scripture box)
+      // or embedded in text
+      if (isQuoted) {
+        // If it's within quotes, just bold the reference and italicize the quote
+        styledRef = `<strong class="text-blue-600 dark:text-blue-400 font-bold">${fullReference}</strong>`;
+      } else {
+        // Check if the reference has parentheses around it (like (John 3:16))
+        const beforeTextFull = text.substring(0, match.index);
+        const afterTextFull = text.substring(scripturePattern.lastIndex);
+        const hasOpenParen = beforeTextFull.endsWith('(') || beforeTextFull.endsWith('（');
+        const hasCloseParen = afterTextFull.startsWith(')') || afterTextFull.startsWith('）');
+        
+        if (hasOpenParen && hasCloseParen) {
+          // It's in parentheses, style the reference
+          styledRef = `<strong class="text-blue-600 dark:text-blue-400 font-bold">${fullReference}</strong>`;
+        } else {
+          // Regular reference in text
+          styledRef = `<strong class="text-blue-600 dark:text-blue-400 font-bold">${fullReference}</strong>`;
+        }
+      }
+      
+      parts.push(styledRef);
+      lastIndex = scripturePattern.lastIndex;
     }
     
     // Add remaining text
@@ -126,36 +194,62 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
     
     // If no scripture references found, return the original text
     if (parts.length === 0) {
-      return text;
+      // Still need to format quotes
+      return formatQuotes(text);
     }
     
-    // Join all parts and return as JSX
+    // Join all parts and render as JSX
     return parts.map((part, i) => {
       if (part.startsWith('<strong')) {
-        // It's a styled scripture reference
         return <span key={i} dangerouslySetInnerHTML={{ __html: part }} />;
       }
-      return <span key={i}>{part}</span>;
+      // Format quotes in the text part
+      return <span key={i}>{formatQuotes(part)}</span>;
     });
   };
 
   // ============================================================
-  // FUNCTION: Format scripture (bold book/chapter/verse)
+  // FORMAT QUOTES - Italicize text within quotes
   // ============================================================
-  const formatScripture = (text: string) => {
-    // Extract the book/chapter/verse part
-    const match = text.match(/^([^:]+:\s*)(.+)$/);
-    if (match) {
-      const reference = match[1];
-      const verse = match[2];
-      return (
-        <>
-          <strong className="text-blue-600 dark:text-blue-400 font-bold">{reference}</strong>
-          <span>"{verse}"</span>
-        </>
-      );
+  const formatQuotes = (text: string) => {
+    // If no quotes, return text
+    if (!text.includes('"') && !text.includes("'")) {
+      return text;
     }
-    return <span>"{text}"</span>;
+    
+    // Process double quotes
+    const parts = [];
+    let remaining = text;
+    let doubleQuoteIndex = remaining.indexOf('"');
+    
+    while (doubleQuoteIndex !== -1) {
+      // Add text before the quote
+      if (doubleQuoteIndex > 0) {
+        parts.push(remaining.substring(0, doubleQuoteIndex));
+      }
+      
+      // Find the closing quote
+      const closeQuoteIndex = remaining.indexOf('"', doubleQuoteIndex + 1);
+      if (closeQuoteIndex !== -1) {
+        // Extract the quoted text (including the quotes)
+        const quotedText = remaining.substring(doubleQuoteIndex, closeQuoteIndex + 1);
+        // Italicize the quoted text
+        parts.push(<em key={parts.length} className="italic text-gray-800 dark:text-gray-200">{quotedText}</em>);
+        remaining = remaining.substring(closeQuoteIndex + 1);
+      } else {
+        // No closing quote, add the rest
+        parts.push(remaining.substring(doubleQuoteIndex));
+        break;
+      }
+      
+      doubleQuoteIndex = remaining.indexOf('"');
+    }
+    
+    if (remaining) {
+      parts.push(remaining);
+    }
+    
+    return parts;
   };
 
   return (
@@ -188,17 +282,19 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
 
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{title}</h1>
           
-          {/* Tagline with two-line formatting */}
+          {/* Tagline with proper line breaks */}
           <p className="text-base italic text-blue-600 dark:text-blue-400 mb-4 whitespace-pre-line">
-            {tagline}
+            {formatTagline(tagline)}
           </p>
 
+          {/* Scripture Box - Bold reference, italic quote */}
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6 border-l-4 border-blue-500">
             <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
               📖 {formatScripture(scripture)}
             </p>
           </div>
 
+          {/* Content with bold scripture references and italic quotes */}
           <div className="prose prose-base dark:prose-invert max-w-none mb-6">
             {formatContent(content)}
           </div>
@@ -216,7 +312,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
           {facebookLink && (
             <div className="mt-4 text-center">
               <a href={facebookLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline">
-                <span> More on Facebook</span>
+                <span>📘 More on Facebook</span>
               </a>
             </div>
           )}
