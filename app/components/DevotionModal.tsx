@@ -9,20 +9,30 @@ interface DevotionModalProps {
 }
 
 export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
+  // Use useMemo to calculate the devotion based on today's date
   const todayDevotion = useMemo(() => {
     if (!isOpen || devotions.length === 0) return null;
     
+    // Force sort by ID to ensure correct order (Devotion-1, Devotion-2, etc.)
     const sortedDevotions = [...devotions].sort((a, b) => {
       const numA = parseInt(a.id.replace('Devotion-', ''));
       const numB = parseInt(b.id.replace('Devotion-', ''));
       return numA - numB;
     });
     
+    // Calculate the day of the year
     const now = new Date();
     const start = new Date(now.getFullYear(), 0, 0);
     const diff = now.getTime() - start.getTime();
     const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    // Calculate index based on day of year - this ensures sequential looping
     const index = (dayOfYear - 1) % sortedDevotions.length;
+    
+    // Log for debugging
+    console.log(`📅 Day ${dayOfYear} of year → Devotion ${index + 1}: ${sortedDevotions[index]?.title}`);
+    console.log(`📚 Total devotions: ${sortedDevotions.length}`);
+    console.log(`📖 Selected: ${sortedDevotions[index]?.id}`);
     
     return sortedDevotions[index];
   }, [isOpen]);
@@ -35,6 +45,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   // FORMAT SCRIPTURE - Bold reference, italic quote
   // ============================================================
   const formatScripture = (text: string) => {
+    // Match: "Book Chapter:Verse "quote""
     const match = text.match(/^(.+?)\s*["“](.+)["”]$/);
     if (match) {
       const reference = match[1].trim();
@@ -46,6 +57,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
         </>
       );
     }
+    // Fallback: try to split by quote
     const quoteIndex = text.indexOf('"');
     if (quoteIndex > 0) {
       const reference = text.substring(0, quoteIndex).trim();
@@ -75,7 +87,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   };
 
   // ============================================================
-  // FORMAT CONTENT - Bold scripture references, italic quotes (SIMPLIFIED)
+  // FORMAT CONTENT - Bold references, italic quotes
   // ============================================================
   const formatContent = (text: string) => {
     const paragraphs = text.split('\n\n');
@@ -94,7 +106,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
         );
       }
       
-      // Process the paragraph - this will format quotes and scripture references
+      // Process the paragraph
       const formatted = processParagraph(trimmed);
       
       return (
@@ -106,10 +118,10 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   };
 
   // ============================================================
-  // PROCESS PARAGRAPH - Combined approach
+  // PROCESS PARAGRAPH - Format scripture references and quotes
   // ============================================================
   const processParagraph = (text: string) => {
-    // First, split by scripture references and format them
+    // Match scripture references like "Hebrews 11:1", "1 Corinthians 13:2", etc.
     const scriptureRegex = /\b((?:[1-3]?\s?[A-Za-z]+)\s+\d+:\d+(?:-\d+)?)\b/g;
     const parts = [];
     let currentIndex = 0;
@@ -122,7 +134,6 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
       // Add text before the reference (with quote formatting)
       if (refStart > currentIndex) {
         const beforeText = text.substring(currentIndex, refStart);
-        // Process quotes in this text
         const quoteParts = processQuotesSimple(beforeText);
         parts.push(...quoteParts);
       }
@@ -144,7 +155,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
       parts.push(...quoteParts);
     }
     
-    // If no parts were added, just process quotes
+    // If no scripture references found, just process quotes
     if (parts.length === 0) {
       return processQuotesSimple(text);
     }
@@ -153,14 +164,25 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   };
 
   // ============================================================
-  // PROCESS QUOTES - Simple and reliable
+  // PROCESS QUOTES - Italicize quoted scripture
   // ============================================================
   const processQuotesSimple = (text: string): (string | JSX.Element)[] => {
     if (!text) return [];
     
     const parts: (string | JSX.Element)[] = [];
     let remaining = text;
-    let quoteStart = remaining.indexOf('"');
+    
+    // Handle both straight quotes and smart quotes
+    const quoteChars = ['"', '“', '”'];
+    let quoteStart = -1;
+    
+    // Find the first quote (any type)
+    for (const char of quoteChars) {
+      const pos = remaining.indexOf(char);
+      if (pos !== -1 && (quoteStart === -1 || pos < quoteStart)) {
+        quoteStart = pos;
+      }
+    }
     
     while (quoteStart !== -1) {
       // Add text before the quote
@@ -168,8 +190,14 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
         parts.push(remaining.substring(0, quoteStart));
       }
       
-      // Find closing quote
-      const quoteEnd = remaining.indexOf('"', quoteStart + 1);
+      // Find the closing quote (matching type)
+      const openingChar = remaining[quoteStart];
+      let closingChar = '"';
+      if (openingChar === '“') closingChar = '”';
+      else if (openingChar === '”') closingChar = '“';
+      else closingChar = '"';
+      
+      const quoteEnd = remaining.indexOf(closingChar, quoteStart + 1);
       if (quoteEnd !== -1) {
         // Extract the quoted text
         const quotedText = remaining.substring(quoteStart, quoteEnd + 1);
@@ -180,17 +208,24 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
         );
         remaining = remaining.substring(quoteEnd + 1);
       } else {
+        // No closing quote, add the rest
         parts.push(remaining.substring(quoteStart));
         break;
       }
       
-      quoteStart = remaining.indexOf('"');
+      // Find the next quote
+      quoteStart = -1;
+      for (const char of quoteChars) {
+        const pos = remaining.indexOf(char);
+        if (pos !== -1 && (quoteStart === -1 || pos < quoteStart)) {
+          quoteStart = pos;
+        }
+      }
     }
     
     // Add any remaining text
     if (remaining) {
-      // Recursively process any remaining quotes
-      if (remaining.includes('"')) {
+      if (remaining.includes('"') || remaining.includes('“') || remaining.includes('”')) {
         const moreParts = processQuotesSimple(remaining);
         parts.push(...moreParts);
       } else {
