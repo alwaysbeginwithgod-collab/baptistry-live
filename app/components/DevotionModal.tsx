@@ -98,10 +98,10 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
       // Scene break
       if (trimmed === '---' || trimmed === '***' || trimmed === '—' || trimmed === '— — —') {
         return (
-          <div key={index} className="text-center text-gray-400 dark:text-gray-500 my-8">
-            <span className="inline-block w-12 h-px bg-gray-300 dark:bg-gray-600 mx-3"></span>
-            <span className="text-gray-400 dark:text-gray-500 text-sm mx-2">✦</span>
-            <span className="inline-block w-12 h-px bg-gray-300 dark:bg-gray-600 mx-3"></span>
+          <div key={index} className="text-center text-gray-400 dark:text-gray-500 my-4">
+            <span className="inline-block w-8 h-px bg-gray-300 dark:bg-gray-600 mx-2"></span>
+            <span className="text-gray-400 dark:text-gray-500 text-xs mx-1">✦</span>
+            <span className="inline-block w-8 h-px bg-gray-300 dark:bg-gray-600 mx-2"></span>
           </div>
         );
       }
