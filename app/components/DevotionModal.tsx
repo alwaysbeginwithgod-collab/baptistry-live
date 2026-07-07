@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { devotions, Devotion } from '../data/devotions';
 
 interface DevotionModalProps {
@@ -9,29 +9,32 @@ interface DevotionModalProps {
 }
 
 export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
-  const [todayDevotion, setTodayDevotion] = useState<Devotion | null>(null);
-
-  useEffect(() => {
-    if (isOpen && devotions.length > 0) {
-      // Force sort by ID to ensure correct order
-      const sortedDevotions = [...devotions].sort((a, b) => {
-        const numA = parseInt(a.id.replace('Devotion-', ''));
-        const numB = parseInt(b.id.replace('Devotion-', ''));
-        return numA - numB;
-      });
-      
-      // Calculate the day of the year
-      const now = new Date();
-      const start = new Date(now.getFullYear(), 0, 0);
-      const diff = now.getTime() - start.getTime();
-      const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-      
-      // Calculate index based on day of year
-      const index = (dayOfYear - 1) % sortedDevotions.length;
-      
-      setTodayDevotion(sortedDevotions[index]);
-    }
-  }, [isOpen]);
+  // Use useMemo to calculate the devotion based on today's date
+  const todayDevotion = useMemo(() => {
+    if (!isOpen || devotions.length === 0) return null;
+    
+    // Force sort by ID
+    const sortedDevotions = [...devotions].sort((a, b) => {
+      const numA = parseInt(a.id.replace('Devotion-', ''));
+      const numB = parseInt(b.id.replace('Devotion-', ''));
+      return numA - numB;
+    });
+    
+    // Calculate the day of the year - using UTC to avoid timezone issues
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 0);
+    const diff = now.getTime() - start.getTime();
+    const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    // Calculate index based on day of year
+    const index = (dayOfYear - 1) % sortedDevotions.length;
+    
+    console.log(`📅 Day ${dayOfYear} of year → Devotion ${index + 1}: ${sortedDevotions[index]?.title}`);
+    console.log(`🔍 Today's date: ${now.toLocaleDateString()}`);
+    console.log(`📚 Total devotions: ${sortedDevotions.length}`);
+    
+    return sortedDevotions[index];
+  }, [isOpen]); // Recalculate when modal opens
 
   if (!isOpen || !todayDevotion) return null;
 
@@ -42,7 +45,6 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   // ============================================================
   const formatTagline = (text: string) => {
     if (!text) return null;
-    // Split by \n and render each line
     const lines = text.split('\n');
     return lines.map((line, index) => (
       <span key={index}>
@@ -53,11 +55,12 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   };
 
   // ============================================================
-  // FORMAT SCRIPTURE - Bold reference, italic quotes
+  // FORMAT SCRIPTURE - Bold reference, italic quote
   // ============================================================
   const formatScripture = (text: string) => {
     // Match pattern: "Book Chapter:Verse" followed by quoted text
-    const match = text.match(/^([^:]+:\s*)(.+)$/);
+    // Example: "Matthew 6:34 "Take therefore..."
+    const match = text.match(/^([^:]+:\s*\d+)\s*["'](.+)["']$/);
     if (match) {
       const reference = match[1].trim();
       const verse = match[2].trim();
@@ -68,6 +71,20 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
         </>
       );
     }
+    
+    // Fallback: try to split by quote
+    const quoteMatch = text.match(/^([^"']+)["'](.+)["']$/);
+    if (quoteMatch) {
+      const reference = quoteMatch[1].trim();
+      const verse = quoteMatch[2].trim();
+      return (
+        <>
+          <strong className="text-blue-600 dark:text-blue-400 font-bold">{reference}</strong>
+          <span className="italic"> "{verse}"</span>
+        </>
+      );
+    }
+    
     return <span className="italic">"{text}"</span>;
   };
 
@@ -75,13 +92,12 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   // FORMAT CONTENT - Bold scripture references, italic quotes
   // ============================================================
   const formatContent = (text: string) => {
-    // Split content into paragraphs by double newlines
     const paragraphs = text.split('\n\n');
     
     return paragraphs.map((paragraph, index) => {
       const trimmed = paragraph.trim();
       
-      // Check if paragraph is a scene break (--- or ***)
+      // Check for scene break
       if (trimmed === '---' || trimmed === '***' || trimmed === '—' || trimmed === '— — —') {
         return (
           <div key={index} className="text-center text-gray-400 dark:text-gray-500 my-8">
@@ -92,8 +108,8 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
         );
       }
       
-      // Format scripture references in the paragraph
-      const formattedParagraph = formatScriptureReferences(trimmed);
+      // Process the paragraph
+      const formattedParagraph = processParagraph(trimmed);
       
       return (
         <p key={index} className="mb-4 leading-relaxed text-gray-700 dark:text-gray-300">
@@ -104,149 +120,104 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   };
 
   // ============================================================
-  // FORMAT SCRIPTURE REFERENCES - Bold reference, italic quotes
+  // PROCESS PARAGRAPH - Format scripture references and quotes
   // ============================================================
-  const formatScriptureReferences = (text: string) => {
-    // Match patterns like "John 3:16", "1 Corinthians 13:2", "Galatians 5:6", etc.
-    const scripturePattern = /\b((?:[1-3]?\s?[A-Za-z]+)\s+\d+:\d+(?:-\d+)?)\b/g;
-    
-    const parts = [];
+  const processParagraph = (text: string) => {
+    // First, find all scripture references and format them
+    const result = [];
+    let remaining = text;
     let lastIndex = 0;
+    
+    // Match scripture references like "Matthew 6:34", "1 Corinthians 13:2", etc.
+    const scriptureRegex = /\b((?:[1-3]?\s?[A-Za-z]+)\s+\d+:\d+(?:-\d+)?)\b/g;
     let match;
+    let tempText = text;
+    let parts = [];
+    let currentIndex = 0;
     
-    // Clone the text to work with
-    let remainingText = text;
-    
-    // Find all scripture references
-    while ((match = scripturePattern.exec(text)) !== null) {
-      // Add text before the scripture reference
-      if (match.index > lastIndex) {
-        parts.push(text.substring(lastIndex, match.index));
+    while ((match = scriptureRegex.exec(text)) !== null) {
+      const ref = match[0];
+      const refStart = match.index;
+      const refEnd = scriptureRegex.lastIndex;
+      
+      // Add text before the reference
+      if (refStart > currentIndex) {
+        const beforeText = text.substring(currentIndex, refStart);
+        // Process quotes in the before text
+        parts.push(...processQuotes(beforeText));
       }
       
-      const fullReference = match[0];
-      const beforeChar = text[match.index - 1] || '';
-      const afterChar = text[scripturePattern.lastIndex] || '';
+      // Add the scripture reference (bold)
+      parts.push(
+        <strong key={`ref-${match.index}`} className="text-blue-600 dark:text-blue-400 font-bold">
+          {ref}
+        </strong>
+      );
       
-      // Check if this reference is part of a quoted scripture
-      // Look for quotes around the reference
-      let isQuoted = false;
-      
-      // Check if the reference is within quotes
-      const beforeText = text.substring(0, match.index);
-      const afterText = text.substring(scripturePattern.lastIndex);
-      
-      // Check if there's an opening quote before this reference that isn't closed
-      const openQuoteIndex = beforeText.lastIndexOf('"');
-      const closeQuoteIndex = afterText.indexOf('"');
-      
-      if (openQuoteIndex !== -1 && closeQuoteIndex !== -1) {
-        // Check if the reference is within these quotes
-        const textBetweenQuotes = text.substring(openQuoteIndex + 1, scripturePattern.lastIndex + closeQuoteIndex);
-        if (textBetweenQuotes.includes(fullReference)) {
-          isQuoted = true;
-        }
-      }
-      
-      // Check for single quote as well
-      const openSingleQuoteIndex = beforeText.lastIndexOf("'");
-      const closeSingleQuoteIndex = afterText.indexOf("'");
-      
-      if (openSingleQuoteIndex !== -1 && closeSingleQuoteIndex !== -1) {
-        const textBetweenSingleQuotes = text.substring(openSingleQuoteIndex + 1, scripturePattern.lastIndex + closeSingleQuoteIndex);
-        if (textBetweenSingleQuotes.includes(fullReference)) {
-          isQuoted = true;
-        }
-      }
-      
-      // Build the styled scripture reference
-      let styledRef;
-      
-      // Check if this is a standalone scripture reference (like in the scripture box)
-      // or embedded in text
-      if (isQuoted) {
-        // If it's within quotes, just bold the reference and italicize the quote
-        styledRef = `<strong class="text-blue-600 dark:text-blue-400 font-bold">${fullReference}</strong>`;
-      } else {
-        // Check if the reference has parentheses around it (like (John 3:16))
-        const beforeTextFull = text.substring(0, match.index);
-        const afterTextFull = text.substring(scripturePattern.lastIndex);
-        const hasOpenParen = beforeTextFull.endsWith('(') || beforeTextFull.endsWith('（');
-        const hasCloseParen = afterTextFull.startsWith(')') || afterTextFull.startsWith('）');
-        
-        if (hasOpenParen && hasCloseParen) {
-          // It's in parentheses, style the reference
-          styledRef = `<strong class="text-blue-600 dark:text-blue-400 font-bold">${fullReference}</strong>`;
-        } else {
-          // Regular reference in text
-          styledRef = `<strong class="text-blue-600 dark:text-blue-400 font-bold">${fullReference}</strong>`;
-        }
-      }
-      
-      parts.push(styledRef);
-      lastIndex = scripturePattern.lastIndex;
+      currentIndex = refEnd;
     }
     
-    // Add remaining text
-    if (lastIndex < text.length) {
-      parts.push(text.substring(lastIndex));
+    // Add remaining text after all references
+    if (currentIndex < text.length) {
+      const afterText = text.substring(currentIndex);
+      parts.push(...processQuotes(afterText));
     }
     
-    // If no scripture references found, return the original text
+    // If no scripture references found, just process quotes
     if (parts.length === 0) {
-      // Still need to format quotes
-      return formatQuotes(text);
+      return processQuotes(text);
     }
     
-    // Join all parts and render as JSX
-    return parts.map((part, i) => {
-      if (part.startsWith('<strong')) {
-        return <span key={i} dangerouslySetInnerHTML={{ __html: part }} />;
-      }
-      // Format quotes in the text part
-      return <span key={i}>{formatQuotes(part)}</span>;
-    });
+    return parts;
   };
 
   // ============================================================
-  // FORMAT QUOTES - Italicize text within quotes
+  // PROCESS QUOTES - Italicize text within quotes
   // ============================================================
-  const formatQuotes = (text: string) => {
-    // If no quotes, return text
-    if (!text.includes('"') && !text.includes("'")) {
-      return text;
-    }
+  const processQuotes = (text: string): (string | JSX.Element)[] => {
+    if (!text) return [];
     
-    // Process double quotes
-    const parts = [];
+    const parts: (string | JSX.Element)[] = [];
     let remaining = text;
-    let doubleQuoteIndex = remaining.indexOf('"');
+    let quoteStart = remaining.indexOf('"');
     
-    while (doubleQuoteIndex !== -1) {
+    while (quoteStart !== -1) {
       // Add text before the quote
-      if (doubleQuoteIndex > 0) {
-        parts.push(remaining.substring(0, doubleQuoteIndex));
+      if (quoteStart > 0) {
+        parts.push(remaining.substring(0, quoteStart));
       }
       
       // Find the closing quote
-      const closeQuoteIndex = remaining.indexOf('"', doubleQuoteIndex + 1);
-      if (closeQuoteIndex !== -1) {
-        // Extract the quoted text (including the quotes)
-        const quotedText = remaining.substring(doubleQuoteIndex, closeQuoteIndex + 1);
-        // Italicize the quoted text
-        parts.push(<em key={parts.length} className="italic text-gray-800 dark:text-gray-200">{quotedText}</em>);
-        remaining = remaining.substring(closeQuoteIndex + 1);
+      const quoteEnd = remaining.indexOf('"', quoteStart + 1);
+      if (quoteEnd !== -1) {
+        // Extract the quoted text (including quotes)
+        const quotedText = remaining.substring(quoteStart, quoteEnd + 1);
+        // Add italicized quoted text
+        parts.push(
+          <em key={`quote-${parts.length}`} className="italic text-gray-800 dark:text-gray-200">
+            {quotedText}
+          </em>
+        );
+        remaining = remaining.substring(quoteEnd + 1);
       } else {
         // No closing quote, add the rest
-        parts.push(remaining.substring(doubleQuoteIndex));
+        parts.push(remaining.substring(quoteStart));
         break;
       }
       
-      doubleQuoteIndex = remaining.indexOf('"');
+      quoteStart = remaining.indexOf('"');
     }
     
+    // Add any remaining text
     if (remaining) {
-      parts.push(remaining);
+      // Check if remaining has quotes
+      if (remaining.includes('"')) {
+        // Recursively process remaining text
+        const moreParts = processQuotes(remaining);
+        parts.push(...moreParts);
+      } else {
+        parts.push(remaining);
+      }
     }
     
     return parts;
@@ -265,7 +236,6 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
         </div>
 
         <div className="p-6">
-          {/* Image with fallback */}
           {image && (
             <div className="mb-6 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700">
               <img 
@@ -282,19 +252,19 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
 
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{title}</h1>
           
-          {/* Tagline with proper line breaks */}
+          {/* Tagline */}
           <p className="text-base italic text-blue-600 dark:text-blue-400 mb-4 whitespace-pre-line">
             {formatTagline(tagline)}
           </p>
 
-          {/* Scripture Box - Bold reference, italic quote */}
+          {/* Scripture Box */}
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6 border-l-4 border-blue-500">
             <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
               📖 {formatScripture(scripture)}
             </p>
           </div>
 
-          {/* Content with bold scripture references and italic quotes */}
+          {/* Content */}
           <div className="prose prose-base dark:prose-invert max-w-none mb-6">
             {formatContent(content)}
           </div>
