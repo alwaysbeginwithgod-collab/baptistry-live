@@ -13,12 +13,25 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
 
   useEffect(() => {
     if (isOpen && devotions.length > 0) {
+      // Force sort by ID to ensure correct order
+      const sortedDevotions = [...devotions].sort((a, b) => {
+        const numA = parseInt(a.id.replace('Devotion-', ''));
+        const numB = parseInt(b.id.replace('Devotion-', ''));
+        return numA - numB;
+      });
+      
+      // Calculate the day of the year
       const now = new Date();
       const start = new Date(now.getFullYear(), 0, 0);
       const diff = now.getTime() - start.getTime();
       const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const index = (dayOfYear - 1) % devotions.length;
-      setTodayDevotion(devotions[index]);
+      
+      // Calculate index based on day of year
+      const index = (dayOfYear - 1) % sortedDevotions.length;
+      
+      console.log(`📅 Day ${dayOfYear} of year → Devotion ${index + 1}: ${sortedDevotions[index]?.title}`);
+      
+      setTodayDevotion(sortedDevotions[index]);
     }
   }, [isOpen]);
 
@@ -56,7 +69,11 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
           )}
 
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{title}</h1>
-          <p className="text-base italic text-blue-600 dark:text-blue-400 mb-4 whitespace-pre-line">{tagline}</p>
+          
+          {/* Tagline with two-line formatting support */}
+          <p className="text-base italic text-blue-600 dark:text-blue-400 mb-4 whitespace-pre-line">
+            {tagline}
+          </p>
 
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6 border-l-4 border-blue-500">
             <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">📖 {scripture}</p>
