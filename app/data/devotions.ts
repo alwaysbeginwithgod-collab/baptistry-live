@@ -50,8 +50,6 @@ What decision has been weighing heavily on your heart? Where have you been relyi
 
 Hebrews 11:6 declares, "But without faith it is impossible to please him…" In a world full of rituals and routines, God sets the standard—faith, not form, pleases Him. "Impossible" means none of our best efforts can substitute for Faith. And Scripture reminds us that without God, it is impossible to have faith at all, for Christ is the "Author and Finisher of our faith" (Hebrews 12:2).
 
----
-
 Faith is like stepping onto a bridge in thick fog. We do not see the end, yet we trust the One who built it. The heroes of Hebrews 11 walked not by sight, yet not without certainty. Faith does not rest in outcomes—it rests in the unchanging character of God.
 
 ---
@@ -82,8 +80,6 @@ What is the one place where you are hesitating to trust God today? You cannot pl
 ---
 
 2 Corinthians 5:7 declares, "For we walk by faith, not by sight." Paul writes to believers navigating pressure and uncertainty, reminding them that the Christian life is not governed by visible realities, but by unseen truths. Sight reacts to circumstances—faith responds to God. One is temporal, the other eternal.
-
----
 
 Walking by faith is like traveling through dense fog with only a lamp for the next step. We may not see the destination, but we trust the direction. Faith does not require a full map—it follows the Master. The path may be hidden, but the Guide is never uncertain.
 
@@ -116,8 +112,6 @@ Where are you waiting for sight before you obey? You cannot walk with God while 
 
 Romans 10:17 settles the origin of faith: “So then faith cometh by hearing, and hearing by the word of God.” Paul writes in the context of the gospel being preached. Faith does not originate within us—it is awakened through Scriptures. It is not self-generated; it is God-originated.
 
----
-
 Faith is like a fire that cannot burn without fuel. Opinions may spark emotion, but only the Word sustains the flame. Remove the fuel, and the fire fades. Fill the heart with truth, and faith grows strong. The strength of our faith is directly tied to the source that feeds it.
 
 ---
@@ -148,8 +142,6 @@ What are you consistently listening to that is shaping your faith today? You can
 ---
 
 Numbers 23:19 declares, “God is not a man, that he should lie; neither the son of man, that he should repent…” Spoken through Balaam, this truth stands firm: God is not like us. He does not deceive, revise, or fail. What He speaks is settled—His Word is as certain as His nature.
-
----
 
 Picture a master builder whose every measurement is perfect—whose level never tilts and whose plumb line never drifts. Every structure stands because every calculation is exact. God’s promises are that plumb line. They do not shift with seasons, circumstances, or human failure. Faith does not cling to outcomes—it clings to the unchanging character of God.
 
@@ -182,8 +174,6 @@ Is there a promise of God you have quietly stopped believing because someone in 
 
 Proverbs 3:5 is one of the most memorized verses in Scripture—yet often one of the least obeyed: “Trust in the LORD with all thine heart; and lean not unto thine own understanding.” Solomon calls us to an all-in trust—one that does not depend on human reasoning. Our understanding is limited and often clouded by emotion, but God’s wisdom is perfect and unchanging.
 
----
-
 Trusting God is like standing on solid rock while waves crash around us. Feelings rise and fall like tides—unpredictable and shifting—but the foundation beneath does not move. Faith does not deny emotion; it refuses to be ruled by it. It stands firm on what God has said.
 
 ---
@@ -214,8 +204,6 @@ Is there a decision you are currently navigating by feeling alone — leaning on
 ---
 
 Joshua 1:9 declares, “Have not I commanded thee? Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest.” Joshua stood under overwhelming responsibility after Moses’ death. God did not remove the challenge—He promised His presence.
-
----
 
 Courage is like a soldier standing firm in battlefield chaos. Orders do not change because fear appears. The mission does not pause while emotions catch up. Courage is not the absence of fear—it is obedience in the presence of fear. Joshua’s strength was not in himself, but in this promise: “The LORD thy God is with thee whithersoever thou goest.”
 
@@ -248,8 +236,6 @@ What step has God been calling you to take that fear keeps delaying? You don’t
 
 1 Peter 1:7 declares, “That the trial of your faith, being much more precious than of gold that perisheth, though it be tried with fire…” Peter wrote to believers scattered through persecution and suffering. God was not abandoning them in affliction—He was refining them through it. Faith tested by fire becomes faith proven genuine.
 
----
-
 A refiner’s fire does not destroy gold—it separates it from impurity. The hotter the flame, the clearer the purity. In the same way, trials expose what we truly trust. Easy seasons may decorate faith, but difficult seasons reveal it. Fire does not create fake faith—it uncovers real faith.
 
 ---
@@ -280,8 +266,6 @@ What trial are you currently enduring that you’ve been treating as an obstacle
 ---
 
 James 1:3 declares, “Knowing this, that the trying of your faith worketh patience.” James does not say trials might produce patience—he guarantees they do. Testing is not random; it is refining. The trial did not come to break us, but to build us. The pressure is not pointless—it is purposeful. Patience in Scripture is not passive waiting; it is steadfast perseverance under pressure.
-
----
 
 Endurance is not built in comfort—it is forged in resistance. Like a muscle strengthened by tension, faith grows through the weight it carries. Remove the weight, and strength never forms. Keep enduring under the weight, and spiritual strength begins to rise. God allows pressure not to crush us, but to condition us.
 
@@ -314,8 +298,6 @@ Where are you closest to giving up right now? And have you asked God what He is 
 
 Isaiah 41:10 declares, “Fear thou not; for I am with thee: be not dismayed; for I am thy God…” God spoke these words to trembling Israel in weakness and uncertainty, reminding them that His presence was greater than their fears. The command “fear thou not” comes with a reason: stop fearing because God is with you.
 
----
-
 Fear is like standing in a storm at night, hearing thunder while unable to see clearly. Yet even in darkness, the lighthouse remains steady. God’s presence is that lighthouse. Fear thrives when we focus on the waves, but faith rises when we remember who stands with us in the storm.
 
 ---
@@ -346,8 +328,6 @@ What fear has been controlling your thoughts more than God’s truth? You don’
 ---
 
 Psalm 27:14 declares, “Wait on the LORD: be of good courage, and he shall strengthen thine heart: wait, I say, on the LORD.” David wrote these words while surrounded by trouble and uncertainty. He understood the ache of delay—years of fleeing Saul, longing for justice, crying out for deliverance. Yet he discovered that waiting was not wasted. It was where courage was formed and strength was renewed.
-
----
 
 Waiting is like a seed buried beneath the soil. For a long season, nothing appears visible, yet hidden growth is taking place underneath. Roots deepen before harvest comes. That is what waiting looks like. We do not stop trusting simply because we cannot yet see progress. God develops deep faith in seasons where visible results are absent.
 
@@ -380,8 +360,6 @@ What answer have you been trying to force because the waiting feels longer than 
 
 Hebrews 11:8 declares, “By faith Abraham, when he was called to go out into a place which he should after receive for an inheritance, obeyed; and he went out, not knowing whither he went.” Abraham obeyed without full clarity. God gave him a promise, not a map. His obedience was built on confidence in the God who called him. He left his country, his family, and every earthly guarantee—and he stepped anyway.
 
----
-
 We know what it is to demand the map before we move. You may not see the end, but you trust the guide. That is the essence of faith. It is not reckless—it is reliant. It is not blind—it is anchored in God. The power of faith is not found in seeing the entire road—it is found in trusting the One who leads our road.
 
 ---
@@ -412,8 +390,6 @@ What has God been calling you to do that you keep postponing until life feels mo
 ---
 
 1 Corinthians 16:13 declares, “Watch ye, stand fast in the faith, quit you like men, be strong.” Paul closes his letter with urgent commands because spiritual pressure is real. “Stand fast” means to remain fixed, steady, and unwavering. Faith is not only about moving forward—it is about standing firm when everything pushes against you. The battle is real, and it arises not always to make us run, but to make us fall.
-
----
 
 Standing firm is like a soldier holding the line in battle while everything around him shakes. The pressure intensifies, the opposition advances, and fear whispers to retreat. Yet he stands because surrender would cost more than resistance. In the same way, faith holds the line not because pressure is absent, but because truth is worth holding. Every believer who stands firm is a soldier who refuses to release that line.
 
@@ -446,8 +422,6 @@ Where have you been tempted to compromise because the pressure feels overwhelmin
 
 Joshua 3:13 declares, “And it shall come to pass, as soon as the soles of the feet of the priests… shall rest in the waters of Jordan, that the waters of Jordan shall be cut off.” God did not part the river before they moved. The priests had to step into the waters first. God is not obligated to part rivers for people unwilling to move forward by faith.
 
----
-
 Faith is like stepping into a river before seeing a bridge appear. The current may look overwhelming, the risk may feel real, and fear may whisper "retreat." Yet the miracle often waits on the other side of obedience. If God orders, He provides. That is the rhythm of faith: God speaks, we step, and He makes the way.
 
 ---
@@ -478,8 +452,6 @@ What river has been stopping you—fear, finances, failure, or just the unknown?
 ---
 
 Mark 11:23 declares, “For verily I say unto you, That whosoever shall say unto this mountain… and shall not doubt in his heart, but shall believe that those things which he saith shall come to pass…” Jesus was teaching His disciples that genuine faith speaks with confidence in God’s power. We often speak to everyone about our mountains, but we rarely speak to our mountains.
-
----
 
 Faith-filled words are like a compass in a storm. The winds may rage, the waves may rise, and circumstances may feel unstable, yet the compass keeps pointing true north. In the same way, faith keeps speaking God’s truth even when emotions and circumstances try to pull the heart elsewhere.
 
@@ -512,8 +484,6 @@ What have your words been revealing about your faith lately? You don’t need Ch
 
 Matthew 14:29 records one of the boldest moments in Scripture: “And he said, Come. And when Peter was come down out of the ship, he walked on the water, to go to Jesus.” The storm was still raging. The wind had not stopped. Yet Peter stepped out because Christ called him. Eleven men stayed in the boat. One man walked on water. The difference was not ability—it was willingness to leave.
 
----
-
 Leaving the boat is like stepping into uncertainty with confidence in Christ. The waves are real, the wind is strong, and fear is present. Yet the safest place is not always where things feel secure—it is wherever Christ is. Peter’s step was not reckless—it was reliant. He trusted the Lord Jesus more than the storm around him.
 
 ---
@@ -544,8 +514,6 @@ What boat have you been sitting in because fear feels safer than obedience? You 
 ---
 
 2 Corinthians 9:7 declares, “Every man according as he purposeth in his heart, so let him give; not grudgingly, or of necessity: for God loveth a cheerful giver.” Paul was not merely collecting an offering—he was teaching believers that biblical giving is not forced; it is joyful. God is the Source, everything else is just a resource. He is rich and not interested in our treasures, but willing hearts that trust Him fully.
-
----
 
 “Not grudgingly, or of necessity” means giving under pressure of obligation rather than giving cheerfully. Picture an open hand beneath a fountain. Cupped palms try to hoard the water, yet lose it through trembling fingers. Open hands receive the steady flow, trusting the Source to supply what is truly needed. Faith gives open‑handed because it trusts the Giver more than the gift.
 
@@ -578,8 +546,6 @@ What are you holding so tightly that God calls you to release—time, talent, tr
 
 Galatians 5:6 declares, “For in Jesus Christ neither circumcision availeth any thing, nor uncircumcision; but faith which worketh by love.” Paul reminds believers that outward religious identity means nothing before God. Rituals may impress people, but only transformed faith produces genuine love. Love is the engine that drives obedience, compassion, and sacrifice.
 
----
-
 Faith working through love is like roots beneath a healthy tree. The roots remain unseen, yet they produce visible fruit. In the same way, genuine faith hidden in the heart eventually reveals itself through action. Love is not the replacement of faith—it is the evidence that faith is alive.
 
 ---
@@ -610,8 +576,6 @@ Who around you needs more than your words right now—someone who needs your ser
 ---
 
 In Matthew 28:19, the risen Christ issues a decree to every believer: “Go ye therefore, and teach all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Ghost.” This Great Commission is an authoritative, corporate mandate. We were never designed to remain hidden within our church walls.
-
----
 
 The Great Commission is like carrying light into a darkened city. Light does not argue with darkness—it simply shines. In the same way, the Gospel enters broken places, hopeless hearts, and blinded lives with the truth of Christ. The world does not need polished performances. It needs faithful witnesses willing to go.
 
@@ -644,8 +608,6 @@ Who in your life has never heard the Gospel because you have remained silent? A 
 
 Matthew 6:34 declares, “Take therefore no thought for the morrow: for the morrow shall take thought for the things of itself. Sufficient unto the day is the evil thereof.” Jesus reminds us that faith is not about stockpiling certainty—it is about daily dependence. Tomorrow is not promised, but today is provided. Faith lives in the present, trusting God moment by moment.
 
----
-
 Faith gathers daily bread like Israel in the wilderness. Storing manna bred rot, yet trusting God’s morning provision sustained them (Exodus 16:19–20). In the same way, God calls us to trust Him daily, not hoard grace for emergencies. We receive His mercy as heaven provides it—fresh and sufficient each day (Lamentations 3:22–23).
 
 ---
@@ -677,8 +639,6 @@ What tomorrow has been stealing your peace today? You do not need Christ merely 
 
 Hebrews 11:1 declares, “Now faith is the substance of things hoped for, the evidence of things not seen.” Faith is confidence in the unseen, assurance in the unknown, and trust in the God who sees the end from the beginning. If all we see is what is visible, we may miss what God is trying to show us. Faith does not eliminate uncertainty—it overcomes it through confidence in God.
 
----
-
 Faith is like an anchor dropped beneath dark waters. The storm above may rage, the winds may howl, and the surface may feel unstable, yet the anchor holds because it is fastened to something deeper than what can be seen. In the same way, faith holds steady because it is anchored in God Himself.
 
 ---
@@ -696,6 +656,129 @@ Abraham walked toward a land he had never seen. Noah built an ark before rain ev
 What uncertainty are you facing today—direction, provision, decisions, relationships, or the future? You do not need Christ merely to remove the unknown—you need Him to lead you through it. Stop waiting for perfect clarity. Trust the God who already stands in your tomorrow. The future may be unseen to you, but it has never been unseen to Him.`,
     prayer: `Heavenly Father, forgive us for doubting You whenever life feels uncertain. Teach us to trust Your promises even when we cannot see the outcome. Strengthen our faith to walk confidently with Christ, knowing that You are faithful in every unseen moment. In Jesus’ Name. Amen.`,
     image: '/devotions/Devotion-21.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-22',
+    title: 'All on the Altar',
+    tagline: `✍️ "Faith is not proven by what we keep;\n     It is proven when we lay all at His feet."`,
+    scripture: 'Romans 12:1 "I beseech you therefore, brethren, by the mercies of God, that ye present your bodies a living sacrifice, holy, acceptable unto God, which is your reasonable service."',
+    content: `We know what it is to hold back the best while offering God the rest—the convenient hours, the comfortable resources, and the controllable corners of our lives. Yet faith is not simply believing—it is surrendering. God does not ask for weekend religion—He asks for our whole lives. The question is not whether we have given something, but whether we have placed everything on the altar.
+
+---
+Romans 12:1 declares, “I beseech you therefore, brethren, by the mercies of God, that ye present your bodies a living sacrifice, holy, acceptable unto God, which is your reasonable service.” Paul speaks with urgency, appealing “by the mercies of God.” He calls every believer to surrender not out of pressure, but in response to what God has already done. Surrender is not the price of mercy—it is the response to it.
+
+Faith that surrenders is like Abraham placing Isaac on the altar. The altar is not where life is lost—it is where life is finally placed into the hands of the One who gave it. Faith surrenders because it trusts that God’s will is better than its own.
+
+---
+
+The Scriptures connects faith with surrender: “Trust in the LORD with all thine heart” (Proverbs 3:5). “If any man will come after me, let him deny himself, and take up his cross daily” (Luke 9:23). “Commit thy way unto the LORD” (Psalm 37:5). Faith that refuses surrender will always remain spiritually divided.
+
+Too often, we cling to control—our time, talents, and treasures. Yet partial surrender is still resistance. “No man can serve two masters” (Matthew 6:24). Do not live like a part-time Christian asking for full blessings, or like one who sings “I surrender all” but only offers some. Faith that surrenders lays everything down because Christ is worthy of everything.
+
+---
+Jesus Himself demonstrated perfect surrender. In Gethsemane He prayed, “not my will, but thine, be done” (Luke 22:42). He surrendered fully to the Father’s will—even unto the cross. Nails did not keep Christ on the cross; love and obedience held Him there for our salvation. Through His finished work, we learn that surrender to God does not end in destruction but in redemption and victory.
+
+---
+What area of your life have you been withholding from God—your future, relationships, plans, habits, fears, or desires? You don’t need Christ merely to improve your life—you need Him to rule it. Stop negotiating with God while calling it surrender. Lay it all on the altar. The safest place for your life is fully surrendered in the hands of Christ.`,
+    prayer: `Heavenly Father, forgive us for giving You partial surrender while holding tightly to our own will. Teach us to yield every part of our lives to You completely. Thank You for the mercy shown through Christ. Help us live as living sacrifices that honor You daily. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-22.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-23',
+    title: 'Calm in Chaos',
+    tagline: `✍️ "When waves surround and fears increase;\n     Christ speaks one word, and storms find peace."`,
+    scripture: 'Mark 4:40 "And he said unto them, Why are ye so fearful? how is it that ye have no faith?"',
+    content: `Storms have a way of exposing what we truly trust. Calm seasons make faith easy to speak about, but chaos tests whether that faith can still stand. A sudden diagnosis, financial collapse, broken relationships, unexpected loss, or burdens too heavy to explain—life can shift without warning. The question is not whether storms will come but whether we still trust Christ when they do.
+
+---
+
+Mark 4:40 declares, “And he said unto them, Why are ye so fearful? how is it that ye have no faith?” The disciples were trapped in a violent storm while Jesus slept in the ship. Waves crashed, winds roared, and experienced fishermen panicked. Yet the greatest danger in that boat was not the storm around them but the unbelief within them. They feared because they forgot who was with them.
+
+Faith in the storm is like an anchor holding a ship steady in raging waters. The winds may push, the waves may crash, and visibility may disappear, yet the anchor keeps the vessel from drifting away. In the same way, faith holds because Christ remains greater than the storm surrounding us.
+
+---
+
+The Scriptures repeatedly remind us that God is present in trouble: “God is our refuge and strength, a very present help in trouble” (Psalm 46:1). “When thou passest through the waters, I will be with thee” (Isaiah 43:2). “The LORD on high is mightier than the noise of many waters” (Psalm 93:4). Storms do not weaken God’s presence—they reveal how desperately we need it.
+
+Too often, we panic before we pray. We magnify the waves while minimizing the Saviour. Fear grows loudest when faith forgets who is in the boat. “Be careful for nothing” (Philippians 4:6). Do not live like a believer who praises God on the shore but questions Him in the storm. Faith is not proven by calm seas—it is proven by clinging to Christ when the boat feels like it is sinking.
+
+---
+
+Jesus Himself faced the greatest storm at Calvary. Darkness covered the sky, the earth trembled, and the full weight of sin fell upon Him. The disciples once cried, “Master, carest thou not that we perish?” (Mark 4:38), yet the cross forever answered that question. Christ cares. Through His finished work, we know that even when heaven feels silent, the Saviour remains present.
+
+---
+
+What chaos surrounds you today—fear, loss, uncertainty, sickness, conflict, or pressure? You do not need Christ merely to calm the storm—you need Him to carry you through it. Stop staring only at the waves. Look again at the One who is with you in the boat. Peace is not found in the absence of chaos but in the presence of Christ. The storm may feel out of control, but it has never moved beyond His control.`,
+    prayer: `Heavenly Father, forgive us for allowing fear to grow larger than our faith. In every storm, teach us to trust Your presence and rest in Your power. Thank You that Christ remains with us through every wave and trial. Strengthen our hearts to walk by faith even in the middle of chaos. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-23.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-24',
+    title: 'Hold On Tight',
+    tagline: `✍️ "When every strength within us starts to fall apart;\n     God remains the refuge holding every heart."`,
+    scripture: 'Psalm 46:1 "God is our refuge and strength, a very present help in trouble."',
+    content: `Life has a way of presenting challenges that feel overwhelming—unexpected loss, crushing burdens, deep uncertainty, and storms that arrive without warning. We often smile outwardly while inwardly wondering how much longer we can hold on. The question is not whether storms will come—but whether we know where to run when they do.
+
+---
+
+Psalm 46:1 declares, “God is our refuge and strength, a very present help in trouble.” Notice the verse does not say God was our refuge or will become our refuge. He is. Present tense. Constant. Unchanging. While everything else shifts, God remains a safe place for weary hearts and troubled minds.
+
+God as our refuge is like a fortress standing firm during a violent siege. Arrows may fly, winds may howl, and enemies may surround, yet those inside the fortress remain secure because the strength of the walls is greater than the force outside them. In the same way, faith does not survive because believers are naturally strong—it survives because God is. 
+
+Faith that holds is faith that knows where to run when life falls apart. It is like gripping a rope in the middle of a raging storm, knowing the rope will not break. In the same way, faith endures not because we are unshakable, but because it clings to the unchangeable God.
+
+---
+
+Scripture reminds us where true security is found: “The name of the LORD is a strong tower: the righteous runneth into it, and is safe” (Proverbs 18:10). “He giveth power to the faint” (Isaiah 40:29). “My flesh and my heart faileth: but God is the strength of my heart” (Psalm 73:26). “Underneath are the everlasting arms” (Deuteronomy 33:27). God never asks us to carry life alone—He calls us to lean fully upon Him.
+
+Too often, we hold tightly to control, pride, or self-reliance while neglecting the refuge God already offers. We exhaust ourselves trying to stay strong enough for everyone else. Yet faith was never meant to stand alone. “Cast thy burden upon the LORD, and he shall sustain thee” (Psalm 55:22). Do not live like someone stranded outside the shelter while the door stands open. When your strength fails, His does not.
+
+---
+
+Christ Himself became our ultimate refuge. He carried grief, endured rejection, bore our sin, and faced the full storm of judgment at the cross. “Come unto me, all ye that labour and are heavy laden, and I will give you rest” (Matthew 11:28). Through His finished work, we are not abandoned in our weakness, but invited to rest in His strength. The hands stretched wide on Calvary are still strong enough to hold the weary.
+
+---
+
+What burden have you been trying to carry alone—fear, pressure, grief, uncertainty, exhaustion, or silent pain? You do not need Christ merely to help you survive the pressure—you need Him to become your refuge within it. Stop clinging to your own strength. Run to the One who never grows weary. Hold on tight—not to your circumstances, but to the God who still holds you securely.`,
+    prayer: `Heavenly Father, we are tired of holding on with our own strength. Forgive us for forgetting that You are our refuge. When our hearts grow weary, remind us that Your strength never fails. Teach us to hold on tightly to You, because You have already held on to us through Christ. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-24.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-25',
+    title: 'Rest Before Ruin',
+    tagline: `✍️ "No striving earns what grace has done;\n     The work is finished; rest, My son."`,
+    scripture: 'Hebrews 4:9–10 "There remaineth therefore a rest to the people of God. For he that is entered into his rest, he also hath ceased from his own works, as God did from his."',
+    content: `We live in a restless age. Deadlines, demands, and burdens keep us running, yet rest is what our souls long for. Even believers often strive as though God’s grace depends on their effort. But true faith is not about endless striving—it is about resting in what Christ has already finished. The question is not whether we can work enough for God—it is whether we trust that His work is enough for us.
+
+---
+
+Hebrews 4:9–10 declares, “There remaineth therefore a rest to the people of God. For he that is entered into his rest, he also hath ceased from his own works…” This rest is deeper than physical sleep. It is the settled confidence that salvation is not achieved by human effort but received through faith in Christ. God never intended His children to live trapped in exhausting spiritual striving.
+
+Faith that rests is like a traveler setting down a heavy burden after a long, exhausting journey. The weight was real, but rest comes when the burden is placed into stronger hands. In the same way, faith finds peace when it stops trying to carry what only Christ can bear.
+
+---
+
+The Scriptures repeatedly point us toward this rest: “Come unto me, all ye that labour and are heavy laden, and I will give you rest” (Matthew 11:28). “Be still, and know that I am God” (Psalm 46:10). “It is finished” (John 19:30). “Being justified by faith, we have peace with God” (Romans 5:1). Faith does not rest in feelings, achievements, or circumstances—it rests in the finished work of Christ.
+
+Many live like servants trying to earn what grace freely gives. We carry guilt, fear, and burdens Christ already paid for, conquered, and invited us to surrender. Striving doesn’t bring peace. “For by grace are ye saved through faith… not of works” (Ephesians 2:8–9). Don’t try to pay a debt the cross already covered. Faith rests because Christ finished the work.
+
+---
+
+Jesus bore the full weight of sin upon the cross and declared, “It is finished” (John 19:30). Not partially finished. Not temporarily finished, but completely finished. Through His death and resurrection, the striving soul can finally find peace with God. The cross was not the beginning of our rest—it was the purchase of it.
+
+---
+
+What burden are you still carrying—guilt, fear, shame, or endless striving? You don’t need Christ to help you work harder—you need Him to become your rest.. Stop living exhausted under burdens He already carried. Rest in Him. You cannot have it from striving, but from trusting the One who finished the work.`,
+    prayer: `Heavenly Father, forgive us for striving to carry burdens You never intended us to bear. Teach us to rest fully in the finished work of Christ and not in our own efforts. Help us to live not as anxious workers but as resting children. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-25.jpg',
     facebookLink: 'https://www.facebook.com/BeginWithGod/'
   },
   // Add more devotions here
