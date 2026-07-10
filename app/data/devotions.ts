@@ -781,5 +781,160 @@ What burden are you still carrying—guilt, fear, shame, or endless striving? Yo
     image: '/devotions/Devotion-25.jpg',
     facebookLink: 'https://www.facebook.com/BeginWithGod/'
   },
+
+  {
+    id: 'Devotion-26',
+    title: 'It’s Already Yours',
+    tagline: `✍️ "Faith does not wait for proof to appear;\n     It receives God’s promise as already here."`,
+    scripture: 'Mark 11:24 "Therefore I say unto you, What things soever ye desire, when ye pray, believe that ye receive them, and ye shall have them."',
+    content: `Many believers pray yet secretly expect nothing. We ask cautiously, expect minimally, and receive accordingly—then wonder why our faith feels weak. We treat God’s promises like items on a shelf we are not sure we are allowed to take. The question is not whether God answers prayer but whether we truly believe Him enough to receive what He has promised.
+
+---
+
+Mark 11:24 declares, “Therefore I say unto you, What things soever ye desire, when ye pray, believe that ye receive them, and ye shall have them.” Jesus taught His disciples dependence upon God. Too often, prayers are filled with unbelief wrapped in religious words. Faith prays not hoping God cares, but knowing God hears, knows, and is able.
+
+Faith that receives is like reaching out empty hands for a gift already offered. The gift is ready, the giver is willing, but the receiver must still open their hands. Many believers stand near God’s promises, yet unbelief keeps them from fully trusting Him. Faith receives because it believes God means what He says.
+
+---
+
+The Scriptures repeatedly connect believing with receiving: “Ask, and it shall be given you” (Matthew 7:7). “According to your faith be it unto you” (Matthew 9:29). “If any of you lack wisdom, let him ask of God” (James 1:5). “He that cometh to God must believe that he is” (Hebrews 11:6). Faith is not confidence in ourselves—it is confidence in God’s character.
+
+Even Jesus prayed, “Not my will, but thine, be done” (Luke 22:42). To “believe that ye receive” is not to dictate to God what He must do; it's to trust Him for what He will do. Yet unbelief has never strengthened prayer. “Lord, I believe; help thou mine unbelief” (Mark 9:24). Don’t live like a starving man sitting beside a full table, afraid to touch the bread prepared for him. Your need is already served; claim it, it's yours.
+
+---
+
+Christ Himself secured every promise at Calvary—not conditionally, not tentatively, but fully and completely. “He that spared not his own Son… how shall he not with him also freely give us all things?” (Romans 8:32). The cross forever settled God’s willingness toward us. And because He arose, nothing He promised remains buried in the grave. It's already yours—receive it.
+
+---
+
+What promise of God have you stopped believing for—peace, wisdom, provision, strength, forgiveness, direction, or the salvation of someone you love? You do not need Christ merely to hear your prayers—you need Him to strengthen your faith while you pray. Stop praying defeated prayers. Stand upon His Word. Trust His promises. It’s already yours—not because of your goodness, but because of His faithfulness.`,
+    prayer: `Heavenly Father, forgive us for doubting promises You have never failed to keep. Strengthen our faith to trust You fully and help us pray with confidence in Your Word. Teach us to rest in Your faithfulness and to believe boldly through Christ. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-26.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-27',
+    title: 'Due Season Comes',
+    tagline: `✍️ "Many quit before the harvest ever comes;\n     Faith keeps sowing because due season comes."`,
+    scripture: 'Galatians 6:9 "And let us not be weary in well doing: for in due season we shall reap, if we faint not."',
+    content: `Doing good is inspiring—until it becomes exhausting. Serving, praying, giving, loving, standing for truth, and obeying daily can wear on the soul when results seem absent. Many do not quit believing in God, but they grow weary while waiting for the harvest. The question is not how difficult the journey becomes, but whether we will remain faithful until due season comes.
+
+---
+
+Galatians 6:9 declares, “And let us not be weary in well doing: for in due season we shall reap, if we faint not.” Notice the promise attached to perseverance. God does not ignore faithful labor. The harvest may look delayed, but it is not denied. It is certain in God's calendar, not ours. Our responsibility is not to produce the harvest—it is to remain faithful in the field.
+
+Faith that perseveres is like a farmer planting seeds through long seasons. The soil may look barren, the rain may be delayed, and the wait may feel endless—but the harvest is certain. In the same way, faith keeps sowing prayer, service, and obedience, confident that God's promise will not fail.
+
+---
+
+The Scriptures affirm this call: “Be ye steadfast, unmoveable, always abounding in the work of the Lord” (1 Corinthians 15:58). “Cast not away therefore your confidence” (Hebrews 10:35). “Ye have need of patience, that, after ye have done the will of God, ye might receive the promise” (Hebrews 10:36). The harvest belongs to those who refuse to abandon the field.
+
+“They that sow in tears shall reap in joy” (Psalm 126:5). The tears prove the sowing was costly—and the joy proves the harvest was worth it. “Blessed is the man that endureth temptation” (James 1:12). Do not live like a farmer who plows the field, plants the seed, waters the ground—and then quits three days before the harvest. Faith continues sowing because God never wastes faithful obedience.
+
+---
+
+Jesus Himself did not quit—when His hometown tried to throw Him off a cliff (Luke 4:29–30), when His disciples abandoned Him in Gethsemane, or when nails pierced His hands. He kept sowing—shedding His own blood into the ground of Calvary, and “endured the cross” (Hebrews 12:2). And three days later, due season came. The harvest of resurrection is the perseverance we now have to endure as well.
+
+---
+
+So, are you weary today? What area of your life tempts you to quit—unanswered prayer, tiring service, or waiting on God’s promise? You don’t need Christ merely to start the journey—you need Him to sustain you through it. Do not measure success by what you can see today. Trust the Lord of the harvest. Keep sowing. Keep serving. Keep believing. Due season comes.`,
+    prayer: `Heavenly Father, we are tired. The sowing has been long, and the field still looks empty. Forgive us for wanting to quit before the harvest. Strengthen our hearts to remain faithful. Help us trust Your timing, knowing that due season comes according to Your perfect will. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-27.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-28',
+    title: 'Still I Will Rejoice',
+    tagline: `✍️ "When everything you counted on has gone;\n     Still you will rejoice, for God is still your song."`,
+    scripture: 'Habakkuk 3:17–18  "Although the fig tree shall not blossom, neither shall fruit be in the vines; the labour of the olive shall fail, and the fields shall yield no meat; the flock shall be cut off from the fold, and there shall be no herd in the stalls: Yet I will rejoice in the LORD, I will joy in the God of my salvation."',
+    content: `Joy is easy when life is full, but faith is revealed when life feels empty. We praise God when the bills are paid, the doctor gives a good report, and the family is well. But what happens when the fig tree does not blossom, the vine bears no fruit, and the fields yield no increase? The question is not whether you will rejoice when life is easy—it is whether you will still rejoice when life is falling apart.
+
+---
+
+Habakkuk 3:17–18 declares, “Although the fig tree shall not blossom, neither shall fruit be in the vines... Yet I will rejoice in the LORD, I will joy in the God of my salvation.” Habakkuk stood in the middle of loss and uncertainty—empty fields, absent flocks, and visible blessings gone. Yet he anchored his joy not in what he saw, but in who God is: “Yet I will rejoice in the LORD.”
+
+Faith that rejoices is like a lighthouse in a storm. Darkness may deepen, winds may rise, and waves may crash, but the light continues shining because its power is not in the storm—it is in its source. In the same way, a believer’s joy is not sustained by changing circumstances but by an unchanging God.
+
+---
+
+The Scriptures affirm this truth: “Rejoice in the Lord alway” (Philippians 4:4). “The joy of the LORD is your strength” (Nehemiah 8:10). “As sorrowful, yet alway rejoicing” (2 Corinthians 6:10). Biblical joy is not denial of pain—it is dependence on God in the midst of it.
+
+“We glory in tribulations also” (Romans 5:3). “Count it all joy when ye fall into divers temptations” (James 1:2). “In thy presence is fulness of joy” (Psalm 16:11). Do not live like a believer whose praise rises and falls with the weather. Faith rejoices because God is worthy—even when life is difficult.
+
+---
+
+Jesus Himself rejoiced in the Father’s will while walking toward the cross. Though He endured suffering, rejection, and agony, Hebrews 12:2 declares that He endured the cross “for the joy that was set before him.” He saw beyond the suffering to the victory that would follow. Through His death and resurrection, we learn that sorrow is never the final chapter for those who trust God.
+
+---
+
+What circumstance has been stealing your joy lately—unanswered prayers, delayed promises, or heavy burdens? You do not need Christ merely to fix your circumstances—you need Him to become your joy within them. Stop waiting for visible results. Rejoice in the God of your salvation. Still, you will rejoice—because your joy is anchored in Him.`,
+    prayer: `Heavenly Father, forgive us for allowing our joy to depend upon changing circumstances. Teach us to rejoice in You even when life feels uncertain. Thank You that our hope is anchored in Christ and not in what we can see. Fill our hearts with joy that remains steady through every season. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-28.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-29',
+    title: 'Victory Starts Here',
+    tagline: `✍️ "You cannot win the war by fighting from within;\n     Victory starts the moment you are born of Him."`,
+    scripture: '1 John 5:4 "For whatsoever is born of God overcometh the world: and this is the victory that overcometh the world, even our faith."',
+    content: `Joy is easy when life is full, but faith is revealed when life feels empty. We praise God when the bills are paid, the doctor gives a good report, and the family is well. But what happens when the fig tree does not blossom, the vine bears no fruit, and the fields yield no increase? The question is not whether you will rejoice when life is easy—it is whether you will still rejoice when life is falling apart.
+
+---
+
+Habakkuk 3:17–18 declares, “Although the fig tree shall not blossom, neither shall fruit be in the vines... Yet I will rejoice in the LORD, I will joy in the God of my salvation.” Habakkuk stood in the middle of loss and uncertainty—empty fields, absent flocks, and visible blessings gone. Yet he anchored his joy not in what he saw, but in who God is: “Yet I will rejoice in the LORD.”
+
+Faith that rejoices is like a lighthouse in a storm. Darkness may deepen, winds may rise, and waves may crash, but the light continues shining because its power is not in the storm—it is in its source. In the same way, a believer’s joy is not sustained by changing circumstances but by an unchanging God.
+
+---
+
+The Scriptures affirm this truth: “Rejoice in the Lord alway” (Philippians 4:4). “The joy of the LORD is your strength” (Nehemiah 8:10). “As sorrowful, yet alway rejoicing” (2 Corinthians 6:10). Biblical joy is not denial of pain—it is dependence on God in the midst of it.
+
+“We glory in tribulations also” (Romans 5:3). “Count it all joy when ye fall into divers temptations” (James 1:2). “In thy presence is fulness of joy” (Psalm 16:11). Do not live like a believer whose praise rises and falls with the weather. Faith rejoices because God is worthy—even when life is difficult.
+
+---
+
+Jesus Himself rejoiced in the Father’s will while walking toward the cross. Though He endured suffering, rejection, and agony, Hebrews 12:2 declares that He endured the cross “for the joy that was set before him.” He saw beyond the suffering to the victory that would follow. Through His death and resurrection, we learn that sorrow is never the final chapter for those who trust God.
+
+---
+
+What circumstance has been stealing your joy lately—unanswered prayers, delayed promises, or heavy burdens? You do not need Christ merely to fix your circumstances—you need Him to become your joy within them. Stop waiting for visible results. Rejoice in the God of your salvation. Still, you will rejoice—because your joy is anchored in Him.`,
+    prayer: `Heavenly Father, thank you for the new birth that made us victorious. Forgive us for fighting battles You have already won. Teach us that victory starts the moment we are born of You. Help us to live as overcomers — not in our strength, but in the strength of Christ who lives in us. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-29.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-30',
+    title: 'Finish Strong',
+    tagline: `✍️ "The start is good; the middle can be long;\n     But only those who finish prove their faith was strong."`,
+    scripture: '2 Timothy 4:7 "I have fought a good fight, I have finished my course, I have kept the faith."',
+    content: `Starting is exciting. Finishing is costly. Many begin the Christian life with enthusiasm, bold promises, and sincere devotion. Yet time, trials, disappointments, distractions, and weariness reveal what excitement alone cannot sustain. Crowds gather at starting lines, but far fewer remain at the finish. The question is not whether you started the race—it’s whether you will finish it faithfully.
+
+---
+
+Paul writes from a cold, dark dungeon, facing imminent execution: “I have fought a good fight, I have finished my course, I have kept the faith” (2 Timothy 4:7). Looking back over a life marked by persecution, imprisonment, hardship, and sacrifice, Paul did not boast of popularity, comfort, or success. He rejoiced that he had remained faithful. He finished his course. He kept the faith.
+
+Faith that endures is like a marathon runner who keeps going after the starting excitement fades. Muscles ache, obstacles come, but the runner presses on for the finish line. Similarly, enduring faith trusts God when emotions fade, circumstances change, and the journey grows hard.
+
+---
+
+Scripture affirms this call to perseverance: “But he that shall endure unto the end, the same shall be saved” (Matthew 24:13). “Let us run with patience the race that is set before us” (Hebrews 12:1). “Be thou faithful unto death, and I will give thee a crown of life” (Revelation 2:10). Faith is not measured merely by how passionately we begin but by how faithfully we continue.
+
+Believers often grow discouraged when the race feels long. Some quit over unanswered prayers, others drift in trials, and some grow complacent after years. But faithfulness shows in the last mile, not the first. “And let us not be weary in well doing: for in due season we shall reap, if we faint not” (Galatians 6:9). Don’t quit before the finish line. Faith endures because Christ is worth enduring for.
+
+---
+
+No one endured more faithfully than Jesus. He faced rejection, betrayal, false accusations, scourging, and the cross. He “endured the cross” (Hebrews 12:2) and declared, “It is finished” (John 19:30). He didn’t quit but finished His Father’s work. Because Christ endured to the end, believers can endure through Him. One day, every race will end, because He’s coming back to bring us home (1 Thessalonians 4:16–18).
+
+---
+
+Are you still running with the same faith you started with—or have you drifted away in weariness, far from the finish line? You don’t need Christ merely to start the race—you need Him to carry you to the finish line. Keep fighting. Keep running. Keep believing. The crown is not given to those who begin well—it is given to those who finish strong.`,
+    prayer: `Heavenly Father, we are tired. The race has been longer than we expected, and the hills steeper than we imagined. Forgive us for wanting to quit. Help us to finish strong, to fight the good fight, and to keep the faith—not in our strength, but in Yours. In Jesus’ Name. Amen.`,
+    image: '/devotions/Devotion-30.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
   // Add more devotions here
 ];
