@@ -881,10 +881,7 @@ export default function MainContent() {
       currentConversationId={currentConversationId}
     />
 
-    <TableOfContents 
-      messages={messages} 
-      onScrollToMessage={scrollToMessage} 
-    />
+    <LeftSidebarTools />
 
       <div className="flex-1 flex flex-col min-w-0">
         <Header 
@@ -1071,12 +1068,10 @@ export default function MainContent() {
         </div>
       </div>
       
-      <RightSidebar />
-      
-      <NameModal 
-        isOpen={showNameModal} 
-        onSave={handleNameSave} 
-      />
-    </div>
+    <TableOfContents 
+      messages={messages} 
+      onScrollToMessage={scrollToMessage} 
+    />
+  </div>
   );
 }
