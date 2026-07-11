@@ -29,10 +29,9 @@ export default function TableOfContents({ messages, onScrollToMessage }: TableOf
       setHoverTimeout(null);
     }
     setIsHovering(true);
-    // Small delay before opening to prevent accidental triggers
     const timeout = setTimeout(() => {
       setIsOpen(true);
-    }, 200);
+    }, 150);
     setHoverTimeout(timeout);
   };
 
@@ -43,14 +42,13 @@ export default function TableOfContents({ messages, onScrollToMessage }: TableOf
       setHoverTimeout(null);
     }
     setIsHovering(false);
-    // Delay closing to allow user to move into the panel
     const timeout = setTimeout(() => {
       setIsOpen(false);
     }, 300);
     setHoverTimeout(timeout);
   };
 
-  // Handle panel mouse leave (when user moves out of the panel)
+  // Handle panel mouse leave
   const handlePanelMouseLeave = () => {
     if (hoverTimeout) {
       clearTimeout(hoverTimeout);
@@ -87,24 +85,47 @@ export default function TableOfContents({ messages, onScrollToMessage }: TableOf
   }
 
   return (
-    <div
-      className="fixed left-0 top-1/2 -translate-y-1/2 z-40"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      {/* Dashed line indicator */}
-      <div className={`
-        relative flex items-center
-        transition-all duration-300 ease-in-out
-        ${isHovering ? 'opacity-100' : 'opacity-60'}
-      `}>
-        {/* Dashed vertical line */}
-        <div className="h-12 w-4 flex items-center justify-center">
-          <div className="h-12 w-0.5 border-l-2 border-dashed border-blue-400 dark:border-blue-500"></div>
-        </div>
+    <>
+      {/* Dashed line indicator - more visible and positioned better */}
+      <div
+        className="fixed left-0 top-1/2 -translate-y-1/2 z-40 group"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Container for the dashed line with better visibility */}
+        <div className={`
+          relative flex items-center
+          transition-all duration-300 ease-in-out
+          ${isHovering ? 'opacity-100' : 'opacity-80'}
+        `}>
+          {/* Dashed vertical line - longer and more visible */}
+          <div className="h-24 w-6 flex items-center justify-center">
+            <div className={`
+              h-20 w-0.5 border-l-2 border-dashed 
+              ${isHovering || isOpen 
+                ? 'border-blue-500 dark:border-blue-400' 
+                : 'border-gray-400 dark:border-gray-500'
+              }
+              transition-all duration-300
+            `}></div>
+          </div>
 
-        {/* Small indicator dot */}
-        <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          {/* "TOC" label - appears on hover */}
+          <div className={`
+            absolute left-3 top-1/2 -translate-y-1/2
+            text-[10px] font-medium tracking-wider uppercase
+            text-gray-400 dark:text-gray-500
+            transition-all duration-300
+            ${isHovering || isOpen ? 'opacity-100' : 'opacity-0'}
+          `}>
+            TOC
+          </div>
+
+          {/* Small indicator dots along the line */}
+          <div className="absolute left-3 top-1/4 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="absolute left-3 top-2/4 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100"></div>
+          <div className="absolute left-3 top-3/4 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200"></div>
+        </div>
       </div>
 
       {/* Floating panel - slides out when open */}
@@ -145,17 +166,14 @@ export default function TableOfContents({ messages, onScrollToMessage }: TableOf
               key={msg.id}
               onClick={() => {
                 onScrollToMessage(msg.id);
-                // Close the panel after clicking
                 setIsOpen(false);
               }}
               className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-150 group"
             >
               <div className="flex items-start gap-3">
-                {/* Topic number */}
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium flex items-center justify-center mt-0.5">
                   {index + 1}
                 </span>
-                {/* Message preview */}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-800 dark:text-gray-200 font-medium truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {getPreview(msg.content)}
@@ -164,7 +182,6 @@ export default function TableOfContents({ messages, onScrollToMessage }: TableOf
                     {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
-                {/* Small arrow indicator */}
                 <svg className="flex-shrink-0 w-4 h-4 text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -173,13 +190,12 @@ export default function TableOfContents({ messages, onScrollToMessage }: TableOf
           ))}
         </div>
 
-        {/* Footer with instruction */}
         <div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-3 text-center">
           <p className="text-xs text-gray-400 dark:text-gray-500">
             Click any topic to jump to that message
           </p>
         </div>
       </div>
-    </div>
+    </>
   );
 }
