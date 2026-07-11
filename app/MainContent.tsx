@@ -10,9 +10,6 @@ import { useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import NameModal from './components/NameModal';
 import { useTheme } from './context/ThemeContext';
-import TableOfContents from './components/TableOfContents';
-import TableOfContents from './components/TableOfContents';
-import LeftSidebarTools from './components/LeftSidebarTools';
 
 type Message = {
   id: string;
@@ -868,20 +865,18 @@ export default function MainContent() {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-    <Sidebar 
-      isOpen={sidebarOpen} 
-      onToggle={() => setSidebarOpen(!sidebarOpen)}
-      onNewChat={handleNewChat}
-      onReturnToWelcome={handleReturnToWelcome}
-      conversations={sidebarConversations}
-      onLoadConversation={loadConversation}
-      onRenameConversation={renameConversation}
-      onDeleteConversation={deleteConversation}
-      onPinConversation={pinConversation}
-      currentConversationId={currentConversationId}
-    />
-
-    <LeftSidebarTools />
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+        onNewChat={handleNewChat}
+        onReturnToWelcome={handleReturnToWelcome}
+        conversations={sidebarConversations}
+        onLoadConversation={loadConversation}
+        onRenameConversation={renameConversation}
+        onDeleteConversation={deleteConversation}
+        onPinConversation={pinConversation}
+        currentConversationId={currentConversationId}
+      />
 
       <div className="flex-1 flex flex-col min-w-0">
         <Header 
@@ -1068,10 +1063,12 @@ export default function MainContent() {
         </div>
       </div>
       
-    <TableOfContents 
-      messages={messages} 
-      onScrollToMessage={scrollToMessage} 
-    />
-  </div>
+      <RightSidebar />
+      
+      <NameModal 
+        isOpen={showNameModal} 
+        onSave={handleNameSave} 
+      />
+    </div>
   );
 }
