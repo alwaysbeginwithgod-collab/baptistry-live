@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import BookDetailModal from './BookDetailModal';
 import EmailContactModal from './EmailContactModal';
 
@@ -12,6 +12,35 @@ interface BooksModalProps {
 export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Close modal when clicking outside or pressing Escape
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -167,7 +196,10 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-        <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-7xl mx-4 max-h-[85vh] overflow-y-auto">
+        <div
+          ref={modalRef}
+          className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-7xl mx-4 max-h-[85vh] overflow-y-auto"
+        >
           <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">📚 BAPTISTRY Books</h2>
             <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400">
