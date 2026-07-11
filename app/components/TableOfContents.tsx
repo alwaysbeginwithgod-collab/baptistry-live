@@ -86,22 +86,21 @@ export default function TableOfContents({ messages, onScrollToMessage }: TableOf
 
   return (
     <>
-      {/* Dashed line indicator - more visible and positioned better */}
+      {/* Dashed line indicator - RIGHT SIDE */}
       <div
-        className="fixed left-0 top-1/2 -translate-y-1/2 z-40 group"
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-40 group"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {/* Container for the dashed line with better visibility */}
         <div className={`
           relative flex items-center
           transition-all duration-300 ease-in-out
           ${isHovering ? 'opacity-100' : 'opacity-80'}
         `}>
-          {/* Dashed vertical line - longer and more visible */}
+          {/* Dashed vertical line */}
           <div className="h-24 w-6 flex items-center justify-center">
             <div className={`
-              h-20 w-0.5 border-l-2 border-dashed 
+              h-20 w-0.5 border-r-2 border-dashed 
               ${isHovering || isOpen 
                 ? 'border-blue-500 dark:border-blue-400' 
                 : 'border-gray-400 dark:border-gray-500'
@@ -112,7 +111,7 @@ export default function TableOfContents({ messages, onScrollToMessage }: TableOf
 
           {/* "TOC" label - appears on hover */}
           <div className={`
-            absolute left-3 top-1/2 -translate-y-1/2
+            absolute right-3 top-1/2 -translate-y-1/2
             text-[10px] font-medium tracking-wider uppercase
             text-gray-400 dark:text-gray-500
             transition-all duration-300
@@ -122,28 +121,28 @@ export default function TableOfContents({ messages, onScrollToMessage }: TableOf
           </div>
 
           {/* Small indicator dots along the line */}
-          <div className="absolute left-3 top-1/4 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div className="absolute left-3 top-2/4 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100"></div>
-          <div className="absolute left-3 top-3/4 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200"></div>
+          <div className="absolute right-3 top-1/4 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="absolute right-3 top-2/4 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100"></div>
+          <div className="absolute right-3 top-3/4 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200"></div>
         </div>
       </div>
 
-      {/* Floating panel - slides out when open */}
+      {/* Floating panel - slides out from RIGHT */}
       <div
         ref={panelRef}
         onMouseEnter={handlePanelMouseEnter}
         onMouseLeave={handlePanelMouseLeave}
         className={`
-          fixed left-0 top-1/2 -translate-y-1/2
+          fixed right-0 top-1/2 -translate-y-1/2
           w-80 max-h-[70vh] overflow-y-auto
           bg-white dark:bg-gray-800
-          rounded-r-xl shadow-2xl
+          rounded-l-xl shadow-2xl
           border border-gray-200 dark:border-gray-700
           transition-all duration-300 ease-in-out
-          ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'}
+          ${isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}
         `}
         style={{
-          boxShadow: '0 20px 60px rgba(0,0,0,0.15), 4px 0 20px rgba(0,0,0,0.05)'
+          boxShadow: '0 20px 60px rgba(0,0,0,0.15), -4px 0 20px rgba(0,0,0,0.05)'
         }}
       >
         {/* Header */}

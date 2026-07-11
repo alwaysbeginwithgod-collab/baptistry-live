@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 
 type Tool = 'bible' | 'dictionary' | 'reference' | null;
 
-export default function RightSidebar() {
+export default function LeftSidebarTools() {
   const [activeTool, setActiveTool] = useState<Tool>(null);
   const [bibleQuery, setBibleQuery] = useState('');
   const [bibleResult, setBibleResult] = useState('');
@@ -96,7 +96,7 @@ export default function RightSidebar() {
   useEffect(() => {
     const handleBibleLookup = (event: CustomEvent) => {
       const reference = event.detail.reference;
-      console.log('📖 RightSidebar received scripture:', reference);
+      console.log('📖 LeftSidebarTools received scripture:', reference);
       
       if (!reference) return;
       
@@ -115,19 +115,17 @@ export default function RightSidebar() {
     };
   }, []);
 
-  // Custom Tooltip Component - Right aligned
+  // TooltipButton component - right aligned
   const TooltipButton = ({ 
     onClick, 
     isActive, 
     icon, 
-    tooltipText, 
-    tooltipPosition = 'above' 
+    tooltipText 
   }: { 
     onClick: () => void; 
     isActive: boolean; 
     icon: React.ReactNode; 
     tooltipText: string;
-    tooltipPosition?: 'above' | 'below';
   }) => {
     return (
       <div className="relative group">
@@ -141,18 +139,17 @@ export default function RightSidebar() {
         >
           {icon}
         </button>
-        {/* Tooltip - positioned above and right-aligned */}
+        {/* Tooltip - positioned above */}
         <div className={`
-          absolute bottom-full mb-2 right-0
+          absolute bottom-full mb-2 left-1/2 -translate-x-1/2
           px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg 
           whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible 
           transition-all duration-200 pointer-events-none z-50
           shadow-lg
         `}>
           {tooltipText}
-          {/* Small arrow/triangle - positioned at the right edge */}
           <div className={`
-            absolute right-2 -bottom-1
+            absolute left-1/2 -translate-x-1/2 -bottom-1
             w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45
           `}></div>
         </div>
@@ -162,13 +159,13 @@ export default function RightSidebar() {
 
   return (
     <>
-      <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-30">
-        <div className="flex flex-col items-center gap-4 py-6 px-2 bg-white dark:bg-gray-800 rounded-l-lg shadow-lg border border-gray-200 dark:border-gray-700">
+      {/* Tools on the LEFT side - right after sidebar */}
+      <div className="fixed left-[320px] top-1/2 transform -translate-y-1/2 z-30">
+        <div className="flex flex-col items-center gap-4 py-6 px-2 bg-white dark:bg-gray-800 rounded-r-lg shadow-lg border border-gray-200 dark:border-gray-700 border-l-0">
           <TooltipButton
             onClick={() => setActiveTool(activeTool === 'bible' ? null : 'bible')}
             isActive={activeTool === 'bible'}
             tooltipText="KJV Bible Lookup"
-            tooltipPosition="above"
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
@@ -180,7 +177,6 @@ export default function RightSidebar() {
             onClick={() => setActiveTool(activeTool === 'dictionary' ? null : 'dictionary')}
             isActive={activeTool === 'dictionary'}
             tooltipText="Webster's 1828 Dictionary"
-            tooltipPosition="above"
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7M16 18.5L19.5 15 17 12.5 13.5 16 16 19.5z" />
@@ -193,7 +189,6 @@ export default function RightSidebar() {
             onClick={() => setActiveTool(activeTool === 'reference' ? null : 'reference')}
             isActive={activeTool === 'reference'}
             tooltipText="Baptist Reference Library"
-            tooltipPosition="above"
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -204,10 +199,11 @@ export default function RightSidebar() {
         </div>
       </div>
 
+      {/* Tool Panel - slides out from LEFT */}
       {activeTool && (
         <div
           ref={toolPanelRef}
-          className="fixed right-12 top-1/2 transform -translate-y-1/2 z-20"
+          className="fixed left-[380px] top-1/2 transform -translate-y-1/2 z-20"
         >
           <div className="w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-h-[85vh] overflow-y-auto">
             <div className="p-4">
