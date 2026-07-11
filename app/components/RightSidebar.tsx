@@ -5,7 +5,6 @@ import { useState, useRef, useEffect } from 'react';
 type Tool = 'bible' | 'dictionary' | 'reference' | null;
 
 interface RightSidebarProps {
-  // New props for TOC functionality
   messages?: Array<{ id: string; role: string; content: string; timestamp: Date }>;
   onScrollToMessage?: (messageId: string) => void;
 }
@@ -27,6 +26,10 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
 
   // Filter only user messages for TOC
   const userMessages = messages.filter(m => m.role === 'user');
+  
+  // Debug logging
+  console.log('🔍 RightSidebar - Total messages:', messages.length);
+  console.log('🔍 RightSidebar - User messages:', userMessages.length);
 
   const searchBible = async () => {
     if (!bibleQuery.trim()) return;
@@ -274,7 +277,7 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
             }
           />
 
-          {/* Separator line and TOC Button */}
+          {/* Separator line and TOC Button - Always show if there are user messages */}
           {userMessages.length > 0 && (
             <>
               <div className="w-8 h-px bg-gray-300 dark:bg-gray-600 my-1"></div>
@@ -440,7 +443,7 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
           className="fixed right-12 top-0 h-screen z-50 pointer-events-auto"
           style={{ width: '320px' }}
         >
-          <div className="h-full w-full bg-white dark:bg-gray-800 shadow-2xl border-l border-gray-200 dark:border-gray-700 overflow-y-auto animate-slideInRight">
+          <div className="h-full w-full bg-white dark:bg-gray-800 shadow-2xl border-l border-gray-200 dark:border-gray-700 overflow-y-auto">
             {/* Header */}
             <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
