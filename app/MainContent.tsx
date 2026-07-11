@@ -1,6 +1,5 @@
 'use client';
 
-import RightSidebar from './components/RightSidebar';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -10,7 +9,6 @@ import { useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import NameModal from './components/NameModal';
 import { useTheme } from './context/ThemeContext';
-import TableOfContents from './components/TableOfContents';
 import TableOfContents from './components/TableOfContents';
 import LeftSidebarTools from './components/LeftSidebarTools';
 
@@ -867,23 +865,27 @@ export default function MainContent() {
   `;
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-    <Sidebar 
-      isOpen={sidebarOpen} 
-      onToggle={() => setSidebarOpen(!sidebarOpen)}
-      onNewChat={handleNewChat}
-      onReturnToWelcome={handleReturnToWelcome}
-      conversations={sidebarConversations}
-      onLoadConversation={loadConversation}
-      onRenameConversation={renameConversation}
-      onDeleteConversation={deleteConversation}
-      onPinConversation={pinConversation}
-      currentConversationId={currentConversationId}
-    />
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+      {/* LEFT SIDE: Sidebar */}
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+        onNewChat={handleNewChat}
+        onReturnToWelcome={handleReturnToWelcome}
+        conversations={sidebarConversations}
+        onLoadConversation={loadConversation}
+        onRenameConversation={renameConversation}
+        onDeleteConversation={deleteConversation}
+        onPinConversation={pinConversation}
+        currentConversationId={currentConversationId}
+      />
 
-    <LeftSidebarTools />
+      {/* LEFT SIDE: Tools (right after sidebar) */}
+      <LeftSidebarTools />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* CENTER: Chat Area */}
+      <div className="flex-1 flex flex-col min-w-0 h-full">
+        {/* HEADER - Fixed at top */}
         <Header 
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
           messageCount={messages.length}
@@ -891,6 +893,7 @@ export default function MainContent() {
           onLoadMessage={scrollToMessage}
         />
 
+        {/* SCROLLABLE CONTENT */}
         <div className="flex-1 overflow-y-auto">
           {messages.length === 0 && !isGenerating ? (
             <div className="flex items-center justify-center h-full">
@@ -1026,7 +1029,8 @@ export default function MainContent() {
           )}
         </div>
 
-        <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+        {/* FOOTER - Fixed at bottom */}
+        <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 flex-shrink-0">
           <div className="max-w-4xl mx-auto">
             <div className="flex gap-3 items-end">
               <textarea
@@ -1043,7 +1047,7 @@ export default function MainContent() {
               {isGenerating ? (
                 <button
                   onClick={stopResponse}
-                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2 border border-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2 border border-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 flex-shrink-0"
                 >
                   ⏹️ Stop
                 </button>
@@ -1051,7 +1055,7 @@ export default function MainContent() {
                 <button
                   onClick={sendMessage}
                   disabled={!input.trim()}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex-shrink-0"
                 >
                   Send
                 </button>
@@ -1067,11 +1071,18 @@ export default function MainContent() {
           </div>
         </div>
       </div>
+
+      {/* RIGHT SIDE: Table of Contents */}
+      <TableOfContents 
+        messages={messages} 
+        onScrollToMessage={scrollToMessage} 
+      />
       
-    <TableOfContents 
-      messages={messages} 
-      onScrollToMessage={scrollToMessage} 
-    />
-  </div>
+      {/* Name Modal - Shows on first sign-in */}
+      <NameModal 
+        isOpen={showNameModal} 
+        onSave={handleNameSave} 
+      />
+    </div>
   );
 }
