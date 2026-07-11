@@ -20,16 +20,11 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
   
   // TOC state
   const [isTocOpen, setIsTocOpen] = useState(false);
-  const [isTocHovering, setIsTocHovering] = useState(false);
   const tocPanelRef = useRef<HTMLDivElement>(null);
-  const tocTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const tocButtonRef = useRef<HTMLButtonElement>(null);
 
   // Filter only user messages for TOC
   const userMessages = messages.filter(m => m.role === 'user');
-  
-  // Debug logging
-  console.log('🔍 RightSidebar - Total messages:', messages.length);
-  console.log('🔍 RightSidebar - User messages:', userMessages.length);
 
   const searchBible = async () => {
     if (!bibleQuery.trim()) return;
@@ -97,6 +92,37 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
     setDictionaryResult('');
   };
 
+  // ============================================================
+  // CLICK OUTSIDE HANDLER - Close TOC when clicking outside
+  // ============================================================
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Check if click is outside the TOC panel and outside the TOC button
+      const isOutsidePanel = tocPanelRef.current && !tocPanelRef.current.contains(event.target as Node);
+      const isOutsideButton = tocButtonRef.current && !tocButtonRef.current.contains(event.target as Node);
+      
+      if (isTocOpen && isOutsidePanel && isOutsideButton) {
+        setIsTocOpen(false);
+      }
+    };
+
+    // Also close when pressing Escape
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isTocOpen) {
+        setIsTocOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isTocOpen]);
+
+  // Close tool panel when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (toolPanelRef.current && !toolPanelRef.current.contains(event.target as Node)) {
@@ -132,53 +158,6 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
       window.removeEventListener('bibleLookup' as any, handleBibleLookup);
     };
   }, []);
-
-  // ============================================================
-  // TOC HANDLERS
-  // ============================================================
-  const handleTocMouseEnter = () => {
-    if (tocTimeoutRef.current) {
-      clearTimeout(tocTimeoutRef.current);
-      tocTimeoutRef.current = null;
-    }
-    setIsTocHovering(true);
-    const timeout = setTimeout(() => {
-      setIsTocOpen(true);
-    }, 200);
-    tocTimeoutRef.current = timeout;
-  };
-
-  const handleTocMouseLeave = () => {
-    if (tocTimeoutRef.current) {
-      clearTimeout(tocTimeoutRef.current);
-      tocTimeoutRef.current = null;
-    }
-    setIsTocHovering(false);
-    const timeout = setTimeout(() => {
-      setIsTocOpen(false);
-    }, 300);
-    tocTimeoutRef.current = timeout;
-  };
-
-  const handleTocPanelMouseEnter = () => {
-    if (tocTimeoutRef.current) {
-      clearTimeout(tocTimeoutRef.current);
-      tocTimeoutRef.current = null;
-    }
-    setIsTocOpen(true);
-  };
-
-  const handleTocPanelMouseLeave = () => {
-    if (tocTimeoutRef.current) {
-      clearTimeout(tocTimeoutRef.current);
-      tocTimeoutRef.current = null;
-    }
-    const timeout = setTimeout(() => {
-      setIsTocOpen(false);
-      setIsTocHovering(false);
-    }, 200);
-    tocTimeoutRef.current = timeout;
-  };
 
   const handleTocClick = (messageId: string) => {
     if (onScrollToMessage) {
@@ -277,40 +256,41 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
             }
           />
 
-{/* Separator line and TOC Button */}
-{userMessages.length > 0 && (
-  <>
-    <div className="w-8 h-px bg-gray-300 dark:bg-gray-600 my-1"></div>
-    
-    <div className="relative w-full group">
-      <button
-        onClick={() => setIsTocOpen(!isTocOpen)}
-        className={`tool-icon-button p-2 rounded-lg transition-colors relative w-full ${
-          isTocOpen
-            ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
-            : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-        }`}
-        title="Conversation History"
-      >
-        <span className="text-lg">📜</span>
-      </button>
-      {/* Tooltip - Hover only, no panel opening */}
-      <div className={`
-        absolute right-full mr-2 top-1/2 -translate-y-1/2
-        px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg 
-        whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-        transition-all duration-200 pointer-events-none z-50
-        shadow-lg
-      `}>
-        Conversation History
-        <div className={`
-          absolute -right-1 top-1/2 -translate-y-1/2
-          w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45
-        `}></div>
-      </div>
-    </div>
-  </>
-)}
+          {/* Separator line and TOC Button */}
+          {userMessages.length > 0 && (
+            <>
+              <div className="w-8 h-px bg-gray-300 dark:bg-gray-600 my-1"></div>
+              
+              <div className="relative w-full group">
+                <button
+                  ref={tocButtonRef}
+                  onClick={() => setIsTocOpen(!isTocOpen)}
+                  className={`tool-icon-button p-2 rounded-lg transition-colors relative w-full ${
+                    isTocOpen
+                      ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                  title="Conversation History"
+                >
+                  <span className="text-lg">📜</span>
+                </button>
+                {/* Tooltip - Only on hover, no panel opening */}
+                <div className={`
+                  absolute right-full mr-2 top-1/2 -translate-y-1/2
+                  px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg 
+                  whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+                  transition-all duration-200 pointer-events-none z-50
+                  shadow-lg
+                `}>
+                  Conversation History
+                  <div className={`
+                    absolute -right-1 top-1/2 -translate-y-1/2
+                    w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45
+                  `}></div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -430,16 +410,14 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
         </div>
       )}
 
-      {/* TOC Panel - OVERLAYS everything */}
+      {/* TOC Panel - Only shows on click, overlays everything */}
       {isTocOpen && userMessages.length > 0 && (
         <div
           ref={tocPanelRef}
-          onMouseEnter={handleTocPanelMouseEnter}
-          onMouseLeave={handleTocPanelMouseLeave}
           className="fixed right-12 top-0 h-screen z-50 pointer-events-auto"
           style={{ width: '320px' }}
         >
-          <div className="h-full w-full bg-white dark:bg-gray-800 shadow-2xl border-l border-gray-200 dark:border-gray-700 overflow-y-auto">
+          <div className="h-full w-full bg-white dark:bg-gray-800 shadow-2xl border-l border-gray-200 dark:border-gray-700 overflow-y-auto animate-slideInRight">
             {/* Header */}
             <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
