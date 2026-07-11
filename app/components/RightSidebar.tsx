@@ -250,7 +250,7 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
           <TooltipButton
             onClick={() => setActiveTool(activeTool === 'reference' ? null : 'reference')}
             isActive={activeTool === 'reference'}
-            tooltipText="Baptist Reference Library"
+            tooltipText="Baptistry Reference Library"
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -309,7 +309,7 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
                 <h3 className="font-semibold text-gray-800 dark:text-white">
                   {activeTool === 'bible' && '🕮 KJV Bible Lookup'}
                   {activeTool === 'dictionary' && '🔍 Webster\'s 1828 Dictionary'}
-                  {activeTool === 'reference' && '📚 Baptist Reference Library'}
+                  {activeTool === 'reference' && '📚 Baptistry Reference Library'}
                 </h3>
                 <button onClick={closeTool} className="text-gray-400 hover:text-gray-600">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -384,7 +384,7 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
                     <h4 className="text-sm font-semibold text-gray-800 dark:text-white mb-2 border-l-2 border-blue-500 pl-2">📖 Doctrinal Defense</h4>
                     <div className="space-y-1 ml-2">
                       <a href="https://www.wayoflife.org" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">Way of Life Literature</a>
-                      <a href="https://www.independentbaptist.com" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">Independent Baptist Portal</a>
+                      <a href="https://openthoumineeyes.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 dark:text-blue-400 hover:underline">Doctrine Portal</a>
                     </div>
                   </div>
 
