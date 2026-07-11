@@ -298,12 +298,12 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
                 >
                   <span className="text-lg">📜</span>
                 </button>
-                {/* Tooltip */}
+                {/* Tooltip - Matches the other tooltips exactly */}
                 <div className={`
-                  absolute right-full mr-2 top-1/2 -translate-y-1/2
-                  px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg 
-                  whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-                  transition-all duration-200 pointer-events-none z-50
+	          absolute right-full mr-2 top-1/2 -translate-y-1/2
+	          px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg 
+	          whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+  	          transition-all duration-200 pointer-events-none z-50
                   shadow-lg
                 `}>
                   Conversation History
