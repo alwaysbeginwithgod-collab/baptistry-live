@@ -881,15 +881,6 @@ export default function MainContent() {
       currentConversationId={currentConversationId}
     />
 
-    <LeftSidebarTools />
-    <div className="flex-1 flex flex-col min-w-0">
-      <Header 
-        onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-        messageCount={messages.length}
-        messages={messages}
-        onLoadMessage={scrollToMessage}
-      />
-
     <TableOfContents 
       messages={messages} 
       onScrollToMessage={scrollToMessage} 
