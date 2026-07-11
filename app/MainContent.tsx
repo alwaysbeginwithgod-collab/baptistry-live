@@ -1063,7 +1063,10 @@ export default function MainContent() {
         </div>
       </div>
       
-      <RightSidebar />
+<RightSidebar 
+  messages={messages} 
+  onScrollToMessage={scrollToMessage} 
+/>
       
       <NameModal 
         isOpen={showNameModal} 
