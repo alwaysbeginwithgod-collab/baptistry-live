@@ -115,53 +115,94 @@ export default function RightSidebar() {
     };
   }, []);
 
+  // Custom Tooltip Component
+  const TooltipButton = ({ 
+    onClick, 
+    isActive, 
+    icon, 
+    tooltipText, 
+    tooltipPosition = 'above' 
+  }: { 
+    onClick: () => void; 
+    isActive: boolean; 
+    icon: React.ReactNode; 
+    tooltipText: string;
+    tooltipPosition?: 'above' | 'below';
+  }) => {
+    return (
+      <div className="relative group">
+        <button
+          onClick={onClick}
+          className={`tool-icon-button p-2 rounded-lg transition-colors relative ${
+            isActive
+              ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
+              : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+        >
+          {icon}
+        </button>
+        {/* Tooltip - positioned above the button */}
+        <div className={`
+          absolute left-1/2 -translate-x-1/2 
+          ${tooltipPosition === 'above' ? 'bottom-full mb-2' : 'top-full mt-2'}
+          px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg 
+          whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+          transition-all duration-200 pointer-events-none z-50
+          shadow-lg
+        `}>
+          {tooltipText}
+          {/* Small arrow/triangle */}
+          <div className={`
+            absolute left-1/2 -translate-x-1/2 
+            w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45
+            ${tooltipPosition === 'above' ? '-bottom-1' : '-top-1'}
+          `}></div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-30">
         <div className="flex flex-col items-center gap-4 py-6 px-2 bg-white dark:bg-gray-800 rounded-l-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          <button
+          <TooltipButton
             onClick={() => setActiveTool(activeTool === 'bible' ? null : 'bible')}
-            className={`tool-icon-button p-2 rounded-lg transition-colors ${
-              activeTool === 'bible'
-                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
-                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-            title="KJV Bible Lookup"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-            </svg>
-          </button>
+            isActive={activeTool === 'bible'}
+            tooltipText="KJV Bible Lookup"
+            tooltipPosition="above"
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+              </svg>
+            }
+          />
 
-          <button
+          <TooltipButton
             onClick={() => setActiveTool(activeTool === 'dictionary' ? null : 'dictionary')}
-            className={`tool-icon-button p-2 rounded-lg transition-colors ${
-              activeTool === 'dictionary'
-                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
-                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-            title="Webster's 1828 Dictionary"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7M16 18.5L19.5 15 17 12.5 13.5 16 16 19.5z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8l-2 4m0 0l-2-4m2 4v6" />
-            </svg>
-          </button>
+            isActive={activeTool === 'dictionary'}
+            tooltipText="Webster's 1828 Dictionary"
+            tooltipPosition="above"
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7M16 18.5L19.5 15 17 12.5 13.5 16 16 19.5z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8l-2 4m0 0l-2-4m2 4v6" />
+              </svg>
+            }
+          />
 
-          <button
+          <TooltipButton
             onClick={() => setActiveTool(activeTool === 'reference' ? null : 'reference')}
-            className={`tool-icon-button p-2 rounded-lg transition-colors ${
-              activeTool === 'reference'
-                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
-                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-            title="Baptist Reference Library"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 13v4m-4-4h8" />
-            </svg>
-          </button>
+            isActive={activeTool === 'reference'}
+            tooltipText="Baptist Reference Library"
+            tooltipPosition="above"
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 13v4m-4-4h8" />
+              </svg>
+            }
+          />
         </div>
       </div>
 
