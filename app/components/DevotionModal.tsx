@@ -45,6 +45,8 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   // FORMAT SCRIPTURE - Bold reference, italic quote
   // ============================================================
   const formatScripture = (text: string) => {
+    if (!text) return <span></span>;
+    
     // Match: "Book Chapter:Verse "quote""
     const match = text.match(/^(.+?)\s*["“](.+)["”]$/);
     if (match) {
@@ -87,9 +89,11 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   };
 
   // ============================================================
-  // FORMAT CONTENT - Bold references, italic quotes
+  // FORMAT CONTENT - Bold references, italic quotes (with safety checks)
   // ============================================================
   const formatContent = (text: string) => {
+    if (!text) return null;
+    
     const paragraphs = text.split('\n\n');
     
     return paragraphs.map((paragraph, index) => {
@@ -121,6 +125,8 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   // PROCESS PARAGRAPH - Format scripture references and quotes
   // ============================================================
   const processParagraph = (text: string) => {
+    if (!text) return text;
+    
     // Match scripture references like "Hebrews 11:1", "1 Corinthians 13:2", etc.
     const scriptureRegex = /\b((?:[1-3]?\s?[A-Za-z]+)\s+\d+:\d+(?:-\d+)?)\b/g;
     const parts = [];
@@ -164,7 +170,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   };
 
   // ============================================================
-  // PROCESS QUOTES - Italicize quoted scripture
+  // PROCESS QUOTES - Italicize quoted scripture (with safety checks)
   // ============================================================
   const processQuotesSimple = (text: string): (string | JSX.Element)[] => {
     if (!text) return [];
@@ -249,6 +255,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
         </div>
 
         <div className="p-6">
+          {/* Image with fallback */}
           {image && (
             <div className="mb-6 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700">
               <img 

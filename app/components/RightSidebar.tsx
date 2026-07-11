@@ -4,7 +4,13 @@ import { useState, useRef, useEffect } from 'react';
 
 type Tool = 'bible' | 'dictionary' | 'reference' | null;
 
-export default function RightSidebar() {
+interface RightSidebarProps {
+  // New props for TOC functionality
+  messages?: Array<{ id: string; role: string; content: string; timestamp: Date }>;
+  onScrollToMessage?: (messageId: string) => void;
+}
+
+export default function RightSidebar({ messages = [], onScrollToMessage }: RightSidebarProps) {
   const [activeTool, setActiveTool] = useState<Tool>(null);
   const [bibleQuery, setBibleQuery] = useState('');
   const [bibleResult, setBibleResult] = useState('');
@@ -12,6 +18,15 @@ export default function RightSidebar() {
   const [dictionaryWord, setDictionaryWord] = useState('');
   const [dictionaryResult, setDictionaryResult] = useState('');
   const toolPanelRef = useRef<HTMLDivElement>(null);
+  
+  // TOC state
+  const [isTocOpen, setIsTocOpen] = useState(false);
+  const [isTocHovering, setIsTocHovering] = useState(false);
+  const tocPanelRef = useRef<HTMLDivElement>(null);
+  const tocTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Filter only user messages for TOC
+  const userMessages = messages.filter(m => m.role === 'user');
 
   const searchBible = async () => {
     if (!bibleQuery.trim()) return;
@@ -115,33 +130,94 @@ export default function RightSidebar() {
     };
   }, []);
 
-  // TooltipButton component - positioned above with right alignment
+  // ============================================================
+  // TOC HANDLERS
+  // ============================================================
+  const handleTocMouseEnter = () => {
+    if (tocTimeoutRef.current) {
+      clearTimeout(tocTimeoutRef.current);
+      tocTimeoutRef.current = null;
+    }
+    setIsTocHovering(true);
+    const timeout = setTimeout(() => {
+      setIsTocOpen(true);
+    }, 200);
+    tocTimeoutRef.current = timeout;
+  };
+
+  const handleTocMouseLeave = () => {
+    if (tocTimeoutRef.current) {
+      clearTimeout(tocTimeoutRef.current);
+      tocTimeoutRef.current = null;
+    }
+    setIsTocHovering(false);
+    const timeout = setTimeout(() => {
+      setIsTocOpen(false);
+    }, 300);
+    tocTimeoutRef.current = timeout;
+  };
+
+  const handleTocPanelMouseEnter = () => {
+    if (tocTimeoutRef.current) {
+      clearTimeout(tocTimeoutRef.current);
+      tocTimeoutRef.current = null;
+    }
+    setIsTocOpen(true);
+  };
+
+  const handleTocPanelMouseLeave = () => {
+    if (tocTimeoutRef.current) {
+      clearTimeout(tocTimeoutRef.current);
+      tocTimeoutRef.current = null;
+    }
+    const timeout = setTimeout(() => {
+      setIsTocOpen(false);
+      setIsTocHovering(false);
+    }, 200);
+    tocTimeoutRef.current = timeout;
+  };
+
+  const handleTocClick = (messageId: string) => {
+    if (onScrollToMessage) {
+      onScrollToMessage(messageId);
+      setIsTocOpen(false);
+    }
+  };
+
+  const getPreview = (content: string) => {
+    const cleanContent = content.replace(/["']/g, '').trim();
+    return cleanContent.length > 40 ? cleanContent.substring(0, 40) + '...' : cleanContent;
+  };
+
+  // TooltipButton component
   const TooltipButton = ({ 
     onClick, 
     isActive, 
     icon, 
-    tooltipText 
+    tooltipText,
+    isToc = false
   }: { 
     onClick: () => void; 
     isActive: boolean; 
     icon: React.ReactNode; 
     tooltipText: string;
+    isToc?: boolean;
   }) => {
     return (
       <div className="relative group">
         <button
           onClick={onClick}
-          className={`tool-icon-button p-2 rounded-lg transition-colors relative ${
+          className={`tool-icon-button p-2 rounded-lg transition-colors relative w-full ${
             isActive
               ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
               : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-          }`}
+          } ${isToc ? 'border-t border-gray-200 dark:border-gray-700 pt-4 mt-1' : ''}`}
         >
           {icon}
         </button>
-        {/* Tooltip - positioned above, right-aligned */}
+        {/* Tooltip - positioned to the left */}
         <div className={`
-          absolute bottom-full mb-2 right-0
+          absolute right-full mr-2 top-1/2 -translate-y-1/2
           px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg 
           whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible 
           transition-all duration-200 pointer-events-none z-50
@@ -149,7 +225,7 @@ export default function RightSidebar() {
         `}>
           {tooltipText}
           <div className={`
-            absolute right-2 -bottom-1
+            absolute -right-1 top-1/2 -translate-y-1/2
             w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45
           `}></div>
         </div>
@@ -159,8 +235,10 @@ export default function RightSidebar() {
 
   return (
     <>
+      {/* Right Sidebar - Fixed position */}
       <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-30">
-        <div className="flex flex-col items-center gap-4 py-6 px-2 bg-white dark:bg-gray-800 rounded-l-lg shadow-lg border border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col items-center gap-3 py-6 px-2 bg-white dark:bg-gray-800 rounded-l-lg shadow-lg border border-gray-200 dark:border-gray-700">
+          {/* Tools */}
           <TooltipButton
             onClick={() => setActiveTool(activeTool === 'bible' ? null : 'bible')}
             isActive={activeTool === 'bible'}
@@ -195,9 +273,49 @@ export default function RightSidebar() {
               </svg>
             }
           />
+
+          {/* Separator line and TOC Button */}
+          {userMessages.length > 0 && (
+            <>
+              <div className="w-8 h-px bg-gray-300 dark:bg-gray-600 my-1"></div>
+              
+              <div 
+                className="relative w-full"
+                onMouseEnter={handleTocMouseEnter}
+                onMouseLeave={handleTocMouseLeave}
+              >
+                <button
+                  onClick={() => setIsTocOpen(!isTocOpen)}
+                  className={`tool-icon-button p-2 rounded-lg transition-colors relative w-full ${
+                    isTocOpen || isTocHovering
+                      ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                  title="Conversation History"
+                >
+                  <span className="text-lg">📜</span>
+                </button>
+                {/* Tooltip */}
+                <div className={`
+                  absolute right-full mr-2 top-1/2 -translate-y-1/2
+                  px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg 
+                  whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+                  transition-all duration-200 pointer-events-none z-50
+                  shadow-lg
+                `}>
+                  Conversation History
+                  <div className={`
+                    absolute -right-1 top-1/2 -translate-y-1/2
+                    w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45
+                  `}></div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
+      {/* Tool Panel */}
       {activeTool && (
         <div
           ref={toolPanelRef}
@@ -308,6 +426,73 @@ export default function RightSidebar() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TOC Panel - OVERLAYS everything */}
+      {isTocOpen && userMessages.length > 0 && (
+        <div
+          ref={tocPanelRef}
+          onMouseEnter={handleTocPanelMouseEnter}
+          onMouseLeave={handleTocPanelMouseLeave}
+          className="fixed right-12 top-0 h-screen z-50 pointer-events-auto"
+          style={{ width: '320px' }}
+        >
+          <div className="h-full w-full bg-white dark:bg-gray-800 shadow-2xl border-l border-gray-200 dark:border-gray-700 overflow-y-auto animate-slideInRight">
+            {/* Header */}
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <span className="text-lg">📜</span>
+                Conversation History
+                <span className="text-xs text-gray-400 dark:text-gray-500 font-normal ml-2">
+                  {userMessages.length} {userMessages.length === 1 ? 'message' : 'messages'}
+                </span>
+              </h3>
+              <button
+                onClick={() => setIsTocOpen(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Message List */}
+            <div className="p-3">
+              {userMessages.map((msg, index) => (
+                <button
+                  key={msg.id}
+                  onClick={() => handleTocClick(msg.id)}
+                  className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-150 group mb-1"
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium flex items-center justify-center mt-0.5">
+                      {index + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-800 dark:text-gray-200 font-medium truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {getPreview(msg.content)}
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    <svg className="flex-shrink-0 w-4 h-4 text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-3 text-center">
+              <p className="text-xs text-gray-400 dark:text-gray-500">
+                Click any message to jump to it in the conversation
+              </p>
             </div>
           </div>
         </div>
