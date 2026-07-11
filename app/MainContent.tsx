@@ -882,7 +882,6 @@ export default function MainContent() {
     />
 
     <LeftSidebarTools />
-
     <div className="flex-1 flex flex-col min-w-0">
       <Header 
         onMenuClick={() => setSidebarOpen(!sidebarOpen)}
