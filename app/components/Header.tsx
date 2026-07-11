@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useUser, SignInButton } from '@clerk/nextjs';
 import UserMenu from './UserMenu';
@@ -17,28 +17,9 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick, messageCount, messages = [], onLoadMessage }: HeaderProps) {
   const { darkMode, toggleDarkMode } = useTheme();
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const historyDropdownRef = useRef<HTMLDivElement>(null);
   const { isSignedIn } = useUser();
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (historyDropdownRef.current && !historyDropdownRef.current.contains(event.target as Node)) {
-        setIsHistoryOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const userMessages = messages.filter(m => m.role === 'user');
-
-  const getPreview = (content: string) => {
-    const words = content.split(' ').slice(0, 5).join(' ');
-    return words.length < content.length ? words + '...' : words;
-  };
 
   // Handle install prompt
   const handleInstallClick = async () => {
@@ -85,9 +66,6 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
   
   // Install button - same base but with green text
   const installButtonClass = `${buttonBaseClass} flex items-center gap-1.5 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300`;
-  
-  // Message count button - exactly the same as dark mode toggle
-  const messageButtonClass = buttonBaseClass;
   
   // Icon button (dark mode toggle, menu) - exactly the same border style
   const iconButtonClass = "p-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
@@ -145,75 +123,6 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
           ) : (
             <UserMenu onHelpClick={() => setIsHelpOpen(true)} onFeedbackClick={() => setIsFeedbackOpen(true)} />
           )}
-
-          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
-
-          {/* Message Count Dropdown */}
-          <div className="relative" ref={historyDropdownRef}>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsHistoryOpen(!isHistoryOpen);
-              }}
-              className={`${messageButtonClass} inline-flex items-center whitespace-nowrap`}
-            >
-              <span>{messageCount} {messageCount === 1 ? 'message' : 'messages'}</span>
-              <svg className={`w-3 h-3 ml-1 flex-shrink-0 transition-transform ${isHistoryOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {isHistoryOpen && (
-              <div 
-                className="fixed right-4 top-auto mt-1 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto"
-                style={{
-                  position: 'fixed',
-                  top: '64px',
-                  right: '16px',
-                }}
-              >
-                <div className="p-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
-                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Message History</h3>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">Click any message to jump to it</p>
-                </div>
-                <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                  {userMessages.length === 0 ? (
-                    <div className="p-4 text-center text-gray-400 dark:text-gray-500 text-sm">No messages yet</div>
-                  ) : (
-                    userMessages.map((msg, index) => (
-                      <button
-                        key={msg.id}
-                        onClick={() => {
-                          if (onLoadMessage) onLoadMessage(msg.id);
-                          setIsHistoryOpen(false);
-                        }}
-                        className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"
-                      >
-                        <div className="flex items-start gap-2">
-                          <div className="flex-shrink-0 mt-0.5">
-                            <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">#{index + 1}</span>
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-gray-800 dark:text-gray-200 font-medium truncate">{getPreview(msg.content)}</p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                              {new Date(msg.timestamp).toLocaleDateString()} at {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
-                          </div>
-                          <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </div>
-                        </div>
-                      </button>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
 
           <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
           <NotificationBell />
