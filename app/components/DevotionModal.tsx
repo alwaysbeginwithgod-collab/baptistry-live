@@ -29,11 +29,6 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
     // Calculate index based on day of year - this ensures sequential looping
     const index = (dayOfYear - 1) % sortedDevotions.length;
     
-    // Log for debugging
-    console.log(`📅 Day ${dayOfYear} of year → Devotion ${index + 1}: ${sortedDevotions[index]?.title}`);
-    console.log(`📚 Total devotions: ${sortedDevotions.length}`);
-    console.log(`📖 Selected: ${sortedDevotions[index]?.id}`);
-    
     return sortedDevotions[index];
   }, [isOpen]);
 
@@ -42,16 +37,16 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   const { title, tagline, scripture, content, prayer, image, facebookLink } = todayDevotion;
 
   // ============================================================
-  // FORMAT SCRIPTURE - Bold reference, italic quote
+  // SAFE FORMAT SCRIPTURE - Bold reference, italic quote
   // ============================================================
   const formatScripture = (text: string) => {
-    if (!text) return <span></span>;
+    if (!text || typeof text !== 'string') return <span></span>;
     
     // Match: "Book Chapter:Verse "quote""
     const match = text.match(/^(.+?)\s*["“](.+)["”]$/);
     if (match) {
-      const reference = match[1].trim();
-      const verse = match[2].trim();
+      const reference = match[1]?.trim() || '';
+      const verse = match[2]?.trim() || '';
       return (
         <>
           <strong className="text-blue-600 dark:text-blue-400 font-bold">{reference}</strong>
@@ -62,8 +57,8 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
     // Fallback: try to split by quote
     const quoteIndex = text.indexOf('"');
     if (quoteIndex > 0) {
-      const reference = text.substring(0, quoteIndex).trim();
-      const verse = text.substring(quoteIndex + 1, text.lastIndexOf('"')).trim();
+      const reference = text.substring(0, quoteIndex)?.trim() || '';
+      const verse = text.substring(quoteIndex + 1, text.lastIndexOf('"'))?.trim() || '';
       return (
         <>
           <strong className="text-blue-600 dark:text-blue-400 font-bold">{reference}</strong>
@@ -71,33 +66,38 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
         </>
       );
     }
-    return <span>{text}</span>;
+    return <span>{text || ''}</span>;
   };
 
   // ============================================================
-  // FORMAT TAGLINE - Handle \n line breaks
+  // SAFE FORMAT TAGLINE - Handle \n line breaks
   // ============================================================
   const formatTagline = (text: string) => {
-    if (!text) return null;
+    if (!text || typeof text !== 'string') return null;
     const lines = text.split('\n');
     return lines.map((line, index) => (
       <span key={index}>
-        {line}
+        {line || ''}
         {index < lines.length - 1 && <br />}
       </span>
     ));
   };
 
   // ============================================================
-  // FORMAT CONTENT - Bold references, italic quotes (with safety checks)
+  // SAFE FORMAT CONTENT - With comprehensive safety checks
   // ============================================================
   const formatContent = (text: string) => {
-    if (!text) return null;
+    if (!text || typeof text !== 'string') return <p className="mb-4 leading-relaxed text-gray-700 dark:text-gray-300">Content not available</p>;
     
-    const paragraphs = text.split('\n\n');
+    const paragraphs = text.split('\n\n').filter(p => p && p.trim().length > 0);
+    
+    if (paragraphs.length === 0) {
+      return <p className="mb-4 leading-relaxed text-gray-700 dark:text-gray-300">{text}</p>;
+    }
     
     return paragraphs.map((paragraph, index) => {
       const trimmed = paragraph.trim();
+      if (!trimmed) return null;
       
       // Scene break
       if (trimmed === '---' || trimmed === '***' || trimmed === '—' || trimmed === '— — —') {
@@ -110,136 +110,158 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
         );
       }
       
-      // Process the paragraph
-      const formatted = processParagraph(trimmed);
-      
-      return (
-        <p key={index} className="mb-4 leading-relaxed text-gray-700 dark:text-gray-300">
-          {formatted}
-        </p>
-      );
+      // Process the paragraph with safety
+      try {
+        const formatted = processParagraphSafe(trimmed);
+        return (
+          <p key={index} className="mb-4 leading-relaxed text-gray-700 dark:text-gray-300">
+            {formatted || trimmed}
+          </p>
+        );
+      } catch (error) {
+        console.error('Error formatting paragraph:', error);
+        return (
+          <p key={index} className="mb-4 leading-relaxed text-gray-700 dark:text-gray-300">
+            {trimmed}
+          </p>
+        );
+      }
     });
   };
 
   // ============================================================
-  // PROCESS PARAGRAPH - Format scripture references and quotes
+  // SAFE PROCESS PARAGRAPH - With error handling
   // ============================================================
-  const processParagraph = (text: string) => {
-    if (!text) return text;
+  const processParagraphSafe = (text: string): (string | JSX.Element)[] | string => {
+    if (!text || typeof text !== 'string') return text || '';
     
-    // Match scripture references like "Hebrews 11:1", "1 Corinthians 13:2", etc.
-    const scriptureRegex = /\b((?:[1-3]?\s?[A-Za-z]+)\s+\d+:\d+(?:-\d+)?)\b/g;
-    const parts = [];
-    let currentIndex = 0;
-    let match;
-    
-    while ((match = scriptureRegex.exec(text)) !== null) {
-      const ref = match[0];
-      const refStart = match.index;
+    try {
+      // Match scripture references like "Hebrews 11:1", "1 Corinthians 13:2", etc.
+      const scriptureRegex = /\b((?:[1-3]?\s?[A-Za-z]+)\s+\d+:\d+(?:-\d+)?)\b/g;
+      const parts: (string | JSX.Element)[] = [];
+      let currentIndex = 0;
+      let match;
       
-      // Add text before the reference (with quote formatting)
-      if (refStart > currentIndex) {
-        const beforeText = text.substring(currentIndex, refStart);
-        const quoteParts = processQuotesSimple(beforeText);
+      while ((match = scriptureRegex.exec(text)) !== null) {
+        const ref = match[0];
+        const refStart = match.index;
+        
+        // Add text before the reference (with quote formatting)
+        if (refStart > currentIndex) {
+          const beforeText = text.substring(currentIndex, refStart);
+          const quoteParts = processQuotesSafe(beforeText);
+          parts.push(...quoteParts);
+        }
+        
+        // Add the scripture reference (bold)
+        parts.push(
+          <strong key={`ref-${match.index}`} className="text-blue-600 dark:text-blue-400 font-bold">
+            {ref}
+          </strong>
+        );
+        
+        currentIndex = scriptureRegex.lastIndex;
+      }
+      
+      // Add remaining text (with quote formatting)
+      if (currentIndex < text.length) {
+        const afterText = text.substring(currentIndex);
+        const quoteParts = processQuotesSafe(afterText);
         parts.push(...quoteParts);
       }
       
-      // Add the scripture reference (bold)
-      parts.push(
-        <strong key={`ref-${match.index}`} className="text-blue-600 dark:text-blue-400 font-bold">
-          {ref}
-        </strong>
-      );
+      // If no scripture references found, just process quotes
+      if (parts.length === 0) {
+        return processQuotesSafe(text);
+      }
       
-      currentIndex = scriptureRegex.lastIndex;
+      return parts;
+    } catch (error) {
+      console.error('Error in processParagraphSafe:', error);
+      return text;
     }
-    
-    // Add remaining text (with quote formatting)
-    if (currentIndex < text.length) {
-      const afterText = text.substring(currentIndex);
-      const quoteParts = processQuotesSimple(afterText);
-      parts.push(...quoteParts);
-    }
-    
-    // If no scripture references found, just process quotes
-    if (parts.length === 0) {
-      return processQuotesSimple(text);
-    }
-    
-    return parts;
   };
 
   // ============================================================
-  // PROCESS QUOTES - Italicize quoted scripture (with safety checks)
+  // SAFE PROCESS QUOTES - With comprehensive safety
   // ============================================================
-  const processQuotesSimple = (text: string): (string | JSX.Element)[] => {
-    if (!text) return [];
+  const processQuotesSafe = (text: string): (string | JSX.Element)[] => {
+    if (!text || typeof text !== 'string') return [];
     
-    const parts: (string | JSX.Element)[] = [];
-    let remaining = text;
-    
-    // Handle both straight quotes and smart quotes
-    const quoteChars = ['"', '“', '”'];
-    let quoteStart = -1;
-    
-    // Find the first quote (any type)
-    for (const char of quoteChars) {
-      const pos = remaining.indexOf(char);
-      if (pos !== -1 && (quoteStart === -1 || pos < quoteStart)) {
-        quoteStart = pos;
-      }
-    }
-    
-    while (quoteStart !== -1) {
-      // Add text before the quote
-      if (quoteStart > 0) {
-        parts.push(remaining.substring(0, quoteStart));
-      }
+    try {
+      const parts: (string | JSX.Element)[] = [];
+      let remaining = text;
       
-      // Find the closing quote (matching type)
-      const openingChar = remaining[quoteStart];
-      let closingChar = '"';
-      if (openingChar === '“') closingChar = '”';
-      else if (openingChar === '”') closingChar = '“';
-      else closingChar = '"';
+      // Handle both straight quotes and smart quotes
+      const quoteChars = ['"', '“', '”'];
+      let quoteStart = -1;
       
-      const quoteEnd = remaining.indexOf(closingChar, quoteStart + 1);
-      if (quoteEnd !== -1) {
-        // Extract the quoted text
-        const quotedText = remaining.substring(quoteStart, quoteEnd + 1);
-        parts.push(
-          <em key={`q-${parts.length}`} className="italic text-gray-800 dark:text-gray-200">
-            {quotedText}
-          </em>
-        );
-        remaining = remaining.substring(quoteEnd + 1);
-      } else {
-        // No closing quote, add the rest
-        parts.push(remaining.substring(quoteStart));
-        break;
-      }
-      
-      // Find the next quote
-      quoteStart = -1;
+      // Find the first quote (any type)
       for (const char of quoteChars) {
         const pos = remaining.indexOf(char);
         if (pos !== -1 && (quoteStart === -1 || pos < quoteStart)) {
           quoteStart = pos;
         }
       }
-    }
-    
-    // Add any remaining text
-    if (remaining) {
-      if (remaining.includes('"') || remaining.includes('“') || remaining.includes('”')) {
-        const moreParts = processQuotesSimple(remaining);
-        parts.push(...moreParts);
-      } else {
+      
+      while (quoteStart !== -1) {
+        // Add text before the quote
+        if (quoteStart > 0) {
+          const beforeText = remaining.substring(0, quoteStart);
+          if (beforeText) {
+            // Check if there are more quotes in beforeText
+            parts.push(beforeText);
+          }
+        }
+        
+        // Find the closing quote (matching type)
+        const openingChar = remaining[quoteStart];
+        let closingChar = '"';
+        if (openingChar === '“') closingChar = '”';
+        else if (openingChar === '”') closingChar = '“';
+        else closingChar = '"';
+        
+        const quoteEnd = remaining.indexOf(closingChar, quoteStart + 1);
+        if (quoteEnd !== -1) {
+          // Extract the quoted text
+          const quotedText = remaining.substring(quoteStart, quoteEnd + 1);
+          if (quotedText) {
+            parts.push(
+              <em key={`q-${parts.length}`} className="italic text-gray-800 dark:text-gray-200">
+                {quotedText}
+              </em>
+            );
+          }
+          remaining = remaining.substring(quoteEnd + 1);
+        } else {
+          // No closing quote, add the rest
+          const restText = remaining.substring(quoteStart);
+          if (restText) {
+            parts.push(restText);
+          }
+          break;
+        }
+        
+        // Find the next quote
+        quoteStart = -1;
+        for (const char of quoteChars) {
+          const pos = remaining.indexOf(char);
+          if (pos !== -1 && (quoteStart === -1 || pos < quoteStart)) {
+            quoteStart = pos;
+          }
+        }
+      }
+      
+      // Add any remaining text
+      if (remaining) {
         parts.push(remaining);
       }
+      
+      return parts;
+    } catch (error) {
+      console.error('Error in processQuotesSafe:', error);
+      return [text];
     }
-    
-    return parts;
   };
 
   return (
@@ -270,7 +292,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
             </div>
           )}
 
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{title}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{title || 'Devotion'}</h1>
           
           {/* Tagline */}
           <p className="text-base italic text-blue-600 dark:text-blue-400 mb-4 whitespace-pre-line">
@@ -291,7 +313,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
 
           <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-5 mb-6 border border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">🙏 Prayer</h3>
-            <p className="text-gray-700 dark:text-gray-300 italic leading-relaxed">{prayer}</p>
+            <p className="text-gray-700 dark:text-gray-300 italic leading-relaxed">{prayer || 'Prayer content not available.'}</p>
           </div>
 
           <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
