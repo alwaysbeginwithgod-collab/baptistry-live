@@ -10,6 +10,7 @@ import { useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import NameModal from './components/NameModal';
 import { useTheme } from './context/ThemeContext';
+import TableOfContents from './components/TableOfContents';
 
 type Message = {
   id: string;
@@ -876,6 +877,19 @@ export default function MainContent() {
         onDeleteConversation={deleteConversation}
         onPinConversation={pinConversation}
         currentConversationId={currentConversationId}
+      />
+
+    <TableOfContents 
+      messages={messages} 
+      onScrollToMessage={scrollToMessage} 
+    />
+
+    <div className="flex-1 flex flex-col min-w-0">
+      <Header 
+        onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+        messageCount={messages.length}
+        messages={messages}
+        onLoadMessage={scrollToMessage}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
