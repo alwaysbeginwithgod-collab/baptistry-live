@@ -277,44 +277,40 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
             }
           />
 
-          {/* Separator line and TOC Button - Always show if there are user messages */}
-          {userMessages.length > 0 && (
-            <>
-              <div className="w-8 h-px bg-gray-300 dark:bg-gray-600 my-1"></div>
-              
-              <div 
-                className="relative w-full"
-                onMouseEnter={handleTocMouseEnter}
-                onMouseLeave={handleTocMouseLeave}
-              >
-                <button
-                  onClick={() => setIsTocOpen(!isTocOpen)}
-                  className={`tool-icon-button p-2 rounded-lg transition-colors relative w-full ${
-                    isTocOpen || isTocHovering
-                      ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
-                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                  title="Conversation History"
-                >
-                  <span className="text-lg">📜</span>
-                </button>
-                {/* Tooltip - Matches the other tooltips exactly */}
-                <div className={`
-	          absolute right-full mr-2 top-1/2 -translate-y-1/2
-	          px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg 
-	          whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-  	          transition-all duration-200 pointer-events-none z-50
-                  shadow-lg
-                `}>
-                  Conversation History
-                  <div className={`
-                    absolute -right-1 top-1/2 -translate-y-1/2
-                    w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45
-                  `}></div>
-                </div>
-              </div>
-            </>
-          )}
+{/* Separator line and TOC Button */}
+{userMessages.length > 0 && (
+  <>
+    <div className="w-8 h-px bg-gray-300 dark:bg-gray-600 my-1"></div>
+    
+    <div className="relative w-full group">
+      <button
+        onClick={() => setIsTocOpen(!isTocOpen)}
+        className={`tool-icon-button p-2 rounded-lg transition-colors relative w-full ${
+          isTocOpen
+            ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
+            : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+        }`}
+        title="Conversation History"
+      >
+        <span className="text-lg">📜</span>
+      </button>
+      {/* Tooltip - Hover only, no panel opening */}
+      <div className={`
+        absolute right-full mr-2 top-1/2 -translate-y-1/2
+        px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg 
+        whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+        transition-all duration-200 pointer-events-none z-50
+        shadow-lg
+      `}>
+        Conversation History
+        <div className={`
+          absolute -right-1 top-1/2 -translate-y-1/2
+          w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45
+        `}></div>
+      </div>
+    </div>
+  </>
+)}
         </div>
       </div>
 
