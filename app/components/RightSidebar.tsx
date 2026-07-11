@@ -307,9 +307,9 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
             <div className="p-4">
               <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
                 <h3 className="font-semibold text-gray-800 dark:text-white">
-                  {activeTool === 'bible' && '🔍 KJV Bible Lookup'}
-                  {activeTool === 'dictionary' && '📙 Webster\'s 1828 Dictionary'}
-                  {activeTool === 'reference' && '🏛️ Baptist Reference Library'}
+                  {activeTool === 'bible' && '🕮 KJV Bible Lookup'}
+                  {activeTool === 'dictionary' && '🔍 Webster\'s 1828 Dictionary'}
+                  {activeTool === 'reference' && '📚 Baptist Reference Library'}
                 </h3>
                 <button onClick={closeTool} className="text-gray-400 hover:text-gray-600">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
