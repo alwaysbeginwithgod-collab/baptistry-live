@@ -76,6 +76,11 @@ export default function MainContent() {
   const stopRequested = useRef(false);
   
   // ============================================================
+  // DIFY CONVERSATION ID - For remembering user across sessions
+  // ============================================================
+  const [difyConversationId, setDifyConversationId] = useState<string | null>(null);
+  
+  // ============================================================
   // DYNAMIC SUGGESTIONS STATE - Staggered updates with slide-up
   // ============================================================
   const [currentSuggestions, setCurrentSuggestions] = useState<string[]>([]);
@@ -229,6 +234,19 @@ export default function MainContent() {
   }, [userId, isLoaded]);
 
   // ============================================================
+  // LOAD DIFY CONVERSATION ID FROM LOCALSTORAGE
+  // ============================================================
+  useEffect(() => {
+    if (userId) {
+      const savedConversationId = localStorage.getItem(`dify_conversation_${userId}`);
+      if (savedConversationId) {
+        console.log('🆔 Loaded Dify conversation ID from localStorage:', savedConversationId);
+        setDifyConversationId(savedConversationId);
+      }
+    }
+  }, [userId]);
+
+  // ============================================================
   // SAVE USER NAME
   // ============================================================
   const handleNameSave = (name: string) => {
@@ -332,6 +350,12 @@ export default function MainContent() {
   const startNewChat = () => {
     if (messages.length > 0 && currentConversationId) {
       saveCurrentConversation();
+    }
+    
+    // ✅ Reset Dify conversation ID for new chat
+    setDifyConversationId(null);
+    if (userId) {
+      localStorage.removeItem(`dify_conversation_${userId}`);
     }
     
     const newConversation: Conversation = {
@@ -600,10 +624,21 @@ export default function MainContent() {
             message: newContent,
             history: newMessages,
             userName: userName || 'friend',
+            conversationId: difyConversationId, // ✅ Pass Dify conversation ID
           }),
         });
 
         const data = await response.json();
+        
+        // ✅ Save the new conversation ID from Dify
+        if (data.conversation_id) {
+          console.log('🆔 New Dify conversation ID:', data.conversation_id);
+          setDifyConversationId(data.conversation_id);
+          if (userId) {
+            localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+          }
+        }
+        
         let fullResponse = data.response || 'I apologize, but I encountered an error.';
         fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
@@ -673,11 +708,22 @@ export default function MainContent() {
         body: JSON.stringify({ 
           message: userMessageContent, 
           history: newMessages,
-          userName: userName || 'friend'
+          userName: userName || 'friend',
+          conversationId: difyConversationId, // ✅ Pass Dify conversation ID
         }),
       });
 
       const data = await response.json();
+      
+      // ✅ Save the new conversation ID from Dify
+      if (data.conversation_id) {
+        console.log('🆔 New Dify conversation ID:', data.conversation_id);
+        setDifyConversationId(data.conversation_id);
+        if (userId) {
+          localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+        }
+      }
+      
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
@@ -763,11 +809,22 @@ export default function MainContent() {
         body: JSON.stringify({ 
           message: sentInput, 
           history: messages,
-          userName: userName || 'friend'
+          userName: userName || 'friend',
+          conversationId: difyConversationId, // ✅ Pass Dify conversation ID
         }),
       });
 
       const data = await response.json();
+      
+      // ✅ Save the new conversation ID from Dify
+      if (data.conversation_id) {
+        console.log('🆔 New Dify conversation ID:', data.conversation_id);
+        setDifyConversationId(data.conversation_id);
+        if (userId) {
+          localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+        }
+      }
+      
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
@@ -1063,10 +1120,10 @@ export default function MainContent() {
         </div>
       </div>
       
-<RightSidebar 
-  messages={messages} 
-  onScrollToMessage={scrollToMessage} 
-/>
+      <RightSidebar 
+        messages={messages} 
+        onScrollToMessage={scrollToMessage} 
+      />
       
       <NameModal 
         isOpen={showNameModal} 

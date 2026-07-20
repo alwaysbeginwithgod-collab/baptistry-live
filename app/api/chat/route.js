@@ -45,7 +45,7 @@ Salvation is not merely a decision or a prayer—it is a supernatural transforma
     scripture: [
       "John 3:16 (KJV): 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.'",
       "Ephesians 2:8-9 (KJV): 'For by grace are ye saved through faith; and that not of yourselves: it is the gift of God: Not of works, lest any man should boast.'",
-      "Romans 10:9-10 (KJV): 'That if thou shalt confess with thy mouth the Lord Jesus, and shalt believe in thine heart that God hath raised him from the dead, thou shalt be saved.'"
+      "Romans 10:9-10 (KJV): 'That if thou shalt confess with thy mouth the Lord Jesus, and shalt believe in thy heart that God hath raised him from the dead, thou shalt be saved.'"
     ],
     resources: [
       { name: "Way of Life Literature", url: "https://www.wayoflife.org" },
@@ -190,7 +190,8 @@ function buildDoctrinalResponse(doctrine, userQuery) {
 
 export async function POST(request) {
   try {
-    const { message, history, userName } = await request.json();
+    // ✅ ADDED: Extract conversationId from request
+    const { message, history, userName, conversationId } = await request.json();
 
     // ============================================================
     // STEP 0: Check for dictionary definition request
@@ -226,32 +227,42 @@ export async function POST(request) {
     }
 
     // ============================================================
-    // STEP 1: Call Dify with STREAMING mode, reduced history, and user name
+    // STEP 1: Call Dify with STREAMING mode, reduced history, user name, and conversation ID
     // ============================================================
     console.log('STEP 1: Trying Dify Knowledge Base for:', message);
+    console.log('🆔 Conversation ID:', conversationId || 'New conversation');
+    console.log('👤 User Name:', userName || 'friend');
 
     // Only send last 5 messages for faster response
     const recentHistory = getRecentHistory(history, 5);
 
     try {
+      // ✅ MODIFIED: Build request body with conversation_id
+      const requestBody = {
+        inputs: {
+          user_name: userName || 'friend',
+        },
+        query: message,
+        response_mode: 'streaming',
+        user: 'baptistry_user',
+        conversation_history: recentHistory.map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: msg.content
+        })),
+      };
+
+      // ✅ ADDED: Only include conversation_id if it exists (to continue conversation)
+      if (conversationId) {
+        requestBody.conversation_id = conversationId;
+      }
+
       const response = await fetch(DIFY_API_URL, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${DIFY_API_KEY}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          inputs: {
-            user_name: userName || 'friend', // ← Add user name here
-          },
-          query: message,
-          response_mode: 'streaming',
-          user: 'baptistry_user',
-          conversation_history: recentHistory.map(msg => ({
-            role: msg.role === 'user' ? 'user' : 'assistant',
-            content: msg.content
-          })),
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       // Handle streaming response
@@ -265,6 +276,7 @@ export async function POST(request) {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let fullResponse = '';
+      let newConversationId = null; // ✅ ADDED: Store new conversation ID
 
       while (true) {
         const { done, value } = await reader.read();
@@ -280,6 +292,10 @@ export async function POST(request) {
               if (data.event === 'message' && data.answer) {
                 fullResponse += data.answer;
               }
+              // ✅ ADDED: Capture the conversation_id from Dify
+              if (data.event === 'message_end' && data.conversation_id) {
+                newConversationId = data.conversation_id;
+              }
               if (data.event === 'message_end') {
                 break;
               }
@@ -292,9 +308,12 @@ export async function POST(request) {
       
       if (fullResponse && fullResponse.length > 50) {
         console.log('✅ Dify streaming response received, length:', fullResponse.length);
+        console.log('🆔 New Conversation ID:', newConversationId);
+        // ✅ MODIFIED: Return conversation_id to frontend
         return NextResponse.json({ 
           response: fullResponse, 
-          source: 'dify-knowledge-base' 
+          source: 'dify-knowledge-base',
+          conversation_id: newConversationId // ✅ Return this to frontend
         });
       } else {
         console.log('⚠️ No substantive response from Dify, falling back to doctrinal library');
