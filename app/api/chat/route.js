@@ -219,25 +219,6 @@ export async function POST(request) {
       }
     }
 
-    // ============================================================
-    // STEP 0.5: Check cache for common questions
-    // ============================================================
-    const cacheKey = message.toLowerCase().trim();
-    if (responseCache.has(cacheKey)) {
-      const cached = responseCache.get(cacheKey);
-      if (Date.now() - cached.timestamp < CACHE_TTL) {
-        console.log('⚡ Cache hit for:', message);
-        // ✅ Return cached response with conversation_id for continuity
-        return NextResponse.json({ 
-          response: cached.response, 
-          source: 'cache',
-          conversation_id: conversationId // Pass through the conversation ID
-        });
-      } else {
-        responseCache.delete(cacheKey);
-      }
-    }
-
     const DIFY_API_KEY = process.env.NEXT_PUBLIC_APP_KEY;
     const DIFY_API_URL = 'https://api.dify.ai/v1/chat-messages';
 
@@ -250,7 +231,7 @@ export async function POST(request) {
     }
 
     // ============================================================
-    // STEP 1: Call Dify with STREAMING mode ALWAYS (for typing effect)
+    // STEP 1: Call Dify with STREAMING mode
     // ============================================================
     console.log('STEP 1: Trying Dify Knowledge Base for:', message);
     console.log('🆔 Conversation ID:', conversationId || 'New conversation');
@@ -265,7 +246,7 @@ export async function POST(request) {
           user_name: userName || 'friend',
         },
         query: message,
-        response_mode: 'streaming', // ✅ ALWAYS streaming for typing effect
+        response_mode: 'streaming',
         user: 'baptistry_user',
         conversation_history: recentHistory.map(msg => ({
           role: msg.role === 'user' ? 'user' : 'assistant',
@@ -293,88 +274,111 @@ export async function POST(request) {
         });
       }
 
-      // ✅ Process streaming response
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = '';
-      let newConversationId = null;
+      // ============================================================
+      // ✅ REAL STREAMING: Pipe Dify's stream directly to the client
+      // ============================================================
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let fullResponse = '';
+          let newConversationId = null;
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.substring(6));
-              if (data.event === 'message' && data.answer) {
-                fullResponse += data.answer;
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              
+              const chunk = decoder.decode(value);
+              const lines = chunk.split('\n');
+              
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  try {
+                    const data = JSON.parse(line.substring(6));
+                    
+                    // Send each chunk to the client
+                    if (data.event === 'message' && data.answer) {
+                      fullResponse += data.answer;
+                      // ✅ Send the incremental response to client
+                      controller.enqueue(encoder.encode(
+                        JSON.stringify({ 
+                          event: 'message', 
+                          answer: fullResponse 
+                        }) + '\n'
+                      ));
+                    }
+                    
+                    if (data.event === 'message_end' && data.conversation_id) {
+                      newConversationId = data.conversation_id;
+                      // ✅ Send the conversation_id to client
+                      controller.enqueue(encoder.encode(
+                        JSON.stringify({ 
+                          event: 'message_end', 
+                          conversation_id: newConversationId 
+                        }) + '\n'
+                      ));
+                    }
+                    
+                    if (data.event === 'message_end') {
+                      // ✅ Cache short responses
+                      if (fullResponse.length < 500) {
+                        const cacheKey = message.toLowerCase().trim();
+                        responseCache.set(cacheKey, {
+                          response: fullResponse,
+                          timestamp: Date.now()
+                        });
+                      }
+                      break;
+                    }
+                  } catch (e) {
+                    // Ignore parse errors
+                  }
+                }
               }
-              if (data.event === 'message_end' && data.conversation_id) {
-                newConversationId = data.conversation_id;
-              }
-              if (data.event === 'message_end') {
-                break;
-              }
-            } catch (e) {
-              // Ignore parse errors
             }
+          } catch (error) {
+            console.error('Stream error:', error);
+          } finally {
+            controller.close();
+            reader.releaseLock();
           }
         }
-      }
-      
-      if (fullResponse && fullResponse.length > 50) {
-        console.log('✅ Dify streaming response received, length:', fullResponse.length);
-        
-        // Cache short responses for speed
-        if (fullResponse.length < 500) {
-          responseCache.set(cacheKey, {
-            response: fullResponse,
-            timestamp: Date.now()
-          });
-        }
-        
-        return NextResponse.json({ 
-          response: fullResponse, 
-          source: 'dify-knowledge-base',
-          conversation_id: newConversationId
-        });
-      } else {
-        console.log('⚠️ No substantive response from Dify, falling back to doctrinal library');
-      }
+      });
+
+      // ✅ Return the stream as the response
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Transfer-Encoding': 'chunked',
+        },
+      });
+
     } catch (error) {
       console.error('Dify API error:', error);
     }
 
     // ============================================================
-    // STEP 2: Fallback to Doctrinal Library
+    // STEP 2: Fallback to Doctrinal Library (non-streaming)
     // ============================================================
     console.log('STEP 2: Using doctrinal library fallback for:', message);
 
+    let fallbackResponse = '';
     if (isAskingForStatementOfFaith(message)) {
-      return NextResponse.json({ 
-        response: "Here is the Short Statement of Faith...", 
-        source: 'dify-fallback' 
-      });
-    }
-
-    const detectedDoctrine = detectDoctrine(message);
-    
-    if (detectedDoctrine) {
-      console.log('Using doctrinal library for:', detectedDoctrine.key);
-      const doctrinalResponse = buildDoctrinalResponse(detectedDoctrine.doctrine, message);
-      return NextResponse.json({ 
-        response: doctrinalResponse,
-        source: 'doctrinal-library-fallback'
-      });
+      fallbackResponse = "Here is the Short Statement of Faith...";
+    } else {
+      const detectedDoctrine = detectDoctrine(message);
+      if (detectedDoctrine) {
+        fallbackResponse = buildDoctrinalResponse(detectedDoctrine.doctrine, message);
+      } else {
+        fallbackResponse = "I could not find an answer in my knowledge base. Please try asking a different question or contact support for assistance.";
+      }
     }
 
     return NextResponse.json({ 
-      response: "I could not find an answer in my knowledge base. Please try asking a different question or contact support for assistance.",
-      source: 'dify-only'
+      response: fallbackResponse,
+      source: 'doctrinal-library-fallback'
     });
 
   } catch (error) {
