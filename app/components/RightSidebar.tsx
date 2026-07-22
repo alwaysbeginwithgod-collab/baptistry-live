@@ -130,8 +130,28 @@ function expandBookName(input: string): string {
     return `${fullBook} ${rest}`;
   }
   
-  // If not a shortcode, return original
   return input;
+}
+
+// ============================================================
+// FUNCTION: Format Bible reference (adds colon if missing)
+// ============================================================
+function formatBibleReference(input: string): string {
+  // First, expand shortcodes (Gen → Genesis, etc.)
+  const expanded = expandBookName(input);
+  
+  // Now handle the format of chapter:verse
+  // Pattern: "Book Chapter Verse" → "Book Chapter:Verse"
+  const match = expanded.match(/^(.+?)\s+(\d+)\s+(\d+)$/);
+  if (match) {
+    const book = match[1];
+    const chapter = match[2];
+    const verse = match[3];
+    return `${book} ${chapter}:${verse}`;
+  }
+  
+  // Already has colon or is just chapter
+  return expanded;
 }
 
 export default function RightSidebar({ messages = [], onScrollToMessage }: RightSidebarProps) {
@@ -157,16 +177,18 @@ const searchBible = async () => {
   setBibleResult('Searching...');
 
   try {
-    // ✅ Convert shortcode to full book name
-    const originalQuery = bibleQuery.trim();
-    const expandedQuery = expandBookName(originalQuery);
+    // ✅ Step 1: Expand shortcode (Gen → Genesis)
+    const expandedQuery = expandBookName(bibleQuery.trim());
     
-    if (originalQuery !== expandedQuery) {
-      console.log('📖 Auto-expanded:', originalQuery, '→', expandedQuery);
+    // ✅ Step 2: Format reference (add colon if missing: "John 1 1" → "John 1:1")
+    const formattedQuery = formatBibleReference(expandedQuery);
+    
+    if (bibleQuery.trim() !== formattedQuery) {
+      console.log('📖 Converted:', bibleQuery.trim(), '→', formattedQuery);
     }
     
-    const formattedQuery = encodeURIComponent(expandedQuery.replace(/ /g, '+'));
-    const apiUrl = `https://dailybible.ca/api/${formattedQuery}?translation=kjv`;
+    const encodedQuery = encodeURIComponent(formattedQuery.replace(/ /g, '+'));
+    const apiUrl = `https://dailybible.ca/api/${encodedQuery}?translation=kjv`;
 
     const response = await fetch(apiUrl);
 
@@ -178,24 +200,21 @@ const searchBible = async () => {
           return `v${v.verse} - ${v.text}`;
         }).join('\n');
 
-        // Show the expanded reference in the result
-        const displayReference = data.reference || expandedQuery;
-        setBibleResult(`${displayReference} (KJV)\n\n${formattedVerses}`);
+        setBibleResult(`${data.reference || formattedQuery} (KJV)\n\n${formattedVerses}`);
       } else if (data.text) {
-        const displayReference = data.reference || expandedQuery;
-        setBibleResult(`${displayReference} (KJV)\n\n"${data.text}"`);
+        setBibleResult(`${data.reference || formattedQuery} (KJV)\n\n"${data.text}"`);
       } else {
-        setBibleResult(`${expandedQuery} - Not found.`);
+        setBibleResult(`${formattedQuery} - Not found.`);
       }
     } else {
-      setBibleResult(`${expandedQuery} - Not found.`);
+      setBibleResult(`${formattedQuery} - Not found.`);
     }
   } catch (error) {
     console.error('Bible API error:', error);
     setBibleResult(`Unable to fetch at this time.`);
   }
   setIsLoading(false);
-};;
+};
 
   const searchDictionary = async () => {
     if (!dictionaryWord.trim()) return;
