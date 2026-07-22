@@ -628,40 +628,80 @@ const editMessage = (messageId: string, newContent: string) => {
         }),
       });
 
-      const data = await response.json();
-      
-      if (data.conversation_id) {
-        console.log('🆔 New Dify conversation ID:', data.conversation_id);
-        setDifyConversationId(data.conversation_id);
-        if (userId) {
-          localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+      // ✅ Handle streaming response
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = '';
+      let accumulatedResponse = '';
+      let newConversationId = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.trim()) {
+            try {
+              const data = JSON.parse(line);
+              if (data.event === 'message' && data.answer) {
+                fullResponse = data.answer;
+                accumulatedResponse = fullResponse;
+                
+                // ✅ Same chunking and delay as before
+                const chunkSize = 5;
+                if (fullResponse.length > streamingText.length) {
+                  const newText = fullResponse;
+                  const chunks = [];
+                  for (let i = 0; i < newText.length; i += chunkSize) {
+                    chunks.push(newText.substring(0, i + chunkSize));
+                  }
+                  
+                  for (let i = 0; i < chunks.length; i++) {
+                    if (stopRequested.current) {
+                      setIsGenerating(false);
+                      setStreamingText('');
+                      return;
+                    }
+                    setStreamingText(chunks[i]);
+                    await new Promise(resolve => setTimeout(resolve, 3));
+                  }
+                }
+              }
+              if (data.event === 'message_end' && data.conversation_id) {
+                newConversationId = data.conversation_id;
+              }
+              if (data.event === 'message_end') {
+                const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+                setStreamingText(cleanResponse);
+                
+                setTimeout(() => {
+                  const assistantMessage: Message = {
+                    id: (Date.now() + 1).toString(),
+                    role: 'assistant',
+                    content: cleanResponse,
+                    timestamp: new Date(),
+                  };
+                  setMessages(prev => [...prev, assistantMessage]);
+                  setStreamingText('');
+                  setIsGenerating(false);
+                }, 100);
+                
+                if (newConversationId) {
+                  setDifyConversationId(newConversationId);
+                  if (userId) {
+                    localStorage.setItem(`dify_conversation_${userId}`, newConversationId);
+                  }
+                }
+              }
+            } catch (e) {
+              // Ignore parse errors
+            }
+          }
         }
       }
-      
-      let fullResponse = data.response || 'I apologize, but I encountered an error.';
-      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-      // ✅ OPTIMIZED: Larger chunks, no delay
-      const chunkSize = 25;
-      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-        if (stopRequested.current) {
-          setIsGenerating(false);
-          setStreamingText('');
-          return;
-        }
-        setStreamingText(fullResponse.substring(0, i));
-        // ✅ REMOVED: await new Promise(resolve => setTimeout(resolve, 3));
-      }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: fullResponse,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-      setStreamingText('');
-      setIsGenerating(false);
 
     } catch (error) {
       console.error('Error:', error);
@@ -713,40 +753,81 @@ const regenerateMessage = async (assistantMessageId: string) => {
       }),
     });
 
-    const data = await response.json();
-    
-    if (data.conversation_id) {
-      console.log('🆔 New Dify conversation ID:', data.conversation_id);
-      setDifyConversationId(data.conversation_id);
-      if (userId) {
-        localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+    // ✅ Handle streaming response
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullResponse = '';
+    let accumulatedResponse = '';
+    let newConversationId = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n');
+
+      for (const line of lines) {
+        if (line.trim()) {
+          try {
+            const data = JSON.parse(line);
+            if (data.event === 'message' && data.answer) {
+              fullResponse = data.answer;
+              accumulatedResponse = fullResponse;
+              
+              // ✅ Same chunking and delay as before
+              const chunkSize = 5;
+              if (fullResponse.length > streamingText.length) {
+                const newText = fullResponse;
+                const chunks = [];
+                for (let i = 0; i < newText.length; i += chunkSize) {
+                  chunks.push(newText.substring(0, i + chunkSize));
+                }
+                
+                for (let i = 0; i < chunks.length; i++) {
+                  if (stopRequested.current) {
+                    setIsGenerating(false);
+                    setStreamingText('');
+                    return;
+                  }
+                  setStreamingText(chunks[i]);
+                  await new Promise(resolve => setTimeout(resolve, 3));
+                }
+              }
+            }
+            if (data.event === 'message_end' && data.conversation_id) {
+              newConversationId = data.conversation_id;
+            }
+            if (data.event === 'message_end') {
+              const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+              setStreamingText(cleanResponse);
+              
+              setTimeout(() => {
+                const newAssistantMessage: Message = {
+                  id: (Date.now() + 1).toString(),
+                  role: 'assistant',
+                  content: cleanResponse,
+                  timestamp: new Date(),
+                };
+                setMessages(prev => [...prev, newAssistantMessage]);
+                setStreamingText('');
+                setIsGenerating(false);
+              }, 100);
+              
+              if (newConversationId) {
+                setDifyConversationId(newConversationId);
+                if (userId) {
+                  localStorage.setItem(`dify_conversation_${userId}`, newConversationId);
+                }
+              }
+            }
+          } catch (e) {
+            // Ignore parse errors
+          }
+        }
       }
     }
-    
-    let fullResponse = data.response || 'I apologize, but I encountered an error.';
-    fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-    // ✅ OPTIMIZED: Larger chunks, no delay
-    const chunkSize = 25;
-    for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-      if (stopRequested.current) {
-        setIsGenerating(false);
-        setStreamingText('');
-        return;
-      }
-      setStreamingText(fullResponse.substring(0, i));
-      // ✅ REMOVED: await new Promise(resolve => setTimeout(resolve, 3));
-    }
-
-    const newAssistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: fullResponse,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, newAssistantMessage]);
-    setStreamingText('');
-    setIsGenerating(false);
   } catch (error) {
     console.error('Regeneration error:', error);
     const errorMessage: Message = {
@@ -759,7 +840,7 @@ const regenerateMessage = async (assistantMessageId: string) => {
     setIsGenerating(false);
     setStreamingText('');
   }
-};;
+};
 
 const sendMessage = async () => {
   if (!input.trim()) return;
@@ -814,40 +895,93 @@ const sendMessage = async () => {
       }),
     });
 
-    const data = await response.json();
-    
-    if (data.conversation_id) {
-      console.log('🆔 New Dify conversation ID:', data.conversation_id);
-      setDifyConversationId(data.conversation_id);
-      if (userId) {
-        localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+    // ✅ Handle streaming response
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullResponse = '';
+    let accumulatedResponse = '';
+    let newConversationId = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n');
+
+      for (const line of lines) {
+        if (line.trim()) {
+          try {
+            const data = JSON.parse(line);
+            if (data.event === 'message' && data.answer) {
+              fullResponse = data.answer;
+              // ✅ Continue accumulating the full response
+              accumulatedResponse = fullResponse;
+              
+              // ✅ Apply chunking and delay for typing animation (matching previous speed)
+              const chunkSize = 5; // Same as before
+              let currentIndex = streamingText.length;
+              
+              // Only update if we have new content
+              if (fullResponse.length > streamingText.length) {
+                // ✅ Use the same chunking logic as before
+                const newText = fullResponse;
+                const chunks = [];
+                for (let i = 0; i < newText.length; i += chunkSize) {
+                  chunks.push(newText.substring(0, i + chunkSize));
+                }
+                
+                // ✅ Animate through chunks with the same 3ms delay
+                for (let i = 0; i < chunks.length; i++) {
+                  if (stopRequested.current) {
+                    setIsGenerating(false);
+                    setStreamingText('');
+                    return;
+                  }
+                  setStreamingText(chunks[i]);
+                  await new Promise(resolve => setTimeout(resolve, 3)); // Same 3ms delay
+                }
+              }
+            }
+            if (data.event === 'message_end' && data.conversation_id) {
+              newConversationId = data.conversation_id;
+            }
+            if (data.event === 'message_end') {
+              // ✅ Final message received - ensure full response is set
+              const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+              
+              // ✅ Make sure the final text is set
+              setStreamingText(cleanResponse);
+              
+              // ✅ Add a small delay before finalizing to show the complete message
+              setTimeout(() => {
+                const assistantMessage: Message = {
+                  id: (Date.now() + 1).toString(),
+                  role: 'assistant',
+                  content: cleanResponse,
+                  timestamp: new Date(),
+                };
+                setMessages(prev => [...prev, assistantMessage]);
+                setStreamingText('');
+                setIsGenerating(false);
+              }, 100);
+              
+              // ✅ Save conversation ID
+              if (newConversationId) {
+                console.log('🆔 New Dify conversation ID:', newConversationId);
+                setDifyConversationId(newConversationId);
+                if (userId) {
+                  localStorage.setItem(`dify_conversation_${userId}`, newConversationId);
+                }
+              }
+            }
+          } catch (e) {
+            // Ignore parse errors
+            console.log('Parse error:', e);
+          }
+        }
       }
     }
-    
-    let fullResponse = data.response || 'I apologize, but I encountered an error.';
-    fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-    // ✅ OPTIMIZED: Larger chunks, no delay
-    const chunkSize = 25; // Increased from 5
-    for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-      if (stopRequested.current) {
-        setIsGenerating(false);
-        setStreamingText('');
-        return;
-      }
-      setStreamingText(fullResponse.substring(0, i));
-      // ✅ REMOVED: await new Promise(resolve => setTimeout(resolve, 3));
-    }
-
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: fullResponse,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, assistantMessage]);
-    setStreamingText('');
-    setIsGenerating(false);
 
   } catch (error) {
     console.error('Error:', error);
