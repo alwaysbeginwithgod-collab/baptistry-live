@@ -9,6 +9,131 @@ interface RightSidebarProps {
   onScrollToMessage?: (messageId: string) => void;
 }
 
+// ============================================================
+// BIBLE BOOK SHORTCODES
+// ============================================================
+const bookShortcodes: { [key: string]: string } = {
+  // Old Testament
+  'gen': 'Genesis',
+  'exo': 'Exodus',
+  'lev': 'Leviticus',
+  'num': 'Numbers',
+  'deu': 'Deuteronomy',
+  'jos': 'Joshua',
+  'josh': 'Joshua',
+  'jgs': 'Judges',
+  'judg': 'Judges',
+  'rut': 'Ruth',
+  'rth': 'Ruth',
+  '1sa': '1 Samuel',
+  '1sam': '1 Samuel',
+  '2sa': '2 Samuel',
+  '2sam': '2 Samuel',
+  '1ki': '1 Kings',
+  '1kgs': '1 Kings',
+  '2ki': '2 Kings',
+  '2kgs': '2 Kings',
+  '1ch': '1 Chronicles',
+  '1chr': '1 Chronicles',
+  '2ch': '2 Chronicles',
+  '2chr': '2 Chronicles',
+  'ezr': 'Ezra',
+  'neh': 'Nehemiah',
+  'est': 'Esther',
+  'job': 'Job',
+  'psa': 'Psalms',
+  'ps': 'Psalms',
+  'pss': 'Psalms',
+  'pro': 'Proverbs',
+  'prov': 'Proverbs',
+  'ecc': 'Ecclesiastes',
+  'eccl': 'Ecclesiastes',
+  'sol': 'Song of Solomon',
+  'song': 'Song of Solomon',
+  'isa': 'Isaiah',
+  'jer': 'Jeremiah',
+  'lam': 'Lamentations',
+  'ezk': 'Ezekiel',
+  'dan': 'Daniel',
+  'hos': 'Hosea',
+  'joe': 'Joel',
+  'amo': 'Amos',
+  'oba': 'Obadiah',
+  'jon': 'Jonah',
+  'mic': 'Micah',
+  'nah': 'Nahum',
+  'hab': 'Habakkuk',
+  'zep': 'Zephaniah',
+  'hag': 'Haggai',
+  'zac': 'Zechariah',
+  'mal': 'Malachi',
+  
+  // New Testament
+  'mat': 'Matthew',
+  'matt': 'Matthew',
+  'mar': 'Mark',
+  'mrk': 'Mark',
+  'luk': 'Luke',
+  'joh': 'John',
+  'jn': 'John',
+  'acts': 'Acts',
+  'rom': 'Romans',
+  '1co': '1 Corinthians',
+  '1cor': '1 Corinthians',
+  '2co': '2 Corinthians',
+  '2cor': '2 Corinthians',
+  'gal': 'Galatians',
+  'eph': 'Ephesians',
+  'phi': 'Philippians',
+  'phil': 'Philippians',
+  'col': 'Colossians',
+  '1th': '1 Thessalonians',
+  '1thess': '1 Thessalonians',
+  '2th': '2 Thessalonians',
+  '2thess': '2 Thessalonians',
+  '1ti': '1 Timothy',
+  '1tim': '1 Timothy',
+  '2ti': '2 Timothy',
+  '2tim': '2 Timothy',
+  'tit': 'Titus',
+  'phm': 'Philemon',
+  'heb': 'Hebrews',
+  'jam': 'James',
+  '1pe': '1 Peter',
+  '1pet': '1 Peter',
+  '2pe': '2 Peter',
+  '2pet': '2 Peter',
+  '1jo': '1 John',
+  '1jn': '1 John',
+  '2jo': '2 John',
+  '2jn': '2 John',
+  '3jo': '3 John',
+  '3jn': '3 John',
+  'jud': 'Jude',
+  'rev': 'Revelation',
+};
+
+// ============================================================
+// FUNCTION: Convert shortcode to full book name
+// ============================================================
+function expandBookName(input: string): string {
+  // Handle formats like "Gen 3:15" or "Genesis 3:15"
+  const match = input.match(/^([a-zA-Z0-9]+)\s+(.+)$/);
+  if (!match) return input;
+  
+  const bookPart = match[1].toLowerCase();
+  const rest = match[2];
+  
+  // Check if it's a shortcode
+  const fullBook = bookShortcodes[bookPart];
+  if (fullBook) {
+    return `${fullBook} ${rest}`;
+  }
+  
+  // If not a shortcode, return original
+  return input;
+}
+
 export default function RightSidebar({ messages = [], onScrollToMessage }: RightSidebarProps) {
   const [activeTool, setActiveTool] = useState<Tool>(null);
   const [bibleQuery, setBibleQuery] = useState('');
@@ -26,40 +151,51 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
   // Filter only user messages for TOC
   const userMessages = messages.filter(m => m.role === 'user');
 
-  const searchBible = async () => {
-    if (!bibleQuery.trim()) return;
-    setIsLoading(true);
-    setBibleResult('Searching...');
+const searchBible = async () => {
+  if (!bibleQuery.trim()) return;
+  setIsLoading(true);
+  setBibleResult('Searching...');
 
-    try {
-      const formattedQuery = encodeURIComponent(bibleQuery.trim().replace(/ /g, '+'));
-      const apiUrl = `https://dailybible.ca/api/${formattedQuery}?translation=kjv`;
-
-      const response = await fetch(apiUrl);
-
-      if (response.ok) {
-        const data = await response.json();
-
-        if (data.verses && data.verses.length > 0) {
-          const formattedVerses = data.verses.map((v: any) => {
-            return `v${v.verse} - ${v.text}`;
-          }).join('\n');
-
-          setBibleResult(`${data.reference} (KJV)\n\n${formattedVerses}`);
-        } else if (data.text) {
-          setBibleResult(`${data.reference || bibleQuery} (KJV)\n\n"${data.text}"`);
-        } else {
-          setBibleResult(`${bibleQuery} - Not found.`);
-        }
-      } else {
-        setBibleResult(`${bibleQuery} - Not found.`);
-      }
-    } catch (error) {
-      console.error('Bible API error:', error);
-      setBibleResult(`Unable to fetch at this time.`);
+  try {
+    // ✅ Convert shortcode to full book name
+    const originalQuery = bibleQuery.trim();
+    const expandedQuery = expandBookName(originalQuery);
+    
+    if (originalQuery !== expandedQuery) {
+      console.log('📖 Auto-expanded:', originalQuery, '→', expandedQuery);
     }
-    setIsLoading(false);
-  };
+    
+    const formattedQuery = encodeURIComponent(expandedQuery.replace(/ /g, '+'));
+    const apiUrl = `https://dailybible.ca/api/${formattedQuery}?translation=kjv`;
+
+    const response = await fetch(apiUrl);
+
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data.verses && data.verses.length > 0) {
+        const formattedVerses = data.verses.map((v: any) => {
+          return `v${v.verse} - ${v.text}`;
+        }).join('\n');
+
+        // Show the expanded reference in the result
+        const displayReference = data.reference || expandedQuery;
+        setBibleResult(`${displayReference} (KJV)\n\n${formattedVerses}`);
+      } else if (data.text) {
+        const displayReference = data.reference || expandedQuery;
+        setBibleResult(`${displayReference} (KJV)\n\n"${data.text}"`);
+      } else {
+        setBibleResult(`${expandedQuery} - Not found.`);
+      }
+    } else {
+      setBibleResult(`${expandedQuery} - Not found.`);
+    }
+  } catch (error) {
+    console.error('Bible API error:', error);
+    setBibleResult(`Unable to fetch at this time.`);
+  }
+  setIsLoading(false);
+};;
 
   const searchDictionary = async () => {
     if (!dictionaryWord.trim()) return;
@@ -326,7 +462,7 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
                       value={bibleQuery}
                       onChange={(e) => setBibleQuery(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && searchBible()}
-                      placeholder="e.g., John 3:16, John 1"
+                      placeholder="e.g., Gen 3:15, John 1, Ps 23"
                       className="flex-1 px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <button
