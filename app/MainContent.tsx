@@ -30,21 +30,21 @@ type Conversation = {
 // Expanded list of dynamic suggestions
 const SUGGESTIONS = [
   { text: "What do you believe about salvation?" },
-  { text: "Give me a devotion about grace" },
-  { text: "Create a preaching about sin" },
+  { text: "Create a devotion message about grace" },
+  { text: "Create a preaching message about sin" },
   { text: "Explain John 3:16" },
   { text: "Does the Bible forbid us to pray to Mary?" },
   { text: "What is the unpardonable sin?" },
   { text: "Who was created first, Satan or Adam?" },
   { text: "What is the fruit of the Spirit?" },
-  { text: "Give me a devotion about forgiveness" },
+  { text: "Give me the fundamentals of faith" },
   { text: "Does the Bible forbid us to drink alcohol?" },
   { text: "Explain the book of Revelation" },
   { text: "What is the Gospel according to Paul?" },
-  { text: "Give me a preaching about love" },
+  { text: "When will Eternal Life be given?" },
   { text: "What does the Bible say about suffering?" },
   { text: "Explain the Trinity" },
-  { text: "Give me a devotion about hope" },
+  { text: "What do you mean by being Born Again?" },
   { text: "What is the meaning of baptism?" },
   { text: "Explain the Lord's Prayer" },
   { text: "What is the 'Mark of the Beast' in Revelation?" },
@@ -995,13 +995,13 @@ const sendMessage = async () => {
                           • "What do you believe about salvation?"
                         </button>
                         <button 
-                          onClick={() => fillInput("Give me a devotion about grace")}
+                          onClick={() => fillInput("Create a devotion message about grace")}
                           className={tryAskingButtonClass}
                         >
                           • "Give me a devotion about grace"
                         </button>
                         <button 
-                          onClick={() => fillInput("Create a preaching about sin")}
+                          onClick={() => fillInput("Create a preaching message about sin")}
                           className={tryAskingButtonClass}
                         >
                           • "Create a preaching about sin"
