@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 
 // ============================================================
+// SIMPLE RESPONSE CACHE for common questions
+// ============================================================
+const responseCache = new Map();
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+// ============================================================
 // DICTIONARY HELPER FUNCTION
 // ============================================================
 async function getWebsterDefinition(word) {
@@ -23,9 +29,22 @@ async function getWebsterDefinition(word) {
 // ============================================================
 // HELPERS: Reduce history size for faster processing
 // ============================================================
-function getRecentHistory(history, limit = 5) {
-  // Only send the last `limit` messages to reduce API load
+function getRecentHistory(history, limit = 3) { // ✅ Reduced from 5 to 3
   return history.slice(-limit);
+}
+
+// ============================================================
+// DETECT SIMPLE QUERIES (for blocking mode)
+// ============================================================
+function isSimpleQuery(message) {
+  const lowerMsg = message.toLowerCase();
+  // Short questions without complex keywords
+  const isShort = message.length < 60;
+  const hasComplexKeyword = lowerMsg.includes('devotion') || 
+                            lowerMsg.includes('preaching') || 
+                            lowerMsg.includes('explain') ||
+                            lowerMsg.includes('create');
+  return isShort && !hasComplexKeyword;
 }
 
 // ============================================================
@@ -190,7 +209,6 @@ function buildDoctrinalResponse(doctrine, userQuery) {
 
 export async function POST(request) {
   try {
-    // ✅ ADDED: Extract conversationId from request
     const { message, history, userName, conversationId } = await request.json();
 
     // ============================================================
@@ -215,6 +233,24 @@ export async function POST(request) {
       }
     }
 
+    // ============================================================
+    // STEP 0.5: Check cache for common questions
+    // ============================================================
+    const cacheKey = message.toLowerCase().trim();
+    if (responseCache.has(cacheKey)) {
+      const cached = responseCache.get(cacheKey);
+      if (Date.now() - cached.timestamp < CACHE_TTL) {
+        console.log('⚡ Cache hit for:', message);
+        return NextResponse.json({ 
+          response: cached.response, 
+          source: 'cache',
+          conversation_id: conversationId // Pass through the conversation ID
+        });
+      } else {
+        responseCache.delete(cacheKey);
+      }
+    }
+
     const DIFY_API_KEY = process.env.NEXT_PUBLIC_APP_KEY;
     const DIFY_API_URL = 'https://api.dify.ai/v1/chat-messages';
 
@@ -227,23 +263,26 @@ export async function POST(request) {
     }
 
     // ============================================================
-    // STEP 1: Call Dify with STREAMING mode, reduced history, user name, and conversation ID
+    // STEP 1: Call Dify with optimized settings
     // ============================================================
     console.log('STEP 1: Trying Dify Knowledge Base for:', message);
     console.log('🆔 Conversation ID:', conversationId || 'New conversation');
     console.log('👤 User Name:', userName || 'friend');
 
-    // Only send last 5 messages for faster response
-    const recentHistory = getRecentHistory(history, 5);
+    // ✅ Only send last 3 messages for faster response
+    const recentHistory = getRecentHistory(history, 3);
+
+    // ✅ Determine if we should use blocking mode for simple queries
+    const useBlocking = isSimpleQuery(message);
+    console.log(`⚡ Using ${useBlocking ? 'blocking' : 'streaming'} mode for:`, message);
 
     try {
-      // ✅ MODIFIED: Build request body with conversation_id
       const requestBody = {
         inputs: {
           user_name: userName || 'friend',
         },
         query: message,
-        response_mode: 'streaming',
+        response_mode: useBlocking ? 'blocking' : 'streaming',
         user: 'baptistry_user',
         conversation_history: recentHistory.map(msg => ({
           role: msg.role === 'user' ? 'user' : 'assistant',
@@ -251,7 +290,6 @@ export async function POST(request) {
         })),
       };
 
-      // ✅ ADDED: Only include conversation_id if it exists (to continue conversation)
       if (conversationId) {
         requestBody.conversation_id = conversationId;
       }
@@ -265,7 +303,6 @@ export async function POST(request) {
         body: JSON.stringify(requestBody),
       });
 
-      // Handle streaming response
       if (!response.ok) {
         console.log('Dify API error:', response.status);
         return NextResponse.json({
@@ -273,50 +310,81 @@ export async function POST(request) {
         });
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = '';
-      let newConversationId = null; // ✅ ADDED: Store new conversation ID
+      // Handle streaming or blocking response
+      if (useBlocking) {
+        // ✅ Blocking mode: Single response, much faster
+        const data = await response.json();
+        const fullResponse = data.answer || '';
+        const newConversationId = data.conversation_id;
+        
+        console.log('✅ Dify blocking response received, length:', fullResponse.length);
+        
+        // Cache short responses
+        if (fullResponse.length < 500) {
+          responseCache.set(cacheKey, {
+            response: fullResponse,
+            timestamp: Date.now()
+          });
+        }
+        
+        return NextResponse.json({ 
+          response: fullResponse, 
+          source: 'dify-blocking',
+          conversation_id: newConversationId
+        });
+      } else {
+        // ✅ Streaming mode: Process chunks
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullResponse = '';
+        let newConversationId = null;
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.substring(6));
-              if (data.event === 'message' && data.answer) {
-                fullResponse += data.answer;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.substring(6));
+                if (data.event === 'message' && data.answer) {
+                  fullResponse += data.answer;
+                }
+                if (data.event === 'message_end' && data.conversation_id) {
+                  newConversationId = data.conversation_id;
+                }
+                if (data.event === 'message_end') {
+                  break;
+                }
+              } catch (e) {
+                // Ignore parse errors
               }
-              // ✅ ADDED: Capture the conversation_id from Dify
-              if (data.event === 'message_end' && data.conversation_id) {
-                newConversationId = data.conversation_id;
-              }
-              if (data.event === 'message_end') {
-                break;
-              }
-            } catch (e) {
-              // Ignore parse errors
             }
           }
         }
-      }
-      
-      if (fullResponse && fullResponse.length > 50) {
-        console.log('✅ Dify streaming response received, length:', fullResponse.length);
-        console.log('🆔 New Conversation ID:', newConversationId);
-        // ✅ MODIFIED: Return conversation_id to frontend
-        return NextResponse.json({ 
-          response: fullResponse, 
-          source: 'dify-knowledge-base',
-          conversation_id: newConversationId // ✅ Return this to frontend
-        });
-      } else {
-        console.log('⚠️ No substantive response from Dify, falling back to doctrinal library');
+        
+        if (fullResponse && fullResponse.length > 50) {
+          console.log('✅ Dify streaming response received, length:', fullResponse.length);
+          
+          // Cache short responses
+          if (fullResponse.length < 500) {
+            responseCache.set(cacheKey, {
+              response: fullResponse,
+              timestamp: Date.now()
+            });
+          }
+          
+          return NextResponse.json({ 
+            response: fullResponse, 
+            source: 'dify-knowledge-base',
+            conversation_id: newConversationId
+          });
+        } else {
+          console.log('⚠️ No substantive response from Dify, falling back to doctrinal library');
+        }
       }
     } catch (error) {
       console.error('Dify API error:', error);
