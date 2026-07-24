@@ -13,9 +13,16 @@ interface HeaderProps {
   messageCount: number;
   messages?: Array<{ id: string; role: string; content: string; timestamp: Date }>;
   onLoadMessage?: (messageId: string) => void;
+  onBooksClick?: () => void; // ✅ Keep this
 }
 
-export default function Header({ onMenuClick, messageCount, messages = [], onLoadMessage }: HeaderProps) {
+export default function Header({ 
+  onMenuClick, 
+  messageCount, 
+  messages = [], 
+  onLoadMessage,
+  onBooksClick // ✅ Destructure and use it
+}: HeaderProps) {
   const { darkMode, toggleDarkMode } = useTheme();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
@@ -27,13 +34,11 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
     const isAndroid = /Android/i.test(navigator.userAgent);
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
     
-    // Desktop
     if (!isMobile) {
       alert('📱 Please open this page on your phone to install the app.');
       return;
     }
     
-    // Android: Try native install prompt
     if (isAndroid) {
       if ('beforeinstallprompt' in window) {
         // @ts-ignore
@@ -49,7 +54,6 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
       return;
     }
     
-    // iOS: Show instructions
     if (isIOS) {
       alert('📱 To install BAPTISTRY on your iPhone/iPad:\n\n1. Tap the share icon (📤) at the bottom\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" in the top-right corner');
       return;
@@ -58,16 +62,9 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
     alert('📱 To install BAPTISTRY:\n\n1. Tap the share icon (📤)\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
   };
 
-  // UNIFORM button classes - ALL buttons use the exact same border style
   const buttonBaseClass = "h-10 px-4 text-sm font-medium rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
-  
-  // Sign In button - same base but with blue text
   const signInButtonClass = `${buttonBaseClass} text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300`;
-  
-  // Install button - same base but with green text
   const installButtonClass = `${buttonBaseClass} flex items-center gap-1.5 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300`;
-  
-  // Icon button (dark mode toggle, menu) - exactly the same border style
   const iconButtonClass = "p-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
 
   return (
@@ -100,7 +97,6 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
                     Sign In
                   </button>
                 </SignInButton>
-                {/* Tooltip - appears on hover */}
                 <div className="absolute right-0 top-full mt-2 w-64 p-3 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg shadow-xl border border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
                   <p className="font-semibold text-yellow-400 mb-1">✨ Save Your Chat History</p>
                   <p className="text-gray-300 leading-relaxed">
@@ -110,7 +106,6 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
                 </div>
               </div>
 
-              {/* 📱 Install Button */}
               <button
                 onClick={handleInstallClick}
                 className={installButtonClass}
@@ -125,7 +120,10 @@ export default function Header({ onMenuClick, messageCount, messages = [], onLoa
           )}
 
           <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
-          <NotificationBell />
+          
+          {/* ✅ Pass onBooksClick to NotificationBell */}
+          <NotificationBell onBooksClick={onBooksClick} />
+          
           <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
 
           <button 

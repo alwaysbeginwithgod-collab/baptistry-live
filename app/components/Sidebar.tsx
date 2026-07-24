@@ -70,11 +70,13 @@ export default function Sidebar({
 
 // Listen for "openDevotion" event from NotificationBell
 useEffect(() => {
-  const handleOpenDevotion = () => {
-    setIsDevotionOpen(true);
+  const handleOpenBooks = () => {
+    setIsBooksOpen(true);
   };
-  window.addEventListener('openDevotion' as any, handleOpenDevotion);
-  return () => window.removeEventListener('openDevotion' as any, handleOpenDevotion);
+  window.addEventListener('openBooks' as any, handleOpenBooks);
+  return () => {
+    window.removeEventListener('openBooks' as any, handleOpenBooks);
+  };
 }, []);
 
   useEffect(() => {

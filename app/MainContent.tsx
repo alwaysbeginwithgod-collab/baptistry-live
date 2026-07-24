@@ -937,12 +937,17 @@ export default function MainContent() {
       />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Header 
-          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-          messageCount={messages.length}
-          messages={messages}
-          onLoadMessage={scrollToMessage}
-        />
+<Header 
+  onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+  messageCount={messages.length}
+  messages={messages}
+  onLoadMessage={scrollToMessage}
+  onBooksClick={() => {
+    // Trigger the Books modal via custom event
+    const event = new CustomEvent('openBooks');
+    window.dispatchEvent(event);
+  }}
+/>
 
         <div className="flex-1 overflow-y-auto">
           {messages.length === 0 && !isGenerating ? (
