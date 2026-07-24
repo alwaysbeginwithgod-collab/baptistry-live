@@ -91,7 +91,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">How It Started</h2>
                   <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                    BAPTISTRY was born from the burden of a preacher who saw countless believers struggling to find <strong>reliable, free, and doctrinally sound Bible study tools</strong>. Many resources are either too expensive, theologically compromised, or buried under confusing interfaces.
+                    BAPTISTRY is a non-denominational Bible Study dedicated tool, born from the burden of a preacher who saw countless believers struggling to find <strong>reliable, free, and doctrinally sound Bible study tools</strong>. Many resources are either too expensive, theologically compromised, or buried under confusing interfaces.
                   </p>
                   <p className="text-gray-700 dark:text-gray-300 mt-2 leading-relaxed">
                     With much prayer and reliance on God's grace, BAPTISTRY was developed to fill this gap. <strong>What started as a personal project has now become a free gift to the body of Christ worldwide.</strong>
