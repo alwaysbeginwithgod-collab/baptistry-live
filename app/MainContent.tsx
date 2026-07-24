@@ -640,7 +640,7 @@ export default function MainContent() {
           body: JSON.stringify({ 
             message: newContent,
             history: newMessages,
-            userName: userName || 'friend', // ✅ Pass user name
+            userName: userName || 'friend',
             conversationId: difyConversationId,
           }),
         });
@@ -724,7 +724,7 @@ export default function MainContent() {
         body: JSON.stringify({ 
           message: userMessageContent, 
           history: newMessages,
-          userName: userName || 'friend', // ✅ Pass user name
+          userName: userName || 'friend',
           conversationId: difyConversationId,
         }),
       });
@@ -824,7 +824,7 @@ export default function MainContent() {
         body: JSON.stringify({ 
           message: sentInput, 
           history: messages,
-          userName: userName || 'friend', // ✅ Pass user name
+          userName: userName || 'friend',
           conversationId: difyConversationId,
         }),
       });
@@ -971,8 +971,8 @@ export default function MainContent() {
                 
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
                   Hi {userName ? `${userName},` : 'Friend,'}
-		  <br />
-		  I'm BAPTISTRY
+                  <br />
+                  I'm BAPTISTRY
                 </h2>
                 
                 <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed font-semibold">
@@ -1136,11 +1136,13 @@ export default function MainContent() {
         </div>
       </div>
       
-{messages.length > 0 && (
-      <RightSidebar 
-        messages={messages} 
-        onScrollToMessage={scrollToMessage} 
-      />
+      {/* RightSidebar - Only show when there are messages */}
+      {messages.length > 0 && (
+        <RightSidebar 
+          messages={messages} 
+          onScrollToMessage={scrollToMessage} 
+        />
+      )}
       
       <NameModal 
         isOpen={showNameModal} 
