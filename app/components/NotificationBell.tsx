@@ -13,7 +13,6 @@ interface Notification {
   read: boolean;
 }
 
-// ✅ Add this interface
 interface NotificationBellProps {
   onBooksClick?: () => void;
 }
@@ -31,14 +30,11 @@ export default function NotificationBell({ onBooksClick }: NotificationBellProps
     const today = new Date().toDateString();
     const encouragement = getDailyEncouragement();
     
-    // Get existing notifications from localStorage
     const savedNotifications = localStorage.getItem('baptistry_notifications');
     let allNotifications: Notification[] = [];
     
     if (savedNotifications) {
       const parsed = JSON.parse(savedNotifications);
-      // Keep only non-daily notifications (updates) and existing daily ones
-      // We'll rebuild daily ones fresh
       const updates = parsed.filter((n: any) => 
         !n.id.startsWith('daily-enc-') && !n.id.startsWith('daily-devotion-')
       );
@@ -67,12 +63,11 @@ export default function NotificationBell({ onBooksClick }: NotificationBellProps
       read: false,
     });
     
-    // --- Remove duplicate daily notifications (keep only today's) ---
+    // --- Remove duplicate daily notifications ---
     const uniqueNotifications: Notification[] = [];
     const seenIds = new Set();
     
     for (const notif of allNotifications) {
-      // For daily notifications, keep only the latest (today's)
       if (notif.id.startsWith('daily-enc-') || notif.id.startsWith('daily-devotion-')) {
         const key = notif.id.startsWith('daily-enc-') ? 'daily-enc' : 'daily-devotion';
         if (!seenIds.has(key)) {
@@ -84,7 +79,7 @@ export default function NotificationBell({ onBooksClick }: NotificationBellProps
       }
     }
     
-    // If no update notifications exist, add sample ones (only once)
+    // --- Add sample updates if none exist ---
     const hasUpdates = uniqueNotifications.some(n => n.type === 'update');
     if (!hasUpdates) {
       const sampleUpdates: Notification[] = [
@@ -119,7 +114,6 @@ export default function NotificationBell({ onBooksClick }: NotificationBellProps
       uniqueNotifications.push(...sampleUpdates);
     }
     
-    // Sort by date (newest first)
     uniqueNotifications.sort((a, b) => b.date.getTime() - a.date.getTime());
     
     setNotifications(uniqueNotifications);
@@ -127,12 +121,10 @@ export default function NotificationBell({ onBooksClick }: NotificationBellProps
     localStorage.setItem('baptistry_notifications', JSON.stringify(uniqueNotifications));
   };
 
-  // Load notifications on mount
   useEffect(() => {
     loadNotifications();
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -159,11 +151,17 @@ export default function NotificationBell({ onBooksClick }: NotificationBellProps
     localStorage.setItem('baptistry_notifications', JSON.stringify(updated));
   };
 
+  // ============================================================
+  // ✅ FIXED: handleNotificationClick - Removed duplicate code
+  // ============================================================
   const handleNotificationClick = (notif: Notification) => {
     markAsRead(notif.id);
     
-    // ✅ Handle Books Showroom notification
+    console.log('🔔 Notification clicked:', notif.title, 'Type:', notif.type);
+    
+    // Handle Books Showroom notification
     if (notif.title.includes('Books Showroom')) {
+      console.log('📚 Opening Books Showroom...');
       if (onBooksClick) {
         onBooksClick();
       }
@@ -171,9 +169,16 @@ export default function NotificationBell({ onBooksClick }: NotificationBellProps
       return;
     }
     
+    // ✅ Handle Devotion notification
     if (notif.type === 'devotion') {
+      console.log('📖 Opening Daily Devotion...');
       window.dispatchEvent(new CustomEvent('openDevotion'));
-    } else if (notif.link && notif.link !== '#') {
+      setIsOpen(false);
+      return;
+    }
+    
+    // Handle other notifications with links
+    if (notif.link && notif.link !== '#') {
       window.open(notif.link, '_blank');
     }
     setIsOpen(false);
