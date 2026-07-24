@@ -60,7 +60,7 @@ export default function Sidebar({
     setBibleVerse(getDailyVerse());
   }, []);
 
-  // ✅ Listen for "openDevotion" event from NotificationBell
+  // ✅ Listen for "openDevotion" event from NotificationBell (ONLY ONCE)
   useEffect(() => {
     const handleOpenDevotion = () => {
       console.log('📖 openDevotion event received in Sidebar');
@@ -84,23 +84,13 @@ export default function Sidebar({
     };
   }, []);
 
+  // ✅ Menu escape and click outside handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && menuOpenId) {
         setMenuOpenId(null);
       }
     };
-
-useEffect(() => {
-  const handleOpenDevotion = () => {
-    console.log('📖 openDevotion event received in Sidebar');
-    setIsDevotionOpen(true);
-  };
-  window.addEventListener('openDevotion' as any, handleOpenDevotion);
-  return () => {
-    window.removeEventListener('openDevotion' as any, handleOpenDevotion);
-  };
-}, []);
 
     const handleClickOutside = (e: MouseEvent) => {
       if (menuOpenId && menuRef.current && !menuRef.current.contains(e.target as Node)) {
