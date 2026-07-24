@@ -93,7 +93,7 @@ export default function MainContent() {
   // NAME MODAL STATE
   // ============================================================
   const [showNameModal, setShowNameModal] = useState(false);
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState<string>('');
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -220,18 +220,47 @@ export default function MainContent() {
   }, [messages.length, isGenerating, currentSuggestions.length, getRandomSuggestions, initializeTextKeys, updateSingleSuggestion]);
 
   // ============================================================
-  // LOAD USER NAME FROM LOCALSTORAGE
+  // LOAD USER NAME FROM LOCALSTORAGE (FIXED)
   // ============================================================
   useEffect(() => {
     if (userId && isLoaded) {
+      // Try to get saved name from localStorage
       const savedName = localStorage.getItem(`baptistry_user_name_${userId}`);
+      console.log('🔍 userId:', userId);
+      console.log('🔍 savedName from localStorage:', savedName);
+      
       if (savedName) {
         setUserName(savedName);
+        console.log('✅ User name loaded:', savedName);
+        setShowNameModal(false);
       } else {
-        setShowNameModal(true);
+        // Also check if Clerk has a name we can use
+        const clerkName = user?.fullName || user?.firstName || user?.username;
+        if (clerkName) {
+          console.log('👤 Using Clerk name:', clerkName);
+          setUserName(clerkName);
+          localStorage.setItem(`baptistry_user_name_${userId}`, clerkName);
+          setShowNameModal(false);
+        } else {
+          console.log('❌ No name found, showing name modal');
+          setShowNameModal(true);
+        }
       }
     }
-  }, [userId, isLoaded]);
+  }, [userId, isLoaded, user]);
+
+  // ============================================================
+  // SAVE USER NAME (FIXED)
+  // ============================================================
+  const handleNameSave = (name: string) => {
+    console.log('💾 Saving name:', name);
+    setUserName(name);
+    if (userId) {
+      localStorage.setItem(`baptistry_user_name_${userId}`, name);
+      console.log('✅ Name saved to localStorage for userId:', userId);
+    }
+    setShowNameModal(false);
+  };
 
   // ============================================================
   // LOAD DIFY CONVERSATION ID FROM LOCALSTORAGE
@@ -245,17 +274,6 @@ export default function MainContent() {
       }
     }
   }, [userId]);
-
-  // ============================================================
-  // SAVE USER NAME
-  // ============================================================
-  const handleNameSave = (name: string) => {
-    setUserName(name);
-    if (userId) {
-      localStorage.setItem(`baptistry_user_name_${userId}`, name);
-    }
-    setShowNameModal(false);
-  };
 
   // Load conversations from Convex cloud (primary) or localStorage (backup)
   useEffect(() => {
@@ -352,7 +370,6 @@ export default function MainContent() {
       saveCurrentConversation();
     }
     
-    // ✅ Reset Dify conversation ID for new chat
     setDifyConversationId(null);
     if (userId) {
       localStorage.removeItem(`dify_conversation_${userId}`);
@@ -570,117 +587,116 @@ export default function MainContent() {
     localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
   };
 
-const editMessage = (messageId: string, newContent: string) => {
-  console.log('✏️ EDIT MESSAGE:', messageId, newContent);
+  const editMessage = (messageId: string, newContent: string) => {
+    console.log('✏️ EDIT MESSAGE:', messageId, newContent);
 
-  const messageIndex = messages.findIndex(m => m.id === messageId);
-  if (messageIndex === -1) return;
+    const messageIndex = messages.findIndex(m => m.id === messageId);
+    if (messageIndex === -1) return;
 
-  const originalMessage = messages[messageIndex];
-  if (originalMessage.role !== 'user') return;
+    const originalMessage = messages[messageIndex];
+    if (originalMessage.role !== 'user') return;
 
-  setIsGenerating(false);
-  setStreamingText('');
-  if (stopRequested.current) {
-    stopRequested.current = false;
-  }
-
-  const newMessages = messages.slice(0, messageIndex);
-  setMessages(newMessages);
-
-  const sendEditedMessage = async () => {
-    if (!newContent.trim()) return;
-
-    if (!currentConversationId) {
-      const newConversation: Conversation = {
-        id: Date.now().toString(),
-        title: newContent.substring(0, 40),
-        messages: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        pinned: false,
-      };
-      setConversations(prev => [newConversation, ...prev]);
-      setCurrentConversationId(newConversation.id);
+    setIsGenerating(false);
+    setStreamingText('');
+    if (stopRequested.current) {
+      stopRequested.current = false;
     }
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: newContent,
-      timestamp: new Date(),
+    const newMessages = messages.slice(0, messageIndex);
+    setMessages(newMessages);
+
+    const sendEditedMessage = async () => {
+      if (!newContent.trim()) return;
+
+      if (!currentConversationId) {
+        const newConversation: Conversation = {
+          id: Date.now().toString(),
+          title: newContent.substring(0, 40),
+          messages: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          pinned: false,
+        };
+        setConversations(prev => [newConversation, ...prev]);
+        setCurrentConversationId(newConversation.id);
+      }
+
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: newContent,
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, userMessage]);
+      setIsGenerating(true);
+      setStreamingText('');
+      stopRequested.current = false;
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message: newContent,
+            history: newMessages,
+            userName: userName || 'friend', // ✅ Pass user name
+            conversationId: difyConversationId,
+          }),
+        });
+
+        const data = await response.json();
+        
+        if (data.conversation_id) {
+          console.log('🆔 New Dify conversation ID:', data.conversation_id);
+          setDifyConversationId(data.conversation_id);
+          if (userId) {
+            localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+          }
+        }
+        
+        let fullResponse = data.response || 'I apologize, but I encountered an error.';
+        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+        const chunkSize = 5;
+        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+          if (stopRequested.current) {
+            setIsGenerating(false);
+            setStreamingText('');
+            return;
+          }
+          setStreamingText(fullResponse.substring(0, i));
+          await new Promise(resolve => setTimeout(resolve, 3));
+        }
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: fullResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+
+      } catch (error) {
+        console.error('Error:', error);
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'I apologize, but I am unable to respond at this moment.',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errorMessage]);
+        setIsGenerating(false);
+        setStreamingText('');
+      }
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setIsGenerating(true);
-    setStreamingText('');
-    stopRequested.current = false;
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: newContent,
-          history: newMessages,
-          userName: userName || 'friend',
-          conversationId: difyConversationId,
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (data.conversation_id) {
-        console.log('🆔 New Dify conversation ID:', data.conversation_id);
-        setDifyConversationId(data.conversation_id);
-        if (userId) {
-          localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
-        }
-      }
-      
-      let fullResponse = data.response || 'I apologize, but I encountered an error.';
-      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-      // ✅ Fixed: Use chunk size 5 (same as sendMessage)
-      const chunkSize = 5;
-      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-        if (stopRequested.current) {
-          setIsGenerating(false);
-          setStreamingText('');
-          return;
-        }
-        setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 3));
-      }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: fullResponse,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-      setStreamingText('');
-      setIsGenerating(false);
-
-    } catch (error) {
-      console.error('Error:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'I apologize, but I am unable to respond at this moment.',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      setIsGenerating(false);
-      setStreamingText('');
-    }
+    setTimeout(() => {
+      sendEditedMessage();
+    }, 50);
   };
-
-  setTimeout(() => {
-    sendEditedMessage();
-  }, 50);
-};
 
   const regenerateMessage = async (assistantMessageId: string) => {
     const assistantIndex = messages.findIndex(m => m.id === assistantMessageId);
@@ -708,14 +724,13 @@ const editMessage = (messageId: string, newContent: string) => {
         body: JSON.stringify({ 
           message: userMessageContent, 
           history: newMessages,
-          userName: userName || 'friend',
-          conversationId: difyConversationId, // ✅ Pass Dify conversation ID
+          userName: userName || 'friend', // ✅ Pass user name
+          conversationId: difyConversationId,
         }),
       });
 
       const data = await response.json();
       
-      // ✅ Save the new conversation ID from Dify
       if (data.conversation_id) {
         console.log('🆔 New Dify conversation ID:', data.conversation_id);
         setDifyConversationId(data.conversation_id);
@@ -809,14 +824,13 @@ const editMessage = (messageId: string, newContent: string) => {
         body: JSON.stringify({ 
           message: sentInput, 
           history: messages,
-          userName: userName || 'friend',
-          conversationId: difyConversationId, // ✅ Pass Dify conversation ID
+          userName: userName || 'friend', // ✅ Pass user name
+          conversationId: difyConversationId,
         }),
       });
 
       const data = await response.json();
       
-      // ✅ Save the new conversation ID from Dify
       if (data.conversation_id) {
         console.log('🆔 New Dify conversation ID:', data.conversation_id);
         setDifyConversationId(data.conversation_id);
@@ -956,9 +970,7 @@ const editMessage = (messageId: string, newContent: string) => {
                 </div>
                 
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
-                  Hi{userName ? `, ${userName}` : ''}
-		 <br />
-    		 I'm BAPTISTRY
+                  Hi{userName ? ` ${userName}` : ''}, I'm BAPTISTRY
                 </h2>
                 
                 <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed font-semibold">
