@@ -13,7 +13,12 @@ interface Notification {
   read: boolean;
 }
 
-export default function NotificationBell() {
+// ✅ Add this interface
+interface NotificationBellProps {
+  onBooksClick?: () => void;
+}
+
+export default function NotificationBell({ onBooksClick }: NotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -156,6 +161,15 @@ export default function NotificationBell() {
 
   const handleNotificationClick = (notif: Notification) => {
     markAsRead(notif.id);
+    
+    // ✅ Handle Books Showroom notification
+    if (notif.title.includes('Books Showroom')) {
+      if (onBooksClick) {
+        onBooksClick();
+      }
+      setIsOpen(false);
+      return;
+    }
     
     if (notif.type === 'devotion') {
       window.dispatchEvent(new CustomEvent('openDevotion'));
