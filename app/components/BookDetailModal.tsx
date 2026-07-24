@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+
 interface BookDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,6 +19,14 @@ interface BookDetailModalProps {
 }
 
 export default function BookDetailModal({ isOpen, onClose, book }: BookDetailModalProps) {
+  // ✅ Reset when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      // Any cleanup if needed
+      console.log('📖 BookDetailModal closed');
+    }
+  }, [isOpen]);
+
   if (!isOpen || !book) return null;
 
   const handleFlipbook = () => {

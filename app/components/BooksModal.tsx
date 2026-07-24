@@ -31,7 +31,6 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleEscape);
-      // Prevent body scroll when modal is open
       document.body.style.overflow = 'hidden';
     }
 
@@ -41,6 +40,13 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
+
+  // ✅ Reset selectedBook when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedBook(null);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
