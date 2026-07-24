@@ -44,20 +44,12 @@ export default function Sidebar({
   const [bibleVerse, setBibleVerse] = useState({ reference: '', text: '' });
   const [isDevotionOpen, setIsDevotionOpen] = useState(false);
 
-  // Get theme - FIXED: useTheme returns { darkMode, toggleDarkMode }
   const { darkMode } = useTheme();
-  
-  // Define colors based on dark mode
-  const yellowColor = darkMode ? '#D4A017' : '#D4A017'; // Golden-yellow
+  const yellowColor = darkMode ? '#D4A017' : '#D4A017';
   const yellowGlow = darkMode ? 'rgba(212, 160, 23, 0.3)' : 'rgba(212, 160, 23, 0.3)';
 
-  // UNIFORM button class - matching header buttons
   const buttonBaseClass = "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
-  
-  // Support button - special case with different styling
   const supportButtonClass = "inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 border border-blue-600 dark:border-blue-500 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 w-full";
-  
-  // New Chat button
   const newChatButtonClass = "w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
 
   const filteredConversations = conversations.filter(conv =>
@@ -68,16 +60,29 @@ export default function Sidebar({
     setBibleVerse(getDailyVerse());
   }, []);
 
-// Listen for "openDevotion" event from NotificationBell
-useEffect(() => {
-  const handleOpenBooks = () => {
-    setIsBooksOpen(true);
-  };
-  window.addEventListener('openBooks' as any, handleOpenBooks);
-  return () => {
-    window.removeEventListener('openBooks' as any, handleOpenBooks);
-  };
-}, []);
+  // ✅ Listen for "openDevotion" event from NotificationBell
+  useEffect(() => {
+    const handleOpenDevotion = () => {
+      console.log('📖 openDevotion event received in Sidebar');
+      setIsDevotionOpen(true);
+    };
+    window.addEventListener('openDevotion' as any, handleOpenDevotion);
+    return () => {
+      window.removeEventListener('openDevotion' as any, handleOpenDevotion);
+    };
+  }, []);
+
+  // ✅ Listen for "openBooks" event from MainContent (for Books Showroom)
+  useEffect(() => {
+    const handleOpenBooks = () => {
+      console.log('📚 openBooks event received in Sidebar');
+      setIsBooksOpen(true);
+    };
+    window.addEventListener('openBooks' as any, handleOpenBooks);
+    return () => {
+      window.removeEventListener('openBooks' as any, handleOpenBooks);
+    };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -85,6 +90,17 @@ useEffect(() => {
         setMenuOpenId(null);
       }
     };
+
+useEffect(() => {
+  const handleOpenDevotion = () => {
+    console.log('📖 openDevotion event received in Sidebar');
+    setIsDevotionOpen(true);
+  };
+  window.addEventListener('openDevotion' as any, handleOpenDevotion);
+  return () => {
+    window.removeEventListener('openDevotion' as any, handleOpenDevotion);
+  };
+}, []);
 
     const handleClickOutside = (e: MouseEvent) => {
       if (menuOpenId && menuRef.current && !menuRef.current.contains(e.target as Node)) {
