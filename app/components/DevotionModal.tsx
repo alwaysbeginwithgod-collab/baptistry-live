@@ -2,10 +2,57 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { devotions, Devotion } from '../data/devotions';
+import { detectScriptureReferences, getVerseForLookup } from '../lib/verseUtils';
 
 interface DevotionModalProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+// ============================================================
+// RENDER CONTENT WITH CLICKABLE VERSE REFERENCES
+// ============================================================
+function renderDevotionContentWithReferences(
+  text: string,
+  onVerseClick: (reference: string) => void
+): (string | JSX.Element)[] {
+  const references = detectScriptureReferences(text);
+  
+  if (references.length === 0) {
+    return [text];
+  }
+  
+  const parts: (string | JSX.Element)[] = [];
+  let lastIndex = 0;
+  
+  for (const ref of references) {
+    // Add text before the reference
+    if (ref.startIndex > lastIndex) {
+      parts.push(text.substring(lastIndex, ref.startIndex));
+    }
+    
+    // Add the clickable reference
+    const verseForLookup = getVerseForLookup(ref.reference);
+    parts.push(
+      <button
+        key={`verse-${ref.startIndex}`}
+        onClick={() => onVerseClick(verseForLookup)}
+        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline underline-offset-2 cursor-pointer font-medium transition-colors"
+        title={`Click to look up ${ref.reference}`}
+      >
+        {ref.text}
+      </button>
+    );
+    
+    lastIndex = ref.endIndex;
+  }
+  
+  // Add remaining text after the last reference
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+  
+  return parts;
 }
 
 export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
@@ -68,6 +115,17 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   const { title, tagline, scripture, content, prayer, image, facebookLink } = todayDevotion;
 
   // ============================================================
+  // HANDLE VERSE CLICK - Broadcast to RightSidebar
+  // ============================================================
+  const handleVerseClick = (reference: string) => {
+    console.log('📖 Devotion verse clicked:', reference);
+    const event = new CustomEvent('bibleLookup', {
+      detail: { reference }
+    });
+    window.dispatchEvent(event);
+  };
+
+  // ============================================================
   // SAFE FORMAT SCRIPTURE - Bold reference, italic quote
   // ============================================================
   const formatScripture = (text: string) => {
@@ -115,7 +173,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   };
 
   // ============================================================
-  // SAFE FORMAT CONTENT - With comprehensive safety checks
+  // SAFE FORMAT CONTENT - With verse hyperlinks
   // ============================================================
   const formatContent = (text: string) => {
     if (!text || typeof text !== 'string') return <p className="mb-4 leading-relaxed text-gray-700 dark:text-gray-300">Content not available</p>;
@@ -161,7 +219,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
   };
 
   // ============================================================
-  // SAFE PROCESS PARAGRAPH - With error handling
+  // SAFE PROCESS PARAGRAPH - With verse hyperlinks
   // ============================================================
   const processParagraphSafe = (text: string): (string | JSX.Element)[] | string => {
     if (!text || typeof text !== 'string') return text || '';
@@ -184,11 +242,16 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
           parts.push(...quoteParts);
         }
         
-        // Add the scripture reference (bold)
+        // Add the scripture reference as a clickable link (bold + clickable)
         parts.push(
-          <strong key={`ref-${match.index}`} className="text-blue-600 dark:text-blue-400 font-bold">
+          <button
+            key={`ref-${match.index}`}
+            onClick={() => handleVerseClick(ref)}
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline underline-offset-2 cursor-pointer font-medium transition-colors"
+            title={`Click to look up ${ref}`}
+          >
             {ref}
-          </strong>
+          </button>
         );
         
         currentIndex = scriptureRegex.lastIndex;
@@ -240,7 +303,6 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
         if (quoteStart > 0) {
           const beforeText = remaining.substring(0, quoteStart);
           if (beforeText) {
-            // Check if there are more quotes in beforeText
             parts.push(beforeText);
           }
         }
@@ -340,7 +402,7 @@ export default function DevotionModal({ isOpen, onClose }: DevotionModalProps) {
             </p>
           </div>
 
-          {/* Content */}
+          {/* Content with verse hyperlinks */}
           <div className="prose prose-base dark:prose-invert max-w-none mb-6">
             {formatContent(content)}
           </div>

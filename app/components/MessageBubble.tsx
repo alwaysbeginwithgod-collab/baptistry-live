@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { detectScriptureReferences, getVerseForLookup } from '../lib/verseUtils';
 
 type Message = {
   id: string;
@@ -19,6 +20,52 @@ interface MessageBubbleProps {
   feedbackStatus?: 'helpful' | 'unhelpful' | null;
 }
 
+// ============================================================
+// RENDER MESSAGE WITH CLICKABLE VERSE REFERENCES
+// ============================================================
+function renderMessageWithReferences(
+  text: string,
+  onVerseClick: (reference: string) => void
+): (string | JSX.Element)[] {
+  const references = detectScriptureReferences(text);
+  
+  if (references.length === 0) {
+    return [text];
+  }
+  
+  const parts: (string | JSX.Element)[] = [];
+  let lastIndex = 0;
+  
+  for (const ref of references) {
+    // Add text before the reference
+    if (ref.startIndex > lastIndex) {
+      parts.push(text.substring(lastIndex, ref.startIndex));
+    }
+    
+    // Add the clickable reference
+    const verseForLookup = getVerseForLookup(ref.reference);
+    parts.push(
+      <button
+        key={`verse-${ref.startIndex}`}
+        onClick={() => onVerseClick(verseForLookup)}
+        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline underline-offset-2 cursor-pointer font-medium transition-colors"
+        title={`Click to look up ${ref.reference}`}
+      >
+        {ref.text}
+      </button>
+    );
+    
+    lastIndex = ref.endIndex;
+  }
+  
+  // Add remaining text after the last reference
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+  
+  return parts;
+}
+
 export default function MessageBubble({ message, onFeedback, onEdit, onRegenerate, feedbackStatus }: MessageBubbleProps) {
   const isUser = message.role === 'user';
   const [isEditing, setIsEditing] = useState(false);
@@ -30,6 +77,19 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   };
 
   const cleanedContent = cleanContent(message.content);
+
+  // ============================================================
+  // HANDLE VERSE CLICK - Broadcast to RightSidebar
+  // ============================================================
+  const handleVerseClick = (reference: string) => {
+    console.log('📖 Verse clicked:', reference);
+    
+    // Dispatch custom event for RightSidebar to listen to
+    const event = new CustomEvent('bibleLookup', {
+      detail: { reference }
+    });
+    window.dispatchEvent(event);
+  };
 
   const handleFeedback = (type: 'helpful' | 'unhelpful') => {
     if (!onFeedback) return;
@@ -167,6 +227,19 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                         hr: ({node, ...props}) => <hr className="my-4 border-gray-300 dark:border-gray-700" {...props} />,
                         blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-400 pl-4 italic my-3" {...props} />,
                         a: ({node, ...props}) => <a className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                        // ✅ Custom component to handle verse references within Markdown
+                        text: ({node, ...props}) => {
+                          // If the text is a string, check for verse references
+                          if (typeof props.children === 'string') {
+                            const textContent = props.children;
+                            const parts = renderMessageWithReferences(textContent, handleVerseClick);
+                            // If parts is an array with JSX elements, render them
+                            if (parts.length > 1 || (parts.length === 1 && typeof parts[0] !== 'string')) {
+                              return <>{parts}</>;
+                            }
+                          }
+                          return <span {...props} />;
+                        },
                       }}
                     >
                       {cleanedContent}
