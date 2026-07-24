@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { detectScriptureReferences, getVerseForLookup } from '../lib/verseUtils';
 
 type Message = {
   id: string;
@@ -20,52 +19,6 @@ interface MessageBubbleProps {
   feedbackStatus?: 'helpful' | 'unhelpful' | null;
 }
 
-// ============================================================
-// RENDER MESSAGE WITH CLICKABLE VERSE REFERENCES
-// ============================================================
-function renderMessageWithReferences(
-  text: string,
-  onVerseClick: (reference: string) => void
-): (string | JSX.Element)[] {
-  const references = detectScriptureReferences(text);
-  
-  if (references.length === 0) {
-    return [text];
-  }
-  
-  const parts: (string | JSX.Element)[] = [];
-  let lastIndex = 0;
-  
-  for (const ref of references) {
-    // Add text before the reference
-    if (ref.startIndex > lastIndex) {
-      parts.push(text.substring(lastIndex, ref.startIndex));
-    }
-    
-    // Add the clickable reference
-    const verseForLookup = getVerseForLookup(ref.reference);
-    parts.push(
-      <button
-        key={`verse-${ref.startIndex}`}
-        onClick={() => onVerseClick(verseForLookup)}
-        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline underline-offset-2 cursor-pointer font-medium transition-colors"
-        title={`Click to look up ${ref.reference}`}
-      >
-        {ref.text}
-      </button>
-    );
-    
-    lastIndex = ref.endIndex;
-  }
-  
-  // Add remaining text after the last reference
-  if (lastIndex < text.length) {
-    parts.push(text.substring(lastIndex));
-  }
-  
-  return parts;
-}
-
 export default function MessageBubble({ message, onFeedback, onEdit, onRegenerate, feedbackStatus }: MessageBubbleProps) {
   const isUser = message.role === 'user';
   const [isEditing, setIsEditing] = useState(false);
@@ -77,18 +30,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   };
 
   const cleanedContent = cleanContent(message.content);
-
-  // ============================================================
-  // HANDLE VERSE CLICK - Broadcast to RightSidebar
-  // ============================================================
-  const handleVerseClick = (reference: string) => {
-    console.log('📖 Verse clicked:', reference);
-    
-    const event = new CustomEvent('bibleLookup', {
-      detail: { reference }
-    });
-    window.dispatchEvent(event);
-  };
 
   const handleFeedback = (type: 'helpful' | 'unhelpful') => {
     if (!onFeedback) return;
@@ -133,9 +74,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
 
   const isHelpfulSelected = feedbackStatus === 'helpful';
   const isUnhelpfulSelected = feedbackStatus === 'unhelpful';
-
-  // ✅ Process content with verse references ONCE
-  const processedContent = renderMessageWithReferences(cleanedContent, handleVerseClick);
 
   return (
     <div id={message.id} className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -192,16 +130,47 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                 </div>
               ) : (
                 <>
-                  {/* ✅ Only render content ONCE with verse references */}
                   <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <div className="whitespace-pre-wrap leading-relaxed">
-                      {processedContent.map((part, index) => {
-                        if (typeof part === 'string') {
-                          return <span key={index}>{part}</span>;
-                        }
-                        return part;
-                      })}
-                    </div>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        table: ({node, ...props}) => (
+                          <div className="overflow-x-auto my-4">
+                            <table className="w-full border-collapse border border-gray-300 dark:border-gray-700 text-sm" {...props} />
+                          </div>
+                        ),
+                        thead: ({node, ...props}) => (
+                          <thead className="bg-gray-100 dark:bg-gray-700" {...props} />
+                        ),
+                        tbody: ({node, ...props}) => (
+                          <tbody className="divide-y divide-gray-200 dark:divide-gray-700" {...props} />
+                        ),
+                        th: ({node, ...props}) => (
+                          <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-900 dark:text-white" {...props} />
+                        ),
+                        td: ({node, ...props}) => (
+                          <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300" {...props} />
+                        ),
+                        tr: ({node, ...props}) => (
+                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" {...props} />
+                        ),
+                        h1: ({node, ...props}) => <h1 className="text-xl font-bold mt-4 mb-2" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-lg font-semibold mt-3 mb-2" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-md font-semibold mt-2 mb-1" {...props} />,
+                        h4: ({node, ...props}) => <h4 className="text-sm font-semibold mt-2 mb-1" {...props} />,
+                        p: ({node, ...props}) => <p className="mb-3 leading-relaxed" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
+                        li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                        strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                        em: ({node, ...props}) => <em className="italic" {...props} />,
+                        hr: ({node, ...props}) => <hr className="my-4 border-gray-300 dark:border-gray-700" {...props} />,
+                        blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-400 pl-4 italic my-3" {...props} />,
+                        a: ({node, ...props}) => <a className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                      }}
+                    >
+                      {cleanedContent}
+                    </ReactMarkdown>
                   </div>
 
                   <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">

@@ -117,12 +117,14 @@ const bookShortcodes: { [key: string]: string } = {
 // FUNCTION: Convert shortcode to full book name
 // ============================================================
 function expandBookName(input: string): string {
+  // Handle formats like "Gen 3:15" or "Genesis 3:15"
   const match = input.match(/^([a-zA-Z0-9]+)\s+(.+)$/);
   if (!match) return input;
   
   const bookPart = match[1].toLowerCase();
   const rest = match[2];
   
+  // Check if it's a shortcode
   const fullBook = bookShortcodes[bookPart];
   if (fullBook) {
     return `${fullBook} ${rest}`;
@@ -135,8 +137,11 @@ function expandBookName(input: string): string {
 // FUNCTION: Format Bible reference (adds colon if missing)
 // ============================================================
 function formatBibleReference(input: string): string {
+  // First, expand shortcodes (Gen → Genesis, etc.)
   const expanded = expandBookName(input);
   
+  // Now handle the format of chapter:verse
+  // Pattern: "Book Chapter Verse" → "Book Chapter:Verse"
   const match = expanded.match(/^(.+?)\s+(\d+)\s+(\d+)$/);
   if (match) {
     const book = match[1];
@@ -145,6 +150,7 @@ function formatBibleReference(input: string): string {
     return `${book} ${chapter}:${verse}`;
   }
   
+  // Already has colon or is just chapter
   return expanded;
 }
 
@@ -165,47 +171,50 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
   // Filter only user messages for TOC
   const userMessages = messages.filter(m => m.role === 'user');
 
-  const searchBible = async () => {
-    if (!bibleQuery.trim()) return;
-    setIsLoading(true);
-    setBibleResult('Searching...');
+const searchBible = async () => {
+  if (!bibleQuery.trim()) return;
+  setIsLoading(true);
+  setBibleResult('Searching...');
 
-    try {
-      const expandedQuery = expandBookName(bibleQuery.trim());
-      const formattedQuery = formatBibleReference(expandedQuery);
-      
-      if (bibleQuery.trim() !== formattedQuery) {
-        console.log('📖 Converted:', bibleQuery.trim(), '→', formattedQuery);
-      }
-      
-      const encodedQuery = encodeURIComponent(formattedQuery.replace(/ /g, '+'));
-      const apiUrl = `https://dailybible.ca/api/${encodedQuery}?translation=kjv`;
+  try {
+    // ✅ Step 1: Expand shortcode (Gen → Genesis)
+    const expandedQuery = expandBookName(bibleQuery.trim());
+    
+    // ✅ Step 2: Format reference (add colon if missing: "John 1 1" → "John 1:1")
+    const formattedQuery = formatBibleReference(expandedQuery);
+    
+    if (bibleQuery.trim() !== formattedQuery) {
+      console.log('📖 Converted:', bibleQuery.trim(), '→', formattedQuery);
+    }
+    
+    const encodedQuery = encodeURIComponent(formattedQuery.replace(/ /g, '+'));
+    const apiUrl = `https://dailybible.ca/api/${encodedQuery}?translation=kjv`;
 
-      const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl);
 
-      if (response.ok) {
-        const data = await response.json();
+    if (response.ok) {
+      const data = await response.json();
 
-        if (data.verses && data.verses.length > 0) {
-          const formattedVerses = data.verses.map((v: any) => {
-            return `v${v.verse} - ${v.text}`;
-          }).join('\n');
+      if (data.verses && data.verses.length > 0) {
+        const formattedVerses = data.verses.map((v: any) => {
+          return `v${v.verse} - ${v.text}`;
+        }).join('\n');
 
-          setBibleResult(`${data.reference || formattedQuery} (KJV)\n\n${formattedVerses}`);
-        } else if (data.text) {
-          setBibleResult(`${data.reference || formattedQuery} (KJV)\n\n"${data.text}"`);
-        } else {
-          setBibleResult(`${formattedQuery} - Not found.`);
-        }
+        setBibleResult(`${data.reference || formattedQuery} (KJV)\n\n${formattedVerses}`);
+      } else if (data.text) {
+        setBibleResult(`${data.reference || formattedQuery} (KJV)\n\n"${data.text}"`);
       } else {
         setBibleResult(`${formattedQuery} - Not found.`);
       }
-    } catch (error) {
-      console.error('Bible API error:', error);
-      setBibleResult(`Unable to fetch at this time.`);
+    } else {
+      setBibleResult(`${formattedQuery} - Not found.`);
     }
-    setIsLoading(false);
-  };
+  } catch (error) {
+    console.error('Bible API error:', error);
+    setBibleResult(`Unable to fetch at this time.`);
+  }
+  setIsLoading(false);
+};
 
   const searchDictionary = async () => {
     if (!dictionaryWord.trim()) return;
@@ -243,6 +252,7 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
   // ============================================================
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Check if click is outside the TOC panel and outside the TOC button
       const isOutsidePanel = tocPanelRef.current && !tocPanelRef.current.contains(event.target as Node);
       const isOutsideButton = tocButtonRef.current && !tocButtonRef.current.contains(event.target as Node);
       
@@ -251,6 +261,7 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
       }
     };
 
+    // Also close when pressing Escape
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isTocOpen) {
         setIsTocOpen(false);
@@ -280,9 +291,7 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ============================================================
-  // ✅ LISTEN FOR VERSE CLICKS FROM MessageBubble AND DevotionModal
-  // ============================================================
+  // Listen for scripture reference clicks from MessageBubble
   useEffect(() => {
     const handleBibleLookup = (event: CustomEvent) => {
       const reference = event.detail.reference;
@@ -290,12 +299,10 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
       
       if (!reference) return;
       
-      // ✅ Auto-open the Bible tool and load the verse
       setActiveTool('bible');
       setBibleQuery(reference);
       setBibleResult('');
       
-      // ✅ Auto-search after a small delay
       setTimeout(() => {
         searchBible();
       }, 200);
@@ -305,7 +312,7 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
     return () => {
       window.removeEventListener('bibleLookup' as any, handleBibleLookup);
     };
-  }, []); // ✅ Empty dependency array - only runs once
+  }, []);
 
   // ============================================================
   // TOC HANDLERS - Panel stays open when clicking messages
@@ -313,6 +320,7 @@ export default function RightSidebar({ messages = [], onScrollToMessage }: Right
   const handleTocClick = (messageId: string) => {
     if (onScrollToMessage) {
       onScrollToMessage(messageId);
+      // ✅ Panel STAYS OPEN - user can browse the list
     }
   };
 
