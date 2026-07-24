@@ -84,7 +84,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   const handleVerseClick = (reference: string) => {
     console.log('📖 Verse clicked:', reference);
     
-    // Dispatch custom event for RightSidebar to listen to
     const event = new CustomEvent('bibleLookup', {
       detail: { reference }
     });
@@ -227,23 +226,20 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                         hr: ({node, ...props}) => <hr className="my-4 border-gray-300 dark:border-gray-700" {...props} />,
                         blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-400 pl-4 italic my-3" {...props} />,
                         a: ({node, ...props}) => <a className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
-                        // ✅ Custom component to handle verse references within Markdown
-                        text: ({node, ...props}) => {
-                          // If the text is a string, check for verse references
-                          if (typeof props.children === 'string') {
-                            const textContent = props.children;
-                            const parts = renderMessageWithReferences(textContent, handleVerseClick);
-                            // If parts is an array with JSX elements, render them
-                            if (parts.length > 1 || (parts.length === 1 && typeof parts[0] !== 'string')) {
-                              return <>{parts}</>;
-                            }
-                          }
-                          return <span {...props} />;
-                        },
                       }}
                     >
                       {cleanedContent}
                     </ReactMarkdown>
+                  </div>
+
+                  {/* ✅ Verse References rendered outside Markdown */}
+                  <div className="mt-2">
+                    {renderMessageWithReferences(cleanedContent, handleVerseClick).map((part, index) => {
+                      if (typeof part === 'string') {
+                        return <span key={index}>{part}</span>;
+                      }
+                      return part;
+                    })}
                   </div>
 
                   <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
