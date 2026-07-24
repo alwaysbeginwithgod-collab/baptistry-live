@@ -220,11 +220,10 @@ export default function MainContent() {
   }, [messages.length, isGenerating, currentSuggestions.length, getRandomSuggestions, initializeTextKeys, updateSingleSuggestion]);
 
   // ============================================================
-  // LOAD USER NAME FROM LOCALSTORAGE (FIXED)
+  // LOAD USER NAME FROM LOCALSTORAGE
   // ============================================================
   useEffect(() => {
     if (userId && isLoaded) {
-      // Try to get saved name from localStorage
       const savedName = localStorage.getItem(`baptistry_user_name_${userId}`);
       console.log('🔍 userId:', userId);
       console.log('🔍 savedName from localStorage:', savedName);
@@ -234,7 +233,6 @@ export default function MainContent() {
         console.log('✅ User name loaded:', savedName);
         setShowNameModal(false);
       } else {
-        // Also check if Clerk has a name we can use
         const clerkName = user?.fullName || user?.firstName || user?.username;
         if (clerkName) {
           console.log('👤 Using Clerk name:', clerkName);
@@ -250,7 +248,7 @@ export default function MainContent() {
   }, [userId, isLoaded, user]);
 
   // ============================================================
-  // SAVE USER NAME (FIXED)
+  // SAVE USER NAME
   // ============================================================
   const handleNameSave = (name: string) => {
     console.log('💾 Saving name:', name);
@@ -400,23 +398,29 @@ export default function MainContent() {
     setTimeout(autoResizeTextarea, 0);
   };
 
+  // ============================================================
+  // FIXED: loadConversation - Properly loads conversation on hard reset
+  // ============================================================
   const loadConversation = (conversationId: string) => {
     console.log('🔵 loadConversation called for:', conversationId);
     console.log('🔵 Current conversations count:', conversations.length);
-    console.log('🔵 Current conversations IDs:', conversations.map(c => c.id));
     
+    // Save current conversation first if any
     if (messages.length > 0 && currentConversationId) {
       saveCurrentConversation();
     }
     
+    // ✅ First, try to find in state
     let conversation = conversations.find(c => c.id === conversationId);
+    console.log('🔵 Found in state:', conversation ? 'Yes' : 'No');
     
+    // ✅ If not in state, try localStorage
     if (!conversation && userId) {
-      console.log('🔵 Conversation not in state, trying localStorage...');
-      const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
-      if (savedConversations) {
+      console.log('🔵 Trying localStorage...');
+      const saved = localStorage.getItem(`baptistry_conversations_${userId}`);
+      if (saved) {
         try {
-          const parsed = JSON.parse(savedConversations);
+          const parsed = JSON.parse(saved);
           const withDates = parsed.map((conv: any) => ({
             ...conv,
             createdAt: new Date(conv.createdAt),
@@ -426,7 +430,11 @@ export default function MainContent() {
               timestamp: new Date(msg.timestamp),
             })),
           }));
+          
+          // Update state with all conversations
           setConversations(withDates);
+          
+          // Find the specific conversation
           conversation = withDates.find(c => c.id === conversationId);
           console.log('🔵 Found in localStorage:', conversation ? 'Yes' : 'No');
         } catch (e) {
@@ -435,18 +443,23 @@ export default function MainContent() {
       }
     }
     
+    // ✅ If found, load it
     if (conversation) {
       console.log('🔵 Loading conversation:', conversationId);
-      console.log('🔵 Messages count:', conversation.messages.length);
+      console.log('🔵 Messages count:', conversation.messages?.length || 0);
       
       if (conversation.messages && conversation.messages.length > 0) {
+        setMessages(conversation.messages);
+        setCurrentConversationId(conversationId);
+        
+        // ✅ Update the updatedAt timestamp
         setConversations(prev => prev.map(conv =>
           conv.id === conversationId
             ? { ...conv, updatedAt: new Date() }
             : conv
         ));
-        setMessages(conversation.messages);
-        setCurrentConversationId(conversationId);
+        
+        // ✅ Scroll to bottom
         requestAnimationFrame(() => {
           setTimeout(() => {
             scrollToBottomImmediate();
@@ -459,32 +472,6 @@ export default function MainContent() {
       }
     } else {
       console.log('❌ Conversation not found anywhere:', conversationId);
-      if (userId) {
-        const saved = localStorage.getItem(`baptistry_conversations_${userId}`);
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            const withDates = parsed.map((conv: any) => ({
-              ...conv,
-              createdAt: new Date(conv.createdAt),
-              updatedAt: new Date(conv.updatedAt),
-              messages: conv.messages.map((msg: any) => ({
-                ...msg,
-                timestamp: new Date(msg.timestamp),
-              })),
-            }));
-            setConversations(withDates);
-            const found = withDates.find(c => c.id === conversationId);
-            if (found) {
-              setMessages(found.messages);
-              setCurrentConversationId(conversationId);
-              console.log('✅ Found conversation after reload');
-            }
-          } catch (e) {
-            console.error('Failed to reload conversations', e);
-          }
-        }
-      }
     }
   };
 
