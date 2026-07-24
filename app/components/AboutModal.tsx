@@ -91,7 +91,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">How It Started</h2>
                   <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                    BAPTISTRY is a non-denominational Bible Study dedicated tool, born from the burden of a preacher who saw countless believers struggling to find <strong>reliable, free, and doctrinally sound Bible study tools</strong>. Many resources are either too expensive, theologically compromised, or buried under confusing interfaces.
+                    BAPTISTRY is a dedicated Bible study tool, born from the burden of a preacher who saw countless believers struggling to find <strong>reliable, free, and doctrinally sound Bible study tools</strong>. Many resources are either too expensive, theologically compromised, or buried under confusing interfaces.
                   </p>
                   <p className="text-gray-700 dark:text-gray-300 mt-2 leading-relaxed">
                     With much prayer and reliance on God's grace, BAPTISTRY was developed to fill this gap. <strong>What started as a personal project has now become a free gift to the body of Christ worldwide.</strong>
@@ -117,10 +117,10 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   </p>
                   <ul className="mt-3 space-y-2 text-gray-700 dark:text-gray-300">
                     <li className="flex items-start gap-2"><span className="text-blue-500">🔍</span><span><strong>Look up Scriptures instantly</strong> — Find any verse in seconds</span></li>
-                    <li className="flex items-start gap-2"><span className="text-blue-500">📚</span><span><strong>Access a built-in dictionary and reference library</strong> — Understand difficult words and explore historic Baptist resources</span></li>
+                    <li className="flex items-start gap-2"><span className="text-blue-500">📚</span><span><strong>Access a built-in dictionary and reference library</strong> — Understand difficult words and explore Bible doctrine resources</span></li>
                     <li className="flex items-start gap-2"><span className="text-blue-500">💡</span><span><strong>Explore doctrines, preachings, and daily devotions</strong> — Deepen your faith with sound teaching</span></li>
                     <li className="flex items-start gap-2"><span className="text-blue-500">💬</span><span><strong>Ask any Bible-related question</strong> — Get immediate, Scripture-based answers rooted in the KJV</span></li>
-                    <li className="flex items-start gap-2"><span className="text-blue-500">🙏</span><span><strong>Read Daily Devotion</strong> — Meditate God's Word though daily devotion posts</span></li>
+                    <li className="flex items-start gap-2"><span className="text-blue-500">🙏</span><span><strong>Read Daily Devotion</strong> — Meditate on God's Word through daily devotion posts</span></li>
                     <li className="flex items-start gap-2"><span className="text-blue-500">📖</span><span><strong>Preview free flipbooks</strong> — Sample written resources before reading more</span></li>
                   </ul>
                 </div>
@@ -158,7 +158,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm"><div className="font-bold text-gray-900 dark:text-white">📝 Ask Anything</div><p className="text-sm text-gray-600 dark:text-gray-300">Submit questions on Scriptures, doctrines, or preachings for immediate study.</p></div>
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm"><div className="font-bold text-gray-900 dark:text-white">📖 KJV Bible Integration</div><p className="text-sm text-gray-600 dark:text-gray-300">Complete King James Version with built-in dictionary.</p></div>
-                    <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm"><div className="font-bold text-gray-900 dark:text-white">📚 Reference Library</div><p className="text-sm text-gray-600 dark:text-gray-300">Access to historic Baptist resources and study materials.</p></div>
+                    <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm"><div className="font-bold text-gray-900 dark:text-white">📚 Reference Library</div><p className="text-sm text-gray-600 dark:text-gray-300">Access to Bible doctrine resources and study materials.</p></div>
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm"><div className="font-bold text-gray-900 dark:text-white">🌓 Dark / Light Mode</div><p className="text-sm text-gray-600 dark:text-gray-300">Comfortable reading day or night.</p></div>
                   </div>
                 </div>
@@ -186,7 +186,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
 
             {/* Invitation */}
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-8 text-center text-white shadow-xl">
-              <h3 className="text-2xl font-bold mb-3">Looking for a FREE and realiable Bible study tool?</h3>
+              <h3 className="text-2xl font-bold mb-3">Looking for a FREE and reliable Bible study tool?</h3>
               <p className="text-xl mb-2"><strong>BAPTISTRY is created for you.</strong></p>
               <p className="text-blue-100 mb-6 max-w-md mx-auto">Use it freely. Share it freely. Grow in grace and in the knowledge of our Lord Jesus Christ.</p>
               <button onClick={onClose} className="px-6 py-2.5 bg-white text-blue-600 rounded-full font-semibold hover:bg-gray-100 transition-all shadow-lg transform hover:scale-105">Start Studying Now →</button>
