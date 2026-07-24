@@ -970,7 +970,9 @@ export default function MainContent() {
                 </div>
                 
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
-                  Hi{userName ? ` ${userName}` : ''}, I'm BAPTISTRY
+                  Hi {userName ? `${userName},` : 'Friend,'}
+		  <br />
+		  I'm BAPTISTRY
                 </h2>
                 
                 <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed font-semibold">
@@ -1134,6 +1136,7 @@ export default function MainContent() {
         </div>
       </div>
       
+{messages.length > 0 && (
       <RightSidebar 
         messages={messages} 
         onScrollToMessage={scrollToMessage} 
