@@ -14,17 +14,33 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
+  // ✅ Reset selectedBook when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedBook(null);
+    }
+  }, [isOpen]);
+
   // Close modal when clicking outside or pressing Escape
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      // ✅ Only close if click is outside and NOT on BookDetailModal
+      const target = event.target as HTMLElement;
+      const isBookDetailModal = target.closest('.book-detail-modal');
+      
+      if (modalRef.current && !modalRef.current.contains(event.target as Node) && !isBookDetailModal) {
         onClose();
       }
     };
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isOpen) {
-        onClose();
+        // ✅ If BookDetailModal is open, close it first
+        if (selectedBook !== null) {
+          setSelectedBook(null);
+        } else {
+          onClose();
+        }
       }
     };
 
@@ -39,14 +55,7 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, onClose]);
-
-  // ✅ Reset selectedBook when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      setSelectedBook(null);
-    }
-  }, [isOpen]);
+  }, [isOpen, onClose, selectedBook]);
 
   if (!isOpen) return null;
 
@@ -331,11 +340,14 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
         </div>
       </div>
 
-      <BookDetailModal
-        isOpen={selectedBook !== null}
-        onClose={() => setSelectedBook(null)}
-        book={selectedBook}
-      />
+      {/* BookDetailModal - Rendered with a class for detection */}
+      <div className="book-detail-modal">
+        <BookDetailModal
+          isOpen={selectedBook !== null}
+          onClose={() => setSelectedBook(null)}
+          book={selectedBook}
+        />
+      </div>
 
       <EmailContactModal
         isOpen={showEmailModal}
