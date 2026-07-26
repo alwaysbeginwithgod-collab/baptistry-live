@@ -42,89 +42,50 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
 
-  // ============================================================
-  // ✅ FIXED: Save conversations with proper Date → number conversion
-  // ============================================================
+  // ✅ Simple save effect - without complex conversions
   useEffect(() => {
-    if (!conversations.length) return;
+    if (!conversations.length || !userId) return;
     
-    const saveData = async () => {
-      try {
-        if (userId) {
-          // ✅ Convert Date objects to numbers for Convex
-          const conversationsForCloud = conversations.map(conv => ({
-            ...conv,
-            messages: conv.messages.map(msg => ({
-              ...msg,
-              timestamp: msg.timestamp instanceof Date ? msg.timestamp.getTime() : msg.timestamp,
-            })),
-            createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
-            updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
-          }));
-          
-          await saveConversationsToCloud({ userId, conversations: conversationsForCloud });
-          console.log('✅ Convex save successful');
-        } else {
-          // Save to LocalStorage (guest)
-          const guestKey = 'baptistry_conversations_guest';
-          localStorage.setItem(guestKey, JSON.stringify(conversations));
-        }
-      } catch (error) {
-        console.error('❌ Failed to save conversations:', error);
-      }
-    };
+    // Convert Date to number for Convex
+    const conversationsForCloud = conversations.map(conv => ({
+      ...conv,
+      messages: conv.messages.map(msg => ({
+        ...msg,
+        timestamp: msg.timestamp instanceof Date ? msg.timestamp.getTime() : msg.timestamp,
+      })),
+      createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
+      updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
+    }));
     
-    saveData();
+    saveConversationsToCloud({ userId, conversations: conversationsForCloud })
+      .then(() => console.log('✅ Convex save successful'))
+      .catch((err) => console.error('❌ Convex save failed:', err));
   }, [conversations, userId, saveConversationsToCloud]);
 
-  // ============================================================
-  // Load conversations from localStorage (guest) or Convex (signed in)
-  // ============================================================
+  // ✅ Simple load effect - without complex conversions
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        if (userId) {
-          // ✅ Load from Convex (handled by parent component)
-          // This is just a fallback - the parent component handles the main load
-          const guestKey = 'baptistry_conversations_guest';
-          const saved = localStorage.getItem(guestKey);
-          if (saved && !conversations.length) {
-            const parsed = JSON.parse(saved);
-            const withDates = parsed.map((conv: any) => ({
-              ...conv,
-              createdAt: new Date(conv.createdAt),
-              updatedAt: new Date(conv.updatedAt),
-              messages: conv.messages.map((msg: any) => ({
-                ...msg,
-                timestamp: new Date(msg.timestamp),
-              })),
-            }));
-            setConversations(withDates);
-          }
-        } else {
-          // Guest: Load from localStorage
-          const guestKey = 'baptistry_conversations_guest';
-          const saved = localStorage.getItem(guestKey);
-          if (saved) {
-            const parsed = JSON.parse(saved);
-            const withDates = parsed.map((conv: any) => ({
-              ...conv,
-              createdAt: new Date(conv.createdAt),
-              updatedAt: new Date(conv.updatedAt),
-              messages: conv.messages.map((msg: any) => ({
-                ...msg,
-                timestamp: new Date(msg.timestamp),
-              })),
-            }));
-            setConversations(withDates);
-          }
-        }
-      } catch (error) {
-        console.error('❌ Failed to load conversations:', error);
-      }
-    };
+    if (!userId) return;
     
-    loadData();
+    // Guest: Load from localStorage
+    const guestKey = 'baptistry_conversations_guest';
+    const saved = localStorage.getItem(guestKey);
+    if (saved && !conversations.length) {
+      try {
+        const parsed = JSON.parse(saved);
+        const withDates = parsed.map((conv: any) => ({
+          ...conv,
+          createdAt: new Date(conv.createdAt),
+          updatedAt: new Date(conv.updatedAt),
+          messages: conv.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          })),
+        }));
+        setConversations(withDates);
+      } catch (error) {
+        console.error('Failed to load guest conversations:', error);
+      }
+    }
   }, [userId]);
 
   return (
