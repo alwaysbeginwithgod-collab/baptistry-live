@@ -74,7 +74,6 @@ export default function MainContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const stopRequested = useRef(false);
-  const [forceRefresh, setForceRefresh] = useState<number>(0);
   
   // ============================================================
   // DIFY CONVERSATION ID - For remembering user across sessions
@@ -141,11 +140,6 @@ export default function MainContent() {
     const keys = suggestions.map((_, index) => `suggestion-${index}-${Date.now()}-${Math.random()}`);
     setTextKeys(keys);
   }, []);
-
-const forceRefresh = () => {
-  console.log('🔄 Force refreshing from Convex...');
-  setForceRefresh(Date.now());
-};
 
   // Update a single suggestion with slide-up animation
   const updateSingleSuggestion = useCallback(() => {
@@ -366,7 +360,7 @@ useEffect(() => {
   } else {
     setConversations([]);
   }
-}, [userId, isLoaded, loadConversationsFromCloud, forceRefresh]);
+}, [userId, isLoaded, loadConversationsFromCloud]);
 
 // ============================================================
 // ✅ FIXED: Save conversations to Convex cloud AND localStorage
