@@ -95,3 +95,7 @@ export const clearAll = mutation({
     return { deleted: docs.length };
   },
 });
+
+// ✅ ADD THESE ALIASES AT THE VERY BOTTOM
+export const saveConversationsClean = saveConversations;
+export const loadConversationsClean = loadConversations;
