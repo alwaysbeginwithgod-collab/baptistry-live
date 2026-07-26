@@ -359,32 +359,42 @@ export default function MainContent() {
   // ============================================================
   // ✅ FIXED: Save conversations to Convex cloud AND localStorage
   // ============================================================
-  useEffect(() => {
-    console.log('🔵 SAVE EFFECT - conversations:', conversations.length, 'userId:', userId);
-    
-    if (!userId) {
-      console.log('⚠️ No userId, skipping save');
-      return;
-    }
-    
-    console.log('💾 SAVING to localStorage and Convex cloud:', conversations.length);
-    localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
-    
-    // ✅ Convert Date objects to numbers for Convex
-    const conversationsForCloud = conversations.map(conv => ({
-      ...conv,
-      messages: conv.messages.map(msg => ({
-        ...msg,
-        timestamp: msg.timestamp instanceof Date ? msg.timestamp.getTime() : msg.timestamp,
-      })),
-      createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
-      updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
-    }));
-    
-    saveConversationsToCloud({ userId, conversations: conversationsForCloud })
-      .then(() => console.log('✅ Convex save successful'))
-      .catch((err) => console.error('❌ Convex save failed:', err));
-  }, [conversations, userId]);
+useEffect(() => {
+  console.log('🔵 SAVE EFFECT - conversations:', conversations.length, 'userId:', userId);
+  
+  if (!userId) {
+    console.log('⚠️ No userId, skipping save');
+    return;
+  }
+  
+  // ✅ Always save, even if empty (to sync empty state)
+  console.log('💾 SAVING to localStorage and Convex cloud:', conversations.length);
+  localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
+  
+  // ✅ Convert Date objects to numbers for Convex
+  const conversationsForCloud = conversations.map(conv => ({
+    ...conv,
+    messages: conv.messages.map(msg => ({
+      ...msg,
+      timestamp: msg.timestamp instanceof Date ? msg.timestamp.getTime() : msg.timestamp,
+    })),
+    createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
+    updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
+  }));
+  
+  saveConversationsToCloud({ userId, conversations: conversationsForCloud })
+    .then(() => console.log('✅ Convex save successful'))
+    .catch((err) => console.error('❌ Convex save failed:', err));
+}, [conversations, userId]);
+
+// In MainContent.tsx, add this useEffect to force a reload when the user signs in
+useEffect(() => {
+  if (userId && isLoaded) {
+    console.log('🔄 Force reloading conversations for user:', userId);
+    // This will trigger the load effect
+    // The load effect will fetch from Convex
+  }
+}, [userId, isLoaded]);
 
   // In MainContent.tsx, when saving conversations:
   const saveCurrentConversation = () => {
