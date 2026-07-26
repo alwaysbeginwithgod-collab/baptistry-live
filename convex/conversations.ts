@@ -49,6 +49,9 @@ export const saveConversations = mutation({
       }
 
       console.log(`✅ Convex save completed - saved ${savedCount} conversations`);
+      
+      // ✅ Return the saved conversations for confirmation
+      return { success: true, savedCount };
     } catch (error) {
       console.error('❌ Convex save error:', error);
       throw error;
@@ -70,6 +73,11 @@ export const loadConversations = query({
         .collect();
 
       console.log('🔵 Found docs:', docs.length);
+
+      // ✅ Log each conversation for debugging
+      for (const doc of docs) {
+        console.log('🔵 Conversation:', doc.conversationId, 'Title:', doc.title, 'Messages:', doc.messages.length);
+      }
 
       if (docs.length === 0) {
         console.log('🔵 No conversations found, returning empty array');
