@@ -57,9 +57,9 @@ export default function MainContent() {
   const { darkMode } = useTheme();
 
   // Convex hooks
-const saveConversationsToCloud = useMutation(api.conversations.saveConversationsV2);
+const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
 const loadConversationsFromCloud = useQuery(
-  api.conversations.loadConversationsV2,
+  api.conversations.loadConversations,
   userId ? { userId } : "skip"
 );
 
@@ -323,11 +323,20 @@ const startNewChat = () => {
     saveCurrentConversation();
   }
   
-  // ✅ Use the Dify conversation ID if it exists, otherwise generate one
+  // ✅ Use Dify conversation ID if exists, otherwise generate one
   const newConversationId = difyConversationId || Date.now().toString();
   
+  // ✅ Check if this conversation already exists
+  const existingConversation = conversations.find(c => c.id === newConversationId);
+  if (existingConversation) {
+    // ✅ If it exists, load it
+    setCurrentConversationId(newConversationId);
+    setMessages(existingConversation.messages);
+    return;
+  }
+  
   const newConversation: Conversation = {
-    id: newConversationId, // ✅ Use the same ID across all devices
+    id: newConversationId,
     title: 'New Chat',
     messages: [],
     createdAt: new Date(),
@@ -336,11 +345,6 @@ const startNewChat = () => {
   };
   
   setConversations(prev => {
-    // ✅ Check if this conversation already exists (to avoid duplicates)
-    const exists = prev.some(conv => conv.id === newConversationId);
-    if (exists) {
-      return prev;
-    }
     const withNew = [newConversation, ...prev];
     const sorted = [...withNew].sort((a, b) => {
       if (a.pinned && !b.pinned) return -1;

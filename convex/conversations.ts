@@ -5,32 +5,15 @@ import { v } from "convex/values";
 export const saveConversations = mutation({
   args: {
     userId: v.string(),
-    conversations: v.array(
-      v.object({
-        id: v.string(),
-        title: v.string(),
-        messages: v.array(
-          v.object({
-            id: v.string(),
-            role: v.string(),
-            content: v.string(),
-            timestamp: v.number(),
-          })
-        ),
-        createdAt: v.number(),
-        updatedAt: v.number(),
-        pinned: v.optional(v.boolean()),
-      })
-    ),
+    conversations: v.any(),
   },
   handler: async (ctx, args) => {
     const { userId, conversations } = args;
     
     console.log('💾 SAVING to Convex - userId:', userId);
-    console.log('💾 Conversations count:', conversations.length);
-    console.log('💾 First conversation:', conversations[0]?.id);
+    console.log('💾 Conversations count:', conversations?.length || 0);
     
-    // ✅ Delete old conversations first
+    // ✅ Delete old conversations for this user
     const existing = await ctx.db
       .query("conversations")
       .withIndex("by_userId", (q) => q.eq("userId", userId))
@@ -43,69 +26,69 @@ export const saveConversations = mutation({
     }
 
     // ✅ Save each conversation as a separate document
-    let savedCount = 0;
-    for (const conv of conversations) {
-      // ✅ Ensure timestamps are numbers
-      const messages = conv.messages.map((m: any) => ({
-        id: m.id,
-        role: m.role,
-        content: m.content,
-        timestamp: typeof m.timestamp === 'number' ? m.timestamp : new Date(m.timestamp).getTime(),
-      }));
-      
-      const createdAt = typeof conv.createdAt === 'number' ? conv.createdAt : new Date(conv.createdAt).getTime();
-      const updatedAt = typeof conv.updatedAt === 'number' ? conv.updatedAt : new Date(conv.updatedAt).getTime();
-      
+    for (const conv of conversations || []) {
       await ctx.db.insert("conversations", {
         userId: userId,
         conversationId: conv.id,
-        title: conv.title,
-        messages: messages,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
+        title: conv.title || "Untitled",
+        messages: conv.messages || [],
+        createdAt: conv.createdAt || Date.now(),
+        updatedAt: conv.updatedAt || Date.now(),
         pinned: conv.pinned || false,
       });
-      savedCount++;
     }
     
-    console.log('✅ Convex save completed - saved:', savedCount, 'conversations');
+    console.log('✅ Convex save completed');
   },
 });
 
 export const loadConversations = query({
-  args: { userId: v.string() },
+  args: {
+    userId: v.string(),
+  },
   handler: async (ctx, args) => {
     console.log('🔵 LOADING from Convex - userId:', args.userId);
     
-    const conversationDocs = await ctx.db
-      .query("conversations")
-      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
-      .collect();
+    try {
+      const conversationDocs = await ctx.db
+        .query("conversations")
+        .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+        .collect();
 
-    console.log('🔵 Found conversation documents:', conversationDocs.length);
-    
-    // ✅ Convert back to the expected format
-    const conversations = conversationDocs.map((conv) => ({
-      id: conv.conversationId,
-      title: conv.title,
-      messages: conv.messages.map((m: any) => ({
-        ...m,
-        timestamp: new Date(m.timestamp),
-      })),
-      createdAt: new Date(conv.createdAt),
-      updatedAt: new Date(conv.updatedAt),
-      pinned: conv.pinned,
-    }));
-    
-    console.log('🔵 Loaded conversations:', conversations.length);
-    console.log('🔵 First conversation ID:', conversations[0]?.id);
-    
-    return conversations;
+      console.log('🔵 Found conversation documents:', conversationDocs.length);
+      
+      if (conversationDocs.length === 0) {
+        return [];
+      }
+      
+      const result = conversationDocs.map((conv) => ({
+        id: conv.conversationId,
+        title: conv.title,
+        messages: conv.messages.map((m: any) => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          timestamp: new Date(m.timestamp),
+        })),
+        createdAt: new Date(conv.createdAt),
+        updatedAt: new Date(conv.updatedAt),
+        pinned: conv.pinned,
+      }));
+      
+      console.log('🔵 Loaded conversations:', result.length);
+      
+      return result;
+    } catch (error) {
+      console.error('🔵 Error loading conversations:', error);
+      return [];
+    }
   },
 });
 
 export const clearAll = mutation({
-  args: { userId: v.string() },
+  args: {
+    userId: v.string(),
+  },
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query("conversations")
