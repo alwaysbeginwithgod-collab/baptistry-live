@@ -57,11 +57,11 @@ export default function MainContent() {
   const { darkMode } = useTheme();
 
   // Convex hooks
-const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
-const loadConversationsFromCloud = useQuery(
-  api.conversations.loadConversations,
-  userId ? { userId } : "skip"
-);
+  const saveConversationsToCloud = useMutation(api.conversations.saveConversationsClean);
+  const loadConversationsFromCloud = useQuery(
+    api.conversations.loadConversationsClean,
+    userId ? { userId } : "skip"
+  );
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -273,116 +273,57 @@ const loadConversationsFromCloud = useQuery(
     }
   }, [userId]);
 
-  console.log('🔵 LOAD EFFECT - userId:', userId, 'isLoaded:', isLoaded);
-
-// ============================================================
-// ✅ FIXED: Save conversations to Convex cloud AND localStorage
-// ============================================================
-useEffect(() => {
-  console.log('🔵 SAVE EFFECT - conversations:', conversations.length, 'userId:', userId);
-  
-  if (!userId) {
-    console.log('⚠️ No userId, skipping save');
-    return;
-  }
-  
-  console.log('💾 SAVING to localStorage and Convex cloud:', conversations.length);
-  localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
-  
-  // ✅ Convert Date objects to numbers for Convex
-  const conversationsForCloud = conversations.map(conv => ({
-    ...conv,
-    messages: conv.messages.map(msg => ({
-      ...msg,
-      timestamp: msg.timestamp instanceof Date ? msg.timestamp.getTime() : msg.timestamp,
-    })),
-    createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
-    updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
-  }));
-  
-  saveConversationsToCloud({ userId, conversations: conversationsForCloud })
-    .then(() => console.log('✅ Convex save successful'))
-    .catch((err) => console.error('❌ Convex save failed:', err));
-}, [conversations, userId]);
-
-// In MainContent.tsx, when saving conversations:
-const saveCurrentConversation = () => {
-  if (!currentConversationId) return;
-  
-  const title = messages[0]?.content?.substring(0, 40) || 'New Chat';
-  const updatedConversations = conversations.map(conv =>
-    conv.id === currentConversationId
-      ? { ...conv, title, messages: [...messages], updatedAt: new Date() }
-      : conv
-  );
-  setConversations(updatedConversations);
-};
-
-const startNewChat = () => {
-  if (messages.length > 0 && currentConversationId) {
-    saveCurrentConversation();
-  }
-  
-  // ✅ Use Dify conversation ID if exists, otherwise generate one
-  const newConversationId = difyConversationId || Date.now().toString();
-  
-  // ✅ Check if this conversation already exists
-  const existingConversation = conversations.find(c => c.id === newConversationId);
-  if (existingConversation) {
-    // ✅ If it exists, load it
-    setCurrentConversationId(newConversationId);
-    setMessages(existingConversation.messages);
-    return;
-  }
-  
-  const newConversation: Conversation = {
-    id: newConversationId,
-    title: 'New Chat',
-    messages: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    pinned: false,
-  };
-  
-  setConversations(prev => {
-    const withNew = [newConversation, ...prev];
-    const sorted = [...withNew].sort((a, b) => {
-      if (a.pinned && !b.pinned) return -1;
-      if (!a.pinned && b.pinned) return 1;
-      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-    });
-    return sorted;
-  });
-  setCurrentConversationId(newConversationId);
-  setMessages([]);
-  setInput('');
-  
-  setTimeout(autoResizeTextarea, 0);
-};
-
   // ============================================================
-  // FIXED: loadConversation - Properly loads conversation on hard reset
+  // ✅ FIXED: Load conversations from Convex with Date conversion
   // ============================================================
-const loadConversation = (conversationId: string) => {
-  console.log('🔵 loadConversation called for:', conversationId);
-  console.log('🔵 Current conversations count:', conversations.length);
-  
-  // Save current conversation first if any
-  if (messages.length > 0 && currentConversationId) {
-    saveCurrentConversation();
-  }
-  
-  // ✅ First, try to find in state
-  let conversation = conversations.find(c => c.id === conversationId);
-  console.log('🔵 Found in state:', conversation ? 'Yes' : 'No');
-  
-  // ✅ If not in state, try localStorage
-  if (!conversation && userId) {
-    console.log('🔵 Trying localStorage...');
-    const saved = localStorage.getItem(`baptistry_conversations_${userId}`);
-    if (saved) {
+  useEffect(() => {
+    console.log('🔵 LOAD EFFECT - userId:', userId, 'isLoaded:', isLoaded);
+    
+    if (!isLoaded) {
+      console.log('⏳ Clerk still loading...');
+      return;
+    }
+    
+    if (!userId) {
+      console.log('⚠️ No userId found (user not signed in)');
+      setConversations([]);
+      return;
+    }
+    
+    if (loadConversationsFromCloud === undefined) {
+      console.log('⏳ Waiting for Convex cloud data...');
+      return;
+    }
+    
+    const isValidCloudData = (data: any): data is Conversation[] => {
+      return data !== null && data !== "skip" && Array.isArray(data);
+    };
+    
+    if (isValidCloudData(loadConversationsFromCloud) && loadConversationsFromCloud.length > 0) {
+      console.log('✅ LOADING FROM CONVEX CLOUD:', loadConversationsFromCloud.length);
+      
+      // ✅ Convert numeric timestamps to Date objects
+      const withDates = loadConversationsFromCloud.map((conv: any) => ({
+        ...conv,
+        messages: conv.messages.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        })),
+        createdAt: new Date(conv.createdAt),
+        updatedAt: new Date(conv.updatedAt),
+      }));
+      
+      setConversations(withDates);
+      localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(withDates));
+      return;
+    }
+    
+    // Fallback to localStorage
+    const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
+    if (savedConversations) {
       try {
-        const parsed = JSON.parse(saved);
+        console.log('💾 LOADING FROM LOCALSTORAGE (fallback)');
+        const parsed = JSON.parse(savedConversations);
         const withDates = parsed.map((conv: any) => ({
           ...conv,
           createdAt: new Date(conv.createdAt),
@@ -393,42 +334,182 @@ const loadConversation = (conversationId: string) => {
           })),
         }));
         setConversations(withDates);
-        conversation = withDates.find(c => c.id === conversationId);
-        console.log('🔵 Found in localStorage:', conversation ? 'Yes' : 'No');
+        
+        // Backup to cloud
+        const conversationsForCloud = withDates.map(conv => ({
+          ...conv,
+          messages: conv.messages.map(msg => ({
+            ...msg,
+            timestamp: msg.timestamp instanceof Date ? msg.timestamp.getTime() : msg.timestamp,
+          })),
+          createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
+          updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
+        }));
+        saveConversationsToCloud({ userId, conversations: conversationsForCloud })
+          .then(() => console.log('✅ Cloud backup successful'))
+          .catch((err) => console.error('❌ Cloud backup failed:', err));
       } catch (e) {
-        console.error('Failed to load from localStorage', e);
+        console.error('Failed to load conversations', e);
+      }
+    } else {
+      setConversations([]);
+    }
+  }, [userId, isLoaded, loadConversationsFromCloud]);
+
+  // ============================================================
+  // ✅ FIXED: Save conversations to Convex cloud AND localStorage
+  // ============================================================
+  useEffect(() => {
+    console.log('🔵 SAVE EFFECT - conversations:', conversations.length, 'userId:', userId);
+    
+    if (!userId) {
+      console.log('⚠️ No userId, skipping save');
+      return;
+    }
+    
+    console.log('💾 SAVING to localStorage and Convex cloud:', conversations.length);
+    localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
+    
+    // ✅ Convert Date objects to numbers for Convex
+    const conversationsForCloud = conversations.map(conv => ({
+      ...conv,
+      messages: conv.messages.map(msg => ({
+        ...msg,
+        timestamp: msg.timestamp instanceof Date ? msg.timestamp.getTime() : msg.timestamp,
+      })),
+      createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
+      updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
+    }));
+    
+    saveConversationsToCloud({ userId, conversations: conversationsForCloud })
+      .then(() => console.log('✅ Convex save successful'))
+      .catch((err) => console.error('❌ Convex save failed:', err));
+  }, [conversations, userId]);
+
+  // In MainContent.tsx, when saving conversations:
+  const saveCurrentConversation = () => {
+    if (!currentConversationId) return;
+    
+    const title = messages[0]?.content?.substring(0, 40) || 'New Chat';
+    const updatedConversations = conversations.map(conv =>
+      conv.id === currentConversationId
+        ? { ...conv, title, messages: [...messages], updatedAt: new Date() }
+        : conv
+    );
+    setConversations(updatedConversations);
+  };
+
+  const startNewChat = () => {
+    if (messages.length > 0 && currentConversationId) {
+      saveCurrentConversation();
+    }
+    
+    // ✅ Use Dify conversation ID if exists, otherwise generate one
+    const newConversationId = difyConversationId || Date.now().toString();
+    
+    // ✅ Check if this conversation already exists
+    const existingConversation = conversations.find(c => c.id === newConversationId);
+    if (existingConversation) {
+      // ✅ If it exists, load it
+      setCurrentConversationId(newConversationId);
+      setMessages(existingConversation.messages);
+      return;
+    }
+    
+    const newConversation: Conversation = {
+      id: newConversationId,
+      title: 'New Chat',
+      messages: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      pinned: false,
+    };
+    
+    setConversations(prev => {
+      const withNew = [newConversation, ...prev];
+      const sorted = [...withNew].sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      });
+      return sorted;
+    });
+    setCurrentConversationId(newConversationId);
+    setMessages([]);
+    setInput('');
+    
+    setTimeout(autoResizeTextarea, 0);
+  };
+
+  // ============================================================
+  // FIXED: loadConversation - Properly loads conversation on hard reset
+  // ============================================================
+  const loadConversation = (conversationId: string) => {
+    console.log('🔵 loadConversation called for:', conversationId);
+    console.log('🔵 Current conversations count:', conversations.length);
+    
+    // Save current conversation first if any
+    if (messages.length > 0 && currentConversationId) {
+      saveCurrentConversation();
+    }
+    
+    // ✅ First, try to find in state
+    let conversation = conversations.find(c => c.id === conversationId);
+    console.log('🔵 Found in state:', conversation ? 'Yes' : 'No');
+    
+    // ✅ If not in state, try localStorage
+    if (!conversation && userId) {
+      console.log('🔵 Trying localStorage...');
+      const saved = localStorage.getItem(`baptistry_conversations_${userId}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          const withDates = parsed.map((conv: any) => ({
+            ...conv,
+            createdAt: new Date(conv.createdAt),
+            updatedAt: new Date(conv.updatedAt),
+            messages: conv.messages.map((msg: any) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp),
+            })),
+          }));
+          setConversations(withDates);
+          conversation = withDates.find(c => c.id === conversationId);
+          console.log('🔵 Found in localStorage:', conversation ? 'Yes' : 'No');
+        } catch (e) {
+          console.error('Failed to load from localStorage', e);
+        }
       }
     }
-  }
-  
-  // ✅ If found, load it
-  if (conversation) {
-    console.log('🔵 Loading conversation:', conversationId);
-    console.log('🔵 Messages count:', conversation.messages?.length || 0);
     
-    if (conversation.messages && conversation.messages.length > 0) {
-      setMessages(conversation.messages);
-      setCurrentConversationId(conversationId);
+    // ✅ If found, load it
+    if (conversation) {
+      console.log('🔵 Loading conversation:', conversationId);
+      console.log('🔵 Messages count:', conversation.messages?.length || 0);
       
-      // ✅ Update the updatedAt timestamp
-      setConversations(prev => prev.map(conv =>
-        conv.id === conversationId
-          ? { ...conv, updatedAt: new Date() }
-          : conv
-      ));
-      
-      setTimeout(() => {
-        scrollToBottomImmediate();
-      }, 100);
+      if (conversation.messages && conversation.messages.length > 0) {
+        setMessages(conversation.messages);
+        setCurrentConversationId(conversationId);
+        
+        // ✅ Update the updatedAt timestamp
+        setConversations(prev => prev.map(conv =>
+          conv.id === conversationId
+            ? { ...conv, updatedAt: new Date() }
+            : conv
+        ));
+        
+        setTimeout(() => {
+          scrollToBottomImmediate();
+        }, 100);
+      } else {
+        console.log('⚠️ Conversation has no messages');
+        setMessages([]);
+        setCurrentConversationId(conversationId);
+      }
     } else {
-      console.log('⚠️ Conversation has no messages');
-      setMessages([]);
-      setCurrentConversationId(conversationId);
+      console.log('❌ Conversation not found anywhere:', conversationId);
     }
-  } else {
-    console.log('❌ Conversation not found anywhere:', conversationId);
-  }
-};
+  };
 
   const renameConversation = (conversationId: string, newTitle: string) => {
     setConversations(prev => prev.map(conv =>
