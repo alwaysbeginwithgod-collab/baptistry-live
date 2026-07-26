@@ -57,9 +57,9 @@ export default function MainContent() {
   const { darkMode } = useTheme();
 
   // ✅ Convex hooks - Use original function names
-  const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
+  const saveConversationsToCloud = useMutation(api.conversations.saveConversationsClean);
   const loadConversationsFromCloud = useQuery(
-    api.conversations.loadConversations,
+    api.conversations.loadConversationsClean,
     userId ? { userId } : "skip"
   );
 
@@ -74,6 +74,7 @@ export default function MainContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const stopRequested = useRef(false);
+  const [forceRefresh, setForceRefresh] = useState<number>(0);
   
   // ============================================================
   // DIFY CONVERSATION ID - For remembering user across sessions
@@ -140,6 +141,11 @@ export default function MainContent() {
     const keys = suggestions.map((_, index) => `suggestion-${index}-${Date.now()}-${Math.random()}`);
     setTextKeys(keys);
   }, []);
+
+const forceRefresh = () => {
+  console.log('🔄 Force refreshing from Convex...');
+  setForceRefresh(Date.now());
+};
 
   // Update a single suggestion with slide-up animation
   const updateSingleSuggestion = useCallback(() => {
@@ -273,92 +279,98 @@ export default function MainContent() {
     }
   }, [userId]);
 
-  // ============================================================
-  // ✅ FIXED: Load conversations from Convex with Date conversion
-  // ============================================================
-  useEffect(() => {
-    console.log('🔵 LOAD EFFECT - userId:', userId, 'isLoaded:', isLoaded);
+// ============================================================
+// ✅ FIXED: Load conversations from Convex (always fresh)
+// ============================================================
+useEffect(() => {
+  console.log('🔵 LOAD EFFECT - userId:', userId, 'isLoaded:', isLoaded);
+  
+  if (!isLoaded) {
+    console.log('⏳ Clerk still loading...');
+    return;
+  }
+  
+  if (!userId) {
+    console.log('⚠️ No userId found (user not signed in)');
+    setConversations([]);
+    return;
+  }
+  
+  if (loadConversationsFromCloud === undefined) {
+    console.log('⏳ Waiting for Convex cloud data...');
+    return;
+  }
+  
+  const isValidCloudData = (data: any): data is Conversation[] => {
+    return data !== null && data !== "skip" && Array.isArray(data);
+  };
+  
+  // ✅ ALWAYS load from Convex first (fresh data)
+  if (isValidCloudData(loadConversationsFromCloud)) {
+    console.log('✅ LOADING FROM CONVEX CLOUD:', loadConversationsFromCloud.length);
     
-    if (!isLoaded) {
-      console.log('⏳ Clerk still loading...');
-      return;
-    }
+    // ✅ Convert numeric timestamps to Date objects
+    const withDates = loadConversationsFromCloud.map((conv: any) => ({
+      ...conv,
+      messages: conv.messages.map((msg: any) => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp),
+      })),
+      createdAt: new Date(conv.createdAt),
+      updatedAt: new Date(conv.updatedAt),
+    }));
     
-    if (!userId) {
-      console.log('⚠️ No userId found (user not signed in)');
-      setConversations([]);
-      return;
-    }
+    // ✅ Update state with fresh data
+    setConversations(withDates);
     
-    if (loadConversationsFromCloud === undefined) {
-      console.log('⏳ Waiting for Convex cloud data...');
-      return;
-    }
-    
-    const isValidCloudData = (data: any): data is Conversation[] => {
-      return data !== null && data !== "skip" && Array.isArray(data);
-    };
-    
-    if (isValidCloudData(loadConversationsFromCloud) && loadConversationsFromCloud.length > 0) {
-      console.log('✅ LOADING FROM CONVEX CLOUD:', loadConversationsFromCloud.length);
-      
-      // ✅ Convert numeric timestamps to Date objects
-      const withDates = loadConversationsFromCloud.map((conv: any) => ({
+    // ✅ Update localStorage with fresh data (for backup)
+    localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(withDates));
+    console.log('✅ Updated localStorage with fresh Convex data');
+    return;
+  }
+  
+  // ✅ Fallback: If Convex returns empty, check localStorage
+  console.log('🔵 Convex returned empty, checking localStorage...');
+  const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
+  if (savedConversations) {
+    try {
+      console.log('💾 LOADING FROM LOCALSTORAGE (fallback)');
+      const parsed = JSON.parse(savedConversations);
+      const withDates = parsed.map((conv: any) => ({
         ...conv,
+        createdAt: new Date(conv.createdAt),
+        updatedAt: new Date(conv.updatedAt),
         messages: conv.messages.map((msg: any) => ({
           ...msg,
           timestamp: new Date(msg.timestamp),
         })),
-        createdAt: new Date(conv.createdAt),
-        updatedAt: new Date(conv.updatedAt),
       }));
-      
       setConversations(withDates);
-      localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(withDates));
-      return;
+      
+      // ✅ Backup to cloud
+      const conversationsForCloud = withDates.map(conv => ({
+        ...conv,
+        messages: conv.messages.map(msg => ({
+          ...msg,
+          timestamp: msg.timestamp instanceof Date ? msg.timestamp.getTime() : msg.timestamp,
+        })),
+        createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
+        updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
+      }));
+      saveConversationsToCloud({ userId, conversations: conversationsForCloud })
+        .then(() => console.log('✅ Cloud backup successful'))
+        .catch((err) => console.error('❌ Cloud backup failed:', err));
+    } catch (e) {
+      console.error('Failed to load conversations', e);
     }
-    
-    // Fallback to localStorage
-    const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
-    if (savedConversations) {
-      try {
-        console.log('💾 LOADING FROM LOCALSTORAGE (fallback)');
-        const parsed = JSON.parse(savedConversations);
-        const withDates = parsed.map((conv: any) => ({
-          ...conv,
-          createdAt: new Date(conv.createdAt),
-          updatedAt: new Date(conv.updatedAt),
-          messages: conv.messages.map((msg: any) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp),
-          })),
-        }));
-        setConversations(withDates);
-        
-        // Backup to cloud
-        const conversationsForCloud = withDates.map(conv => ({
-          ...conv,
-          messages: conv.messages.map(msg => ({
-            ...msg,
-            timestamp: msg.timestamp instanceof Date ? msg.timestamp.getTime() : msg.timestamp,
-          })),
-          createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
-          updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
-        }));
-        saveConversationsToCloud({ userId, conversations: conversationsForCloud })
-          .then(() => console.log('✅ Cloud backup successful'))
-          .catch((err) => console.error('❌ Cloud backup failed:', err));
-      } catch (e) {
-        console.error('Failed to load conversations', e);
-      }
-    } else {
-      setConversations([]);
-    }
-  }, [userId, isLoaded, loadConversationsFromCloud]);
+  } else {
+    setConversations([]);
+  }
+}, [userId, isLoaded, loadConversationsFromCloud, forceRefresh]);
 
-  // ============================================================
-  // ✅ FIXED: Save conversations to Convex cloud AND localStorage
-  // ============================================================
+// ============================================================
+// ✅ FIXED: Save conversations to Convex cloud AND localStorage
+// ============================================================
 useEffect(() => {
   console.log('🔵 SAVE EFFECT - conversations:', conversations.length, 'userId:', userId);
   
@@ -367,11 +379,12 @@ useEffect(() => {
     return;
   }
   
-  // ✅ Always save, even if empty (to sync empty state)
-  console.log('💾 SAVING to localStorage and Convex cloud:', conversations.length);
+  // ✅ Always save to localStorage (for backup)
   localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
+  console.log('💾 Saved to localStorage');
   
-  // ✅ Convert Date objects to numbers for Convex
+  // ✅ Only save to Convex if there are conversations OR we need to clear data
+  // Convert Date objects to numbers for Convex
   const conversationsForCloud = conversations.map(conv => ({
     ...conv,
     messages: conv.messages.map(msg => ({

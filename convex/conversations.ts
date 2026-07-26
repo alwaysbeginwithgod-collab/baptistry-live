@@ -14,7 +14,7 @@ export const saveConversations = mutation({
     console.log('💾 Conversations count:', conversations?.length || 0);
 
     try {
-      // Delete all existing conversations for this user
+      // ✅ Delete all existing conversations for this user
       const existing = await ctx.db
         .query("conversations")
         .withIndex("by_userId", (q) => q.eq("userId", userId))
@@ -26,7 +26,7 @@ export const saveConversations = mutation({
         await ctx.db.delete(doc._id);
       }
 
-      // Insert new conversations
+      // ✅ Insert new conversations
       let savedCount = 0;
       for (const conv of conversations || []) {
         const messages = (conv.messages || []).map((m: any) => ({
