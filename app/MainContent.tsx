@@ -351,17 +351,23 @@ export default function MainContent() {
       .catch((err) => console.error('❌ Convex save failed:', err));
   }, [conversations, userId]);
 
-  const saveCurrentConversation = () => {
-    if (!currentConversationId) return;
-    
-    const title = messages[0]?.content?.substring(0, 40) || 'New Chat';
-    const updatedConversations = conversations.map(conv =>
-      conv.id === currentConversationId
-        ? { ...conv, title, messages: [...messages], updatedAt: new Date() }
-        : conv
-    );
-    setConversations(updatedConversations);
-  };
+// In MainContent.tsx, when saving conversations:
+const saveCurrentConversation = () => {
+  if (!currentConversationId) return;
+  
+  const title = messages[0]?.content?.substring(0, 40) || 'New Chat';
+  const updatedConversations = conversations.map(conv =>
+    conv.id === currentConversationId
+      ? { 
+          ...conv, 
+          title, 
+          messages: [...messages], 
+          updatedAt: new Date() 
+        }
+      : conv
+  );
+  setConversations(updatedConversations);
+};
 
   const startNewChat = () => {
     if (messages.length > 0 && currentConversationId) {

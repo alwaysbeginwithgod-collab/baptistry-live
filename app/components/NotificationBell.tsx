@@ -152,36 +152,33 @@ export default function NotificationBell({ onBooksClick }: NotificationBellProps
   };
 
   // ============================================================
-  // ✅ FIXED: handleNotificationClick - Removed duplicate code
+  // ✅ handleNotificationClick - Single clean function
   // ============================================================
   const handleNotificationClick = (notif: Notification) => {
-  markAsRead(notif.id);
-  
-  console.log('🔔 Notification clicked:', notif.title, 'Type:', notif.type);
-  
-  // Handle Books Showroom notification
-  if (notif.title.includes('Books Showroom')) {
-    console.log('📚 Opening Books Showroom...');
-    if (onBooksClick) {
-      onBooksClick();
+    markAsRead(notif.id);
+    
+    // Handle Books Showroom notification
+    if (notif.title.includes('Books Showroom')) {
+      if (onBooksClick) {
+        onBooksClick();
+      }
+      setIsOpen(false);
+      return;
+    }
+    
+    // Handle Devotion notification
+    if (notif.type === 'devotion') {
+      window.dispatchEvent(new CustomEvent('openDevotion'));
+      setIsOpen(false);
+      return;
+    }
+    
+    // Handle other notifications with links
+    if (notif.link && notif.link !== '#') {
+      window.open(notif.link, '_blank');
     }
     setIsOpen(false);
-    return;
-  }
-  
-  // ✅ Handle Devotion notification
-  if (notif.type === 'devotion') {
-    console.log('📖 Opening Daily Devotion...');
-    window.dispatchEvent(new CustomEvent('openDevotion'));
-    setIsOpen(false);
-    return;
-  }
-  
-  if (notif.link && notif.link !== '#') {
-    window.open(notif.link, '_blank');
-  }
-  setIsOpen(false);
-};
+  };
 
   const addUpdateNotification = (title: string, message: string, link?: string) => {
     const newNotification: Notification = {
