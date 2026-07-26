@@ -56,10 +56,10 @@ export default function MainContent() {
   const userId = user?.id;
   const { darkMode } = useTheme();
 
-  // Convex hooks
-  const saveConversationsToCloud = useMutation(api.conversations.saveConversationsClean);
+  // ✅ Convex hooks - Use original function names
+  const saveConversationsToCloud = useMutation(api.conversations.saveConversations);
   const loadConversationsFromCloud = useQuery(
-    api.conversations.loadConversationsClean,
+    api.conversations.loadConversations,
     userId ? { userId } : "skip"
   );
 
