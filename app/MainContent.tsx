@@ -63,6 +63,11 @@ export default function MainContent() {
     userId ? { userId } : "skip"
   );
 
+const loadConversationsFromCloud = useQuery(
+  api.conversations.loadConversations,
+  userId ? { userId } : "skip"
+);
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);

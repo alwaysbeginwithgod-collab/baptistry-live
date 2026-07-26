@@ -12,11 +12,11 @@ export default defineSchema({
         id: v.string(),
         role: v.string(),
         content: v.string(),
-        timestamp: v.number(),
+        timestamp: v.number(), // ✅ Must be number
       })
     ),
-    createdAt: v.number(),
-    updatedAt: v.number(),
+    createdAt: v.number(), // ✅ Must be number
+    updatedAt: v.number(), // ✅ Must be number
     pinned: v.boolean(),
   }).index("by_userId", ["userId"]),
 });
