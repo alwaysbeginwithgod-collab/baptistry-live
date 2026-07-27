@@ -274,7 +274,7 @@ export default function MainContent() {
   }, [userId]);
 
 // ============================================================
-// ✅ FIXED: Load conversations from Convex (always fresh)
+// ✅ FIXED: Load conversations from Convex (with protection)
 // ============================================================
 useEffect(() => {
   console.log('🔵 LOAD EFFECT - userId:', userId, 'isLoaded:', isLoaded);
@@ -303,6 +303,12 @@ useEffect(() => {
   if (isValidCloudData(loadConversationsFromCloud)) {
     console.log('✅ LOADING FROM CONVEX CLOUD:', loadConversationsFromCloud.length);
     
+    // ✅ PROTECTION: If Convex returns empty but we have local conversations, keep local
+    if (loadConversationsFromCloud.length === 0 && conversations.length > 0) {
+      console.log('⚠️ Convex returned empty but we have local conversations - keeping local data');
+      return;
+    }
+    
     // ✅ Convert numeric timestamps to Date objects
     const withDates = loadConversationsFromCloud.map((conv: any) => ({
       ...conv,
@@ -324,7 +330,7 @@ useEffect(() => {
   }
   
   // ✅ Fallback: If Convex returns empty, check localStorage
-  console.log('🔵 Convex returned empty, checking localStorage...');
+  console.log('🔵 Convex returned empty or undefined, checking localStorage...');
   const savedConversations = localStorage.getItem(`baptistry_conversations_${userId}`);
   if (savedConversations) {
     try {
@@ -341,19 +347,21 @@ useEffect(() => {
       }));
       setConversations(withDates);
       
-      // ✅ Backup to cloud
-      const conversationsForCloud = withDates.map(conv => ({
-        ...conv,
-        messages: conv.messages.map(msg => ({
-          ...msg,
-          timestamp: msg.timestamp instanceof Date ? msg.timestamp.getTime() : msg.timestamp,
-        })),
-        createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
-        updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
-      }));
-      saveConversationsToCloud({ userId, conversations: conversationsForCloud })
-        .then(() => console.log('✅ Cloud backup successful'))
-        .catch((err) => console.error('❌ Cloud backup failed:', err));
+      // ✅ Backup to cloud (only if we have data)
+      if (withDates.length > 0) {
+        const conversationsForCloud = withDates.map(conv => ({
+          ...conv,
+          messages: conv.messages.map(msg => ({
+            ...msg,
+            timestamp: msg.timestamp instanceof Date ? msg.timestamp.getTime() : msg.timestamp,
+          })),
+          createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
+          updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
+        }));
+        saveConversationsToCloud({ userId, conversations: conversationsForCloud })
+          .then(() => console.log('✅ Cloud backup successful'))
+          .catch((err) => console.error('❌ Cloud backup failed:', err));
+      }
     } catch (e) {
       console.error('Failed to load conversations', e);
     }
@@ -363,7 +371,7 @@ useEffect(() => {
 }, [userId, isLoaded, loadConversationsFromCloud]);
 
 // ============================================================
-// ✅ FIXED: Save conversations to Convex cloud AND localStorage
+// ✅ FIXED: Save conversations ONLY when there are conversations
 // ============================================================
 useEffect(() => {
   console.log('🔵 SAVE EFFECT - conversations:', conversations.length, 'userId:', userId);
@@ -373,12 +381,19 @@ useEffect(() => {
     return;
   }
   
-  // ✅ Always save to localStorage (for backup)
+  // ✅ ONLY save if there are conversations
+  if (conversations.length === 0) {
+    console.log('⚠️ No conversations to save, skipping Convex save');
+    // Still save to localStorage (even empty)
+    localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
+    return;
+  }
+  
+  // Save to localStorage (for backup)
   localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
   console.log('💾 Saved to localStorage');
   
-  // ✅ Only save to Convex if there are conversations OR we need to clear data
-  // Convert Date objects to numbers for Convex
+  // ✅ Convert Date objects to numbers for Convex
   const conversationsForCloud = conversations.map(conv => ({
     ...conv,
     messages: conv.messages.map(msg => ({
