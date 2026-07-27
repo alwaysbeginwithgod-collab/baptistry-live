@@ -129,6 +129,27 @@ export default function MainContent() {
     autoResizeTextarea();
   };
 
+// ============================================================
+// GET USER NAME - Always return a valid name
+// ============================================================
+const getUserName = (): string => {
+  // 1. Use the state value
+  if (userName) return userName;
+  
+  // 2. Try localStorage
+  if (userId) {
+    const savedName = localStorage.getItem(`baptistry_user_name_${userId}`);
+    if (savedName) return savedName;
+  }
+  
+  // 3. Try Clerk's user data
+  const clerkName = user?.fullName || user?.firstName || user?.username;
+  if (clerkName) return clerkName;
+  
+  // 4. Fallback
+  return 'Friend';
+};
+
   // ============================================================
   // DYNAMIC SUGGESTIONS - Text slide-up animation
   // ============================================================
@@ -721,17 +742,19 @@ const loadConversation = (conversationId: string) => {
       setStreamingText('');
       stopRequested.current = false;
 
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            message: newContent,
-            history: newMessages,
-            userName: userName || 'friend',
-            conversationId: difyConversationId,
-          }),
-        });
+  const finalUserName = getUserName();
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        message: newContent,
+        history: newMessages,
+        userName: finalUserName, // ✅ Pass the user name
+        conversationId: difyConversationId,
+      }),
+    });
 
         const data = await response.json();
         
@@ -805,17 +828,19 @@ const loadConversation = (conversationId: string) => {
     setStreamingText('');
     stopRequested.current = false;
     
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: userMessageContent, 
-          history: newMessages,
-          userName: userName || 'friend',
-          conversationId: difyConversationId,
-        }),
-      });
+  const finalUserName = getUserName();
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        message: userMessageContent, 
+        history: newMessages,
+        userName: finalUserName, // ✅ Pass the user name
+        conversationId: difyConversationId,
+      }),
+    });
 
       const data = await response.json();
       
@@ -868,11 +893,14 @@ const sendMessage = async () => {
   if (!input.trim()) return;
   if (isGenerating) return;
 
+  // ✅ Get the user name using the helper
+  const finalUserName = getUserName();
+  console.log('👤 Sending message with user name:', finalUserName);
+
   // ✅ Use Dify conversation ID if available
   let convId = currentConversationId;
   
   if (!convId) {
-    // ✅ If no conversation ID, use Dify ID or generate one
     convId = difyConversationId || Date.now().toString();
     setCurrentConversationId(convId);
     
@@ -899,33 +927,33 @@ const sendMessage = async () => {
     });
   }
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: input,
-      timestamp: new Date(),
-    };
+  const userMessage: Message = {
+    id: Date.now().toString(),
+    role: 'user',
+    content: input,
+    timestamp: new Date(),
+  };
 
-    setMessages(prev => [...prev, userMessage]);
-    const sentInput = input;
-    setInput('');
-    setIsGenerating(true);
-    setStreamingText('');
-    stopRequested.current = false;
-    
-    setTimeout(autoResizeTextarea, 0);
+  setMessages(prev => [...prev, userMessage]);
+  const sentInput = input;
+  setInput('');
+  setIsGenerating(true);
+  setStreamingText('');
+  stopRequested.current = false;
+  
+  setTimeout(autoResizeTextarea, 0);
 
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: sentInput, 
-          history: messages,
-          userName: userName || 'friend',
-          conversationId: difyConversationId,
-        }),
-      });
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        message: sentInput, 
+        history: messages,
+        userName: finalUserName, // ✅ Pass the user name
+        conversationId: difyConversationId,
+      }),
+    });
 
       const data = await response.json();
       
