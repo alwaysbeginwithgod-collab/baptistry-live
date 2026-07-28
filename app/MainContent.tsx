@@ -769,7 +769,7 @@ const loadConversation = (conversationId: string) => {
         let fullResponse = data.response || 'I apologize, but I encountered an error.';
         fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-        const chunkSize = 5;
+        const chunkSize = 7;
         const delay = 3;
         for (let i = 0; i <= fullResponse.length; i += chunkSize) {
           if (stopRequested.current) {
@@ -856,7 +856,7 @@ const loadConversation = (conversationId: string) => {
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 5;
+      const chunkSize = 7;
       const delay = 3;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
@@ -969,7 +969,7 @@ const sendMessage = async () => {
     fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
     // ✅ BALANCED: chunk size 5 with 2ms delay for visible typing animation
-    const chunkSize = 5;
+    const chunkSize = 7;
     const delay = 3;
     for (let i = 0; i <= fullResponse.length; i += chunkSize) {
       if (stopRequested.current) {
