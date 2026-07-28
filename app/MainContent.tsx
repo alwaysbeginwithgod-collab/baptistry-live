@@ -770,7 +770,7 @@ const loadConversation = (conversationId: string) => {
         fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
         const chunkSize = 5;
-        const delay = 2;
+        const delay = 3;
         for (let i = 0; i <= fullResponse.length; i += chunkSize) {
           if (stopRequested.current) {
             setIsGenerating(false);
@@ -857,7 +857,7 @@ const loadConversation = (conversationId: string) => {
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
       const chunkSize = 5;
-      const delay = 2;
+      const delay = 3;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
@@ -968,8 +968,9 @@ const sendMessage = async () => {
     let fullResponse = data.response || 'I apologize, but I encountered an error.';
     fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-    // ✅ FASTER: Larger chunk size (10 instead of 5) and NO delay
-    const chunkSize = 10;
+    // ✅ BALANCED: chunk size 5 with 2ms delay for visible typing animation
+    const chunkSize = 5;
+    const delay = 3;
     for (let i = 0; i <= fullResponse.length; i += chunkSize) {
       if (stopRequested.current) {
         setIsGenerating(false);
@@ -977,7 +978,7 @@ const sendMessage = async () => {
         return;
       }
       setStreamingText(fullResponse.substring(0, i));
-      // ✅ REMOVED the 3ms delay
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
 
     const assistantMessage: Message = {
