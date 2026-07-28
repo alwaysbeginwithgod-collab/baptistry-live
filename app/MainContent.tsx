@@ -933,134 +933,118 @@ const loadConversation = (conversationId: string) => {
   // ============================================================
   // ✅ FIXED: sendMessage with Real-Time Streaming
   // ============================================================
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    if (isGenerating) return;
+const sendMessage = async () => {
+  if (!input.trim()) return;
+  if (isGenerating) return;
 
-    const finalUserName = getUserName();
-    console.log('👤 Sending message with user name:', finalUserName);
+  const finalUserName = getUserName();
+  console.log('👤 Sending message with user name:', finalUserName);
 
-    let convId = currentConversationId;
+  let convId = currentConversationId;
+  
+  if (!convId) {
+    convId = difyConversationId || Date.now().toString();
+    setCurrentConversationId(convId);
     
-    if (!convId) {
-      convId = difyConversationId || Date.now().toString();
-      setCurrentConversationId(convId);
-      
-      const newConversation: Conversation = {
-        id: convId,
-        title: input.substring(0, 40),
-        messages: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        pinned: false,
-      };
-      setConversations(prev => {
-        const exists = prev.some(conv => conv.id === convId);
-        if (exists) {
-          return prev;
-        }
-        const withNew = [newConversation, ...prev];
-        const sorted = [...withNew].sort((a, b) => {
-          if (a.pinned && !b.pinned) return -1;
-          if (!a.pinned && b.pinned) return 1;
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-        });
-        return sorted;
+    const newConversation: Conversation = {
+      id: convId,
+      title: input.substring(0, 40),
+      messages: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      pinned: false,
+    };
+    setConversations(prev => {
+      const exists = prev.some(conv => conv.id === convId);
+      if (exists) {
+        return prev;
+      }
+      const withNew = [newConversation, ...prev];
+      const sorted = [...withNew].sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
       });
+      return sorted;
+    });
+  }
+
+  const userMessage: Message = {
+    id: Date.now().toString(),
+    role: 'user',
+    content: input,
+    timestamp: new Date(),
+  };
+
+  setMessages(prev => [...prev, userMessage]);
+  const sentInput = input;
+  setInput('');
+  setIsGenerating(true);
+  setStreamingText('');
+  stopRequested.current = false;
+  
+  setTimeout(autoResizeTextarea, 0);
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        message: sentInput, 
+        history: messages,
+        userName: finalUserName,
+        conversationId: difyConversationId,
+      }),
+    });
+
+    const data = await response.json();
+    
+    if (data.conversation_id) {
+      console.log('🆔 New Dify conversation ID:', data.conversation_id);
+      setDifyConversationId(data.conversation_id);
+      if (userId) {
+        localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+      }
+    }
+    
+    let fullResponse = data.response || 'I apologize, but I encountered an error.';
+    fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+    // ✅ FASTER: Larger chunk size (10 instead of 5) and NO delay
+    const chunkSize = 10;
+    for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+      if (stopRequested.current) {
+        setIsGenerating(false);
+        setStreamingText('');
+        return;
+      }
+      setStreamingText(fullResponse.substring(0, i));
+      // ✅ REMOVED the 3ms delay - now updates instantly
     }
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: input,
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: fullResponse,
       timestamp: new Date(),
     };
-
-    setMessages(prev => [...prev, userMessage]);
-    const sentInput = input;
-    setInput('');
-    setIsGenerating(true);
+    setMessages(prev => [...prev, assistantMessage]);
     setStreamingText('');
-    stopRequested.current = false;
-    
-    setTimeout(autoResizeTextarea, 0);
+    setIsGenerating(false);
 
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: sentInput, 
-          history: messages,
-          userName: finalUserName,
-          conversationId: difyConversationId,
-        }),
-      });
-
-      // ✅ Process streaming response
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = '';
-      let newConversationId = null;
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (line.trim()) {
-            try {
-              const data = JSON.parse(line);
-              if (data.event === 'message' && data.answer) {
-                fullResponse = data.answer;
-                setStreamingText(fullResponse);
-              }
-              if (data.event === 'message_end' && data.conversation_id) {
-                newConversationId = data.conversation_id;
-              }
-              if (data.event === 'message_end') {
-                const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-                const assistantMessage: Message = {
-                  id: (Date.now() + 1).toString(),
-                  role: 'assistant',
-                  content: cleanResponse,
-                  timestamp: new Date(),
-                };
-                setMessages(prev => [...prev, assistantMessage]);
-                setStreamingText('');
-                setIsGenerating(false);
-                
-                if (newConversationId) {
-                  setDifyConversationId(newConversationId);
-                  if (userId) {
-                    localStorage.setItem(`dify_conversation_${userId}`, newConversationId);
-                  }
-                }
-              }
-            } catch (e) {
-              // Ignore parse errors
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'I apologize, but I am unable to respond at this moment.',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      setIsGenerating(false);
-      setStreamingText('');
-    }
-  };
+  } catch (error) {
+    console.error('Error:', error);
+    const errorMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: 'I apologize, but I am unable to respond at this moment.',
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, errorMessage]);
+    setIsGenerating(false);
+    setStreamingText('');
+  }
+};
 
   const stopResponse = () => {
     stopRequested.current = true;
