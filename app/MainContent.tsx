@@ -1000,6 +1000,20 @@ const sendMessage = async () => {
   }
 };
 
+const stopResponse = () => {
+  stopRequested.current = true;
+  setIsGenerating(false);
+  setStreamingText('');
+  
+  const stopMessage: Message = {
+    id: (Date.now() + 1).toString(),
+    role: 'assistant',
+    content: "⏹️ You stopped me from responding. No worries! Feel free to **edit your message** and try again, or ask me something new. 🙏",
+    timestamp: new Date(),
+  };
+  setMessages(prev => [...prev, stopMessage]);
+};
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
