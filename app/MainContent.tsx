@@ -36,9 +36,9 @@ const SUGGESTIONS = [
   { text: "What is the fruit of the Spirit?" },
   { text: "What is the unpardonable sin?" },
   { text: "Explain the book of Revelation" },
-  { text: "Give me a preaching about love" },
+  { text: "Create a preaching about love" },
   { text: "What is the meaning of baptism?" },
-  { text: "Give me a devotion about forgiveness" },
+  { text: "Create a devotion about forgiveness" },
   { text: "Does the Bible forbid us to drink alcohol?" },
   { text: "What is the Gospel according to Paul?" },
   { text: "What does the Bible say about suffering?" },
@@ -769,15 +769,14 @@ const loadConversation = (conversationId: string) => {
         let fullResponse = data.response || 'I apologize, but I encountered an error.';
         fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-        const chunkSize = 5;
+        const chunkSize = 10;
         for (let i = 0; i <= fullResponse.length; i += chunkSize) {
           if (stopRequested.current) {
             setIsGenerating(false);
             setStreamingText('');
             return;
           }
-          setStreamingText(fullResponse.substring(0, i));
-          await new Promise(resolve => setTimeout(resolve, 3));
+          setStreamingText(fullResponse.substring(0, i));       
         }
 
         const assistantMessage: Message = {
@@ -855,7 +854,7 @@ const loadConversation = (conversationId: string) => {
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 5;
+      const chunkSize = 10;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
@@ -863,7 +862,6 @@ const loadConversation = (conversationId: string) => {
           return;
         }
         setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 3));
       }
 
       const newAssistantMessage: Message = {
@@ -893,11 +891,9 @@ const sendMessage = async () => {
   if (!input.trim()) return;
   if (isGenerating) return;
 
-  // ✅ Get the user name using the helper
   const finalUserName = getUserName();
   console.log('👤 Sending message with user name:', finalUserName);
 
-  // ✅ Use Dify conversation ID if available
   let convId = currentConversationId;
   
   if (!convId) {
@@ -950,72 +946,59 @@ const sendMessage = async () => {
       body: JSON.stringify({ 
         message: sentInput, 
         history: messages,
-        userName: finalUserName, // ✅ Pass the user name
+        userName: finalUserName,
         conversationId: difyConversationId,
       }),
     });
 
-      const data = await response.json();
-      
-      if (data.conversation_id) {
-        console.log('🆔 New Dify conversation ID:', data.conversation_id);
-        setDifyConversationId(data.conversation_id);
-        if (userId) {
-          localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
-        }
-      }
-      
-      let fullResponse = data.response || 'I apologize, but I encountered an error.';
-      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-      const chunkSize = 5;
-      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-        if (stopRequested.current) {
-          setIsGenerating(false);
-          setStreamingText('');
-          return;
-        }
-        setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, 3));
-      }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: fullResponse,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-      setStreamingText('');
-      setIsGenerating(false);
-
-    } catch (error) {
-      console.error('Error:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'I apologize, but I am unable to respond at this moment.',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      setIsGenerating(false);
-      setStreamingText('');
-    }
-  };
-
-  const stopResponse = () => {
-    stopRequested.current = true;
-    setIsGenerating(false);
-    setStreamingText('');
+    const data = await response.json();
     
-    const stopMessage: Message = {
+    if (data.conversation_id) {
+      console.log('🆔 New Dify conversation ID:', data.conversation_id);
+      setDifyConversationId(data.conversation_id);
+      if (userId) {
+        localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+      }
+    }
+    
+    let fullResponse = data.response || 'I apologize, but I encountered an error.';
+    fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+    // ✅ FASTER: Larger chunk size (10 instead of 5) and NO delay
+    const chunkSize = 10;
+    for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+      if (stopRequested.current) {
+        setIsGenerating(false);
+        setStreamingText('');
+        return;
+      }
+      setStreamingText(fullResponse.substring(0, i));
+      // ✅ REMOVED the 3ms delay
+    }
+
+    const assistantMessage: Message = {
       id: (Date.now() + 1).toString(),
       role: 'assistant',
-      content: "⏹️ You stopped me from responding. No worries! Feel free to **edit your message** and try again, or ask me something new. 🙏",
+      content: fullResponse,
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, stopMessage]);
-  };
+    setMessages(prev => [...prev, assistantMessage]);
+    setStreamingText('');
+    setIsGenerating(false);
+
+  } catch (error) {
+    console.error('Error:', error);
+    const errorMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: 'I apologize, but I am unable to respond at this moment.',
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, errorMessage]);
+    setIsGenerating(false);
+    setStreamingText('');
+  }
+};
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -1140,10 +1123,10 @@ const sendMessage = async () => {
                           • "What do you believe about salvation?"
                         </button>
                         <button 
-                          onClick={() => fillInput("Give me a devotion about grace")}
+                          onClick={() => fillInput("Create a devotion about grace")}
                           className={tryAskingButtonClass}
                         >
-                          • "Give me a devotion about grace"
+                          • "Create a devotion about grace"
                         </button>
                         <button 
                           onClick={() => fillInput("Create a preaching about sin")}
