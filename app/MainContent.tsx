@@ -770,7 +770,7 @@ const loadConversation = (conversationId: string) => {
         fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
         const chunkSize = 7;
-        const delay = 3;
+        const delay = 2;
         for (let i = 0; i <= fullResponse.length; i += chunkSize) {
           if (stopRequested.current) {
             setIsGenerating(false);
@@ -857,7 +857,7 @@ const loadConversation = (conversationId: string) => {
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
       const chunkSize = 7;
-      const delay = 3;
+      const delay = 2;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
@@ -970,7 +970,7 @@ const sendMessage = async () => {
 
     // ✅ BALANCED: chunk size 5 with 2ms delay for visible typing animation
     const chunkSize = 7;
-    const delay = 3;
+    const delay = 2;
     for (let i = 0; i <= fullResponse.length; i += chunkSize) {
       if (stopRequested.current) {
         setIsGenerating(false);
