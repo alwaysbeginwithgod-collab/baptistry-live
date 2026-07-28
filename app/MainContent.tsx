@@ -769,14 +769,16 @@ const loadConversation = (conversationId: string) => {
         let fullResponse = data.response || 'I apologize, but I encountered an error.';
         fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-        const chunkSize = 10;
+        const chunkSize = 5;
+        const delay = 2;
         for (let i = 0; i <= fullResponse.length; i += chunkSize) {
           if (stopRequested.current) {
             setIsGenerating(false);
             setStreamingText('');
             return;
           }
-          setStreamingText(fullResponse.substring(0, i));       
+          setStreamingText(fullResponse.substring(0, i));
+          await new Promise(resolve => setTimeout(resolve, delay));       
         }
 
         const assistantMessage: Message = {
@@ -854,7 +856,8 @@ const loadConversation = (conversationId: string) => {
       let fullResponse = data.response || 'I apologize, but I encountered an error.';
       fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      const chunkSize = 10;
+      const chunkSize = 5;
+      const delay = 2;
       for (let i = 0; i <= fullResponse.length; i += chunkSize) {
         if (stopRequested.current) {
           setIsGenerating(false);
@@ -862,6 +865,7 @@ const loadConversation = (conversationId: string) => {
           return;
         }
         setStreamingText(fullResponse.substring(0, i));
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
 
       const newAssistantMessage: Message = {
