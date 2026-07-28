@@ -36,9 +36,9 @@ const SUGGESTIONS = [
   { text: "What is the fruit of the Spirit?" },
   { text: "What is the unpardonable sin?" },
   { text: "Explain the book of Revelation" },
-  { text: "Create a preaching about love" },
+  { text: "Give me a preaching about love" },
   { text: "What is the meaning of baptism?" },
-  { text: "Create a devotion about forgiveness" },
+  { text: "Give me a devotion about forgiveness" },
   { text: "Does the Bible forbid us to drink alcohol?" },
   { text: "What is the Gospel according to Paul?" },
   { text: "What does the Bible say about suffering?" },
@@ -696,9 +696,6 @@ const loadConversation = (conversationId: string) => {
     localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
   };
 
-  // ============================================================
-  // ✅ FIXED: editMessage with Real-Time Streaming
-  // ============================================================
   const editMessage = (messageId: string, newContent: string) => {
     console.log('✏️ EDIT MESSAGE:', messageId, newContent);
 
@@ -745,71 +742,54 @@ const loadConversation = (conversationId: string) => {
       setStreamingText('');
       stopRequested.current = false;
 
-      const finalUserName = getUserName();
+  const finalUserName = getUserName();
 
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            message: newContent,
-            history: newMessages,
-            userName: finalUserName,
-            conversationId: difyConversationId,
-          }),
-        });
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        message: newContent,
+        history: newMessages,
+        userName: finalUserName, // ✅ Pass the user name
+        conversationId: difyConversationId,
+      }),
+    });
 
-        // ✅ Process streaming response
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let fullResponse = '';
-        let newConversationId = null;
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (line.trim()) {
-              try {
-                const data = JSON.parse(line);
-                if (data.event === 'message' && data.answer) {
-                  fullResponse = data.answer;
-                  setStreamingText(fullResponse);
-                }
-                if (data.event === 'message_end' && data.conversation_id) {
-                  newConversationId = data.conversation_id;
-                }
-                if (data.event === 'message_end') {
-                  const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-                  const assistantMessage: Message = {
-                    id: (Date.now() + 1).toString(),
-                    role: 'assistant',
-                    content: cleanResponse,
-                    timestamp: new Date(),
-                  };
-                  setMessages(prev => [...prev, assistantMessage]);
-                  setStreamingText('');
-                  setIsGenerating(false);
-                  
-                  if (newConversationId) {
-                    setDifyConversationId(newConversationId);
-                    if (userId) {
-                      localStorage.setItem(`dify_conversation_${userId}`, newConversationId);
-                    }
-                  }
-                }
-              } catch (e) {
-                // Ignore parse errors
-              }
-            }
+        const data = await response.json();
+        
+        if (data.conversation_id) {
+          console.log('🆔 New Dify conversation ID:', data.conversation_id);
+          setDifyConversationId(data.conversation_id);
+          if (userId) {
+            localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
           }
         }
+        
+        let fullResponse = data.response || 'I apologize, but I encountered an error.';
+        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+        const chunkSize = 5;
+        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+          if (stopRequested.current) {
+            setIsGenerating(false);
+            setStreamingText('');
+            return;
+          }
+          setStreamingText(fullResponse.substring(0, i));
+          await new Promise(resolve => setTimeout(resolve, 3));
+        }
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: fullResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+
       } catch (error) {
         console.error('Error:', error);
         const errorMessage: Message = {
@@ -829,9 +809,6 @@ const loadConversation = (conversationId: string) => {
     }, 50);
   };
 
-  // ============================================================
-  // ✅ FIXED: regenerateMessage with Real-Time Streaming
-  // ============================================================
   const regenerateMessage = async (assistantMessageId: string) => {
     const assistantIndex = messages.findIndex(m => m.id === assistantMessageId);
     if (assistantIndex === -1) return;
@@ -851,71 +828,53 @@ const loadConversation = (conversationId: string) => {
     setStreamingText('');
     stopRequested.current = false;
     
-    const finalUserName = getUserName();
+  const finalUserName = getUserName();
 
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: userMessageContent, 
-          history: newMessages,
-          userName: finalUserName,
-          conversationId: difyConversationId,
-        }),
-      });
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        message: userMessageContent, 
+        history: newMessages,
+        userName: finalUserName, // ✅ Pass the user name
+        conversationId: difyConversationId,
+      }),
+    });
 
-      // ✅ Process streaming response
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = '';
-      let newConversationId = null;
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (line.trim()) {
-            try {
-              const data = JSON.parse(line);
-              if (data.event === 'message' && data.answer) {
-                fullResponse = data.answer;
-                setStreamingText(fullResponse);
-              }
-              if (data.event === 'message_end' && data.conversation_id) {
-                newConversationId = data.conversation_id;
-              }
-              if (data.event === 'message_end') {
-                const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-                const newAssistantMessage: Message = {
-                  id: (Date.now() + 1).toString(),
-                  role: 'assistant',
-                  content: cleanResponse,
-                  timestamp: new Date(),
-                };
-                setMessages(prev => [...prev, newAssistantMessage]);
-                setStreamingText('');
-                setIsGenerating(false);
-                
-                if (newConversationId) {
-                  setDifyConversationId(newConversationId);
-                  if (userId) {
-                    localStorage.setItem(`dify_conversation_${userId}`, newConversationId);
-                  }
-                }
-              }
-            } catch (e) {
-              // Ignore parse errors
-            }
-          }
+      const data = await response.json();
+      
+      if (data.conversation_id) {
+        console.log('🆔 New Dify conversation ID:', data.conversation_id);
+        setDifyConversationId(data.conversation_id);
+        if (userId) {
+          localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
         }
       }
+      
+      let fullResponse = data.response || 'I apologize, but I encountered an error.';
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+      const chunkSize = 5;
+      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+        if (stopRequested.current) {
+          setIsGenerating(false);
+          setStreamingText('');
+          return;
+        }
+        setStreamingText(fullResponse.substring(0, i));
+        await new Promise(resolve => setTimeout(resolve, 3));
+      }
+
+      const newAssistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: fullResponse,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, newAssistantMessage]);
+      setStreamingText('');
+      setIsGenerating(false);
     } catch (error) {
       console.error('Regeneration error:', error);
       const errorMessage: Message = {
@@ -930,16 +889,15 @@ const loadConversation = (conversationId: string) => {
     }
   };
 
-  // ============================================================
-  // ✅ FIXED: sendMessage with Real-Time Streaming
-  // ============================================================
 const sendMessage = async () => {
   if (!input.trim()) return;
   if (isGenerating) return;
 
+  // ✅ Get the user name using the helper
   const finalUserName = getUserName();
   console.log('👤 Sending message with user name:', finalUserName);
 
+  // ✅ Use Dify conversation ID if available
   let convId = currentConversationId;
   
   if (!convId) {
@@ -992,59 +950,58 @@ const sendMessage = async () => {
       body: JSON.stringify({ 
         message: sentInput, 
         history: messages,
-        userName: finalUserName,
+        userName: finalUserName, // ✅ Pass the user name
         conversationId: difyConversationId,
       }),
     });
 
-    const data = await response.json();
-    
-    if (data.conversation_id) {
-      console.log('🆔 New Dify conversation ID:', data.conversation_id);
-      setDifyConversationId(data.conversation_id);
-      if (userId) {
-        localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+      const data = await response.json();
+      
+      if (data.conversation_id) {
+        console.log('🆔 New Dify conversation ID:', data.conversation_id);
+        setDifyConversationId(data.conversation_id);
+        if (userId) {
+          localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+        }
       }
-    }
-    
-    let fullResponse = data.response || 'I apologize, but I encountered an error.';
-    fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      
+      let fullResponse = data.response || 'I apologize, but I encountered an error.';
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-    // ✅ FASTER: Larger chunk size (10 instead of 5) and NO delay
-    const chunkSize = 10;
-    for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-      if (stopRequested.current) {
-        setIsGenerating(false);
-        setStreamingText('');
-        return;
+      const chunkSize = 5;
+      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+        if (stopRequested.current) {
+          setIsGenerating(false);
+          setStreamingText('');
+          return;
+        }
+        setStreamingText(fullResponse.substring(0, i));
+        await new Promise(resolve => setTimeout(resolve, 3));
       }
-      setStreamingText(fullResponse.substring(0, i));
-      // ✅ REMOVED the 3ms delay - now updates instantly
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: fullResponse,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+      setStreamingText('');
+      setIsGenerating(false);
+
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I apologize, but I am unable to respond at this moment.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setIsGenerating(false);
+      setStreamingText('');
     }
-
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: fullResponse,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, assistantMessage]);
-    setStreamingText('');
-    setIsGenerating(false);
-
-  } catch (error) {
-    console.error('Error:', error);
-    const errorMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: 'I apologize, but I am unable to respond at this moment.',
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, errorMessage]);
-    setIsGenerating(false);
-    setStreamingText('');
-  }
-};
+  };
 
   const stopResponse = () => {
     stopRequested.current = true;
@@ -1119,16 +1076,17 @@ const sendMessage = async () => {
       />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Header 
-          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-          messageCount={messages.length}
-          messages={messages}
-          onLoadMessage={scrollToMessage}
-          onBooksClick={() => {
-            const event = new CustomEvent('openBooks');
-            window.dispatchEvent(event);
-          }}
-        />
+<Header 
+  onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+  messageCount={messages.length}
+  messages={messages}
+  onLoadMessage={scrollToMessage}
+  onBooksClick={() => {
+    // Trigger the Books modal via custom event
+    const event = new CustomEvent('openBooks');
+    window.dispatchEvent(event);
+  }}
+/>
 
         <div className="flex-1 overflow-y-auto">
           {messages.length === 0 && !isGenerating ? (
