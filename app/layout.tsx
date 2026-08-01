@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import { ClerkProvider } from '@clerk/nextjs'
 import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import PWAInstall from './components/PWAInstall';
 import MaintenanceMode from './components/MaintenanceMode';
@@ -42,6 +43,7 @@ export default function RootLayout({
               />
               {children}
               <Analytics />
+              <SpeedInsights />
               <PWAInstall />
               <MaintenanceMode />
             </body>
