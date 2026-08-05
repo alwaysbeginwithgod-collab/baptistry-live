@@ -890,7 +890,7 @@ const loadConversation = (conversationId: string) => {
 
         // Use the existing typing animation
         const chunkSize = 2;
-        const delay = 7;
+        const delay = 10;
         for (let i = 0; i <= fullResponse.length; i += chunkSize) {
           if (stopRequested.current) {
             setIsGenerating(false);
