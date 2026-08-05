@@ -889,8 +889,8 @@ const loadConversation = (conversationId: string) => {
         fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
         // Use the existing typing animation
-        const chunkSize = 7;
-        const delay = 2;
+        const chunkSize = 3;
+        const delay = 5;
         for (let i = 0; i <= fullResponse.length; i += chunkSize) {
           if (stopRequested.current) {
             setIsGenerating(false);
