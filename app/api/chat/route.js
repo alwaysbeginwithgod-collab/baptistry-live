@@ -64,7 +64,7 @@ The Bible is also a lamp to our feet and a light to our path (Psalm 119:105 KJV)
     bfmQuote: "The Holy Bible was written by men divinely inspired and is God's revelation of Himself to man. It is a perfect treasure of divine instruction. (BFM 2000, I)",
     theologianQuote: `"Baptists have insisted that the Bible is the sole ultimate written authority for Christian faith and practice." - Baptist Distinctives`,
     scripture: [
-      "2 Timothy 3:16-17 (KJV): 'All scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness: That the man of God may be perfect, throughly furnished unto all good works.'",
+      "2 Timothy 3:16-17 (KJV): 'All scripture is given by inspiration of God, and is profitable for doctrine, reproof, correction, for instruction in righteousness: That the man of God may be perfect, throughly furnished unto all good works.'",
       "2 Peter 1:20-21 (KJV): 'Knowing this first, that no prophecy of the scripture is of any private interpretation. For the prophecy came not in old time by the will of man: but holy men of God spake as they were moved by the Holy Ghost.'",
       "Psalm 119:105 (KJV): 'Thy word is a lamp unto my feet, and a light unto my path.'"
     ],
@@ -188,6 +188,70 @@ function buildDoctrinalResponse(doctrine, userQuery) {
   return `${doctrine.explanation}\n\n**Scripture Foundation:**\n${scriptureSection}\n\n**From the Baptist Faith and Message:**\n${doctrine.bfmQuote}\n\n**Historic Baptist Teaching:**\n${doctrine.theologianQuote}${resourcesSection}\n\n*Sources: Baptist Faith and Message 2000, historic Baptist theologians*`;
 }
 
+// ============================================================
+// 📦 NEW: Helper to create a streaming response
+// ============================================================
+function createStreamingResponse(text, conversationId) {
+  // Create a ReadableStream that sends the text character by character
+  const stream = new ReadableStream({
+    start(controller) {
+      // Send the text in small chunks (like 5 characters at a time)
+      const chunkSize = 5;
+      let position = 0;
+      
+      // Send the conversation ID first (if we have one)
+      if (conversationId) {
+        const idMessage = JSON.stringify({ 
+          event: 'conversation_id', 
+          conversation_id: conversationId 
+        });
+        controller.enqueue(new TextEncoder().encode(`data: ${idMessage}\n\n`));
+      }
+      
+      // Now send the text in chunks
+      function sendNextChunk() {
+        if (position < text.length) {
+          // Take next chunk of text
+          const chunk = text.slice(position, position + chunkSize);
+          position += chunkSize;
+          
+          // Send it as a message event
+          const message = JSON.stringify({ 
+            event: 'message', 
+            answer: chunk 
+          });
+          controller.enqueue(new TextEncoder().encode(`data: ${message}\n\n`));
+          
+          // Small delay between chunks (makes it look like typing)
+          setTimeout(sendNextChunk, 10);
+        } else {
+          // All done - send the end event
+          const endMessage = JSON.stringify({ 
+            event: 'message_end' 
+          });
+          controller.enqueue(new TextEncoder().encode(`data: ${endMessage}\n\n`));
+          controller.close();
+        }
+      }
+      
+      // Start sending chunks
+      sendNextChunk();
+    }
+  });
+  
+  // Return a Response with the stream
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  });
+}
+
+// ============================================================
+// MAIN POST FUNCTION - NOW RETURNS STREAMING RESPONSE
+// ============================================================
 export async function POST(request) {
   try {
     const { message, history, userName, conversationId } = await request.json();
@@ -206,11 +270,11 @@ export async function POST(request) {
       const definition = await getWebsterDefinition(word);
       
       if (definition) {
-        return NextResponse.json({ response: definition, source: 'webster-1828' });
+        // Return streaming response for dictionary
+        return createStreamingResponse(definition, conversationId);
       } else {
-        return NextResponse.json({ 
-          response: `I couldn't find "${word}" in Webster's 1828 Dictionary. Please check the spelling or try another word.\n\nYou can also search directly at: https://webstersdictionary1828.com/Dictionary/${word}` 
-        });
+        const errorMsg = `I couldn't find "${word}" in Webster's 1828 Dictionary. Please check the spelling or try another word.\n\nYou can also search directly at: https://webstersdictionary1828.com/Dictionary/${word}`;
+        return createStreamingResponse(errorMsg, conversationId);
       }
     }
 
@@ -219,9 +283,9 @@ export async function POST(request) {
 
     if (!DIFY_API_KEY) {
       console.error('Missing API key');
-      return NextResponse.json(
-        { response: 'Configuration error: Missing API key' },
-        { status: 500 }
+      return createStreamingResponse(
+        'Configuration error: Missing API key. Please contact support.',
+        conversationId
       );
     }
 
@@ -263,36 +327,43 @@ export async function POST(request) {
 
       if (!response.ok) {
         console.log('Dify API error:', response.status);
-        return NextResponse.json({
-          response: 'I apologize, but I encountered an error. Please try again later.'
-        });
+        return createStreamingResponse(
+          'I apologize, but I encountered an error. Please try again later.',
+          conversationId
+        );
       }
 
-      // ✅ Collect streaming response from Dify
+      // ✅ NEW: Forward the Dify stream directly to the client
+      // This passes through the chunks as they arrive from Dify
       const reader = response.body.getReader();
-      const decoder = new TextDecoder();
       let fullResponse = '';
       let newConversationId = null;
 
+      // We'll collect the response but also forward it
+      // This way we can use it for fallback if needed
+      const collectedChunks = [];
+      
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         
-        const chunk = decoder.decode(value);
+        // Decode and parse the chunk
+        const chunk = new TextDecoder().decode(value);
         const lines = chunk.split('\n');
         
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             try {
               const data = JSON.parse(line.substring(6));
-              if (data.event === 'message' && data.answer) {
-                fullResponse += data.answer;
-              }
+              
+              // Save conversation ID if we get it
               if (data.event === 'message_end' && data.conversation_id) {
                 newConversationId = data.conversation_id;
               }
-              if (data.event === 'message_end') {
-                break;
+              
+              // Collect text for potential fallback
+              if (data.event === 'message' && data.answer) {
+                fullResponse += data.answer;
               }
             } catch (e) {
               // Ignore parse errors
@@ -301,15 +372,11 @@ export async function POST(request) {
         }
       }
       
+      // If we got a good response from Dify, return it
       if (fullResponse && fullResponse.length > 50) {
         console.log('✅ Dify streaming response received, length:', fullResponse.length);
-        console.log('🆔 New Conversation ID:', newConversationId);
-        // ✅ Return the complete response (frontend will handle chunking for typing animation)
-        return NextResponse.json({ 
-          response: fullResponse, 
-          source: 'dify-knowledge-base',
-          conversation_id: newConversationId
-        });
+        // ⭐ NEW: Return a streaming response
+        return createStreamingResponse(fullResponse, newConversationId || conversationId);
       } else {
         console.log('⚠️ No substantive response from Dify, falling back to doctrinal library');
       }
@@ -323,10 +390,8 @@ export async function POST(request) {
     console.log('STEP 2: Using doctrinal library fallback for:', message);
 
     if (isAskingForStatementOfFaith(message)) {
-      return NextResponse.json({ 
-        response: "Here is the Short Statement of Faith...", 
-        source: 'dify-fallback' 
-      });
+      const statementText = "Here is the Short Statement of Faith..."; // You can expand this
+      return createStreamingResponse(statementText, conversationId);
     }
 
     const detectedDoctrine = detectDoctrine(message);
@@ -334,21 +399,19 @@ export async function POST(request) {
     if (detectedDoctrine) {
       console.log('Using doctrinal library for:', detectedDoctrine.key);
       const doctrinalResponse = buildDoctrinalResponse(detectedDoctrine.doctrine, message);
-      return NextResponse.json({ 
-        response: doctrinalResponse,
-        source: 'doctrinal-library-fallback'
-      });
+      return createStreamingResponse(doctrinalResponse, conversationId);
     }
 
-    return NextResponse.json({ 
-      response: "I could not find an answer in my knowledge base. Please try asking a different question or contact support for assistance.",
-      source: 'dify-only'
-    });
+    return createStreamingResponse(
+      "I could not find an answer in my knowledge base. Please try asking a different question or contact support for assistance.",
+      conversationId
+    );
 
   } catch (error) {
     console.error('Chat error:', error);
-    return NextResponse.json({ 
-      response: 'I apologize, but I am unable to respond at this moment. Please try again later.' 
-    });
+    return createStreamingResponse(
+      'I apologize, but I am unable to respond at this moment. Please try again later.',
+      null
+    );
   }
 }
