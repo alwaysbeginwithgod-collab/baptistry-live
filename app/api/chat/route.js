@@ -24,6 +24,7 @@ async function getWebsterDefinition(word) {
 // HELPERS: Reduce history size for faster processing
 // ============================================================
 function getRecentHistory(history, limit = 5) {
+  // Only send the last `limit` messages to reduce API load
   return history.slice(-limit);
 }
 
@@ -267,107 +268,81 @@ export async function POST(request) {
         });
       }
 
-      // ============================================================
-      // ✅ TRUE SSE STREAMING - Pipes Dify's stream directly to the client
-      // ============================================================
-      const encoder = new TextEncoder();
-      const stream = new ReadableStream({
-        async start(controller) {
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder();
-          let buffer = '';
-          let newConversationId = null;
-          let fullResponse = ''; // For tracking only, not for sending
+      // ✅ Collect streaming response from Dify
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = '';
+      let newConversationId = null;
 
-          try {
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              
-              buffer += decoder.decode(value, { stream: true });
-              const lines = buffer.split('\n');
-              buffer = lines.pop() || '';
-              
-              for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                  try {
-                    const data = JSON.parse(line.substring(6));
-                    
-                    // ✅ Send each message chunk IMMEDIATELY to the client
-                    if (data.event === 'message' && data.answer) {
-                      fullResponse += data.answer;
-                      // Send incremental response to client
-                      controller.enqueue(encoder.encode(
-                        JSON.stringify({ 
-                          event: 'message', 
-                          answer: fullResponse 
-                        }) + '\n'
-                      ));
-                    }
-                    
-                    if (data.event === 'message_end' && data.conversation_id) {
-                      newConversationId = data.conversation_id;
-                      // Send the conversation_id to client
-                      controller.enqueue(encoder.encode(
-                        JSON.stringify({ 
-                          event: 'message_end', 
-                          conversation_id: newConversationId 
-                        }) + '\n'
-                      ));
-                    }
-                    
-                    if (data.event === 'message_end') {
-                      break;
-                    }
-                  } catch (e) {
-                    // Ignore parse errors for incomplete chunks
-                  }
-                }
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.substring(6));
+              if (data.event === 'message' && data.answer) {
+                fullResponse += data.answer;
               }
+              if (data.event === 'message_end' && data.conversation_id) {
+                newConversationId = data.conversation_id;
+              }
+              if (data.event === 'message_end') {
+                break;
+              }
+            } catch (e) {
+              // Ignore parse errors
             }
-          } catch (error) {
-            console.error('Stream error:', error);
-          } finally {
-            controller.close();
-            reader.releaseLock();
           }
         }
-      });
-
-      // ✅ Return the stream as the response with proper SSE headers
-      return new Response(stream, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Transfer-Encoding': 'chunked',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-        },
-      });
-
+      }
+      
+      if (fullResponse && fullResponse.length > 50) {
+        console.log('✅ Dify streaming response received, length:', fullResponse.length);
+        console.log('🆔 New Conversation ID:', newConversationId);
+        // ✅ Return the complete response (frontend will handle chunking for typing animation)
+        return NextResponse.json({ 
+          response: fullResponse, 
+          source: 'dify-knowledge-base',
+          conversation_id: newConversationId
+        });
+      } else {
+        console.log('⚠️ No substantive response from Dify, falling back to doctrinal library');
+      }
     } catch (error) {
       console.error('Dify API error:', error);
     }
 
     // ============================================================
-    // STEP 2: Fallback to Doctrinal Library (non-streaming)
+    // STEP 2: Fallback to Doctrinal Library
     // ============================================================
     console.log('STEP 2: Using doctrinal library fallback for:', message);
 
-    let fallbackResponse = '';
     if (isAskingForStatementOfFaith(message)) {
-      fallbackResponse = "Here is the Short Statement of Faith...";
-    } else {
-      const detectedDoctrine = detectDoctrine(message);
-      if (detectedDoctrine) {
-        fallbackResponse = buildDoctrinalResponse(detectedDoctrine.doctrine, message);
-      } else {
-        fallbackResponse = "I could not find an answer in my knowledge base. Please try asking a different question or contact support for assistance.";
-      }
+      return NextResponse.json({ 
+        response: "Here is the Short Statement of Faith...", 
+        source: 'dify-fallback' 
+      });
+    }
+
+    const detectedDoctrine = detectDoctrine(message);
+    
+    if (detectedDoctrine) {
+      console.log('Using doctrinal library for:', detectedDoctrine.key);
+      const doctrinalResponse = buildDoctrinalResponse(detectedDoctrine.doctrine, message);
+      return NextResponse.json({ 
+        response: doctrinalResponse,
+        source: 'doctrinal-library-fallback'
+      });
     }
 
     return NextResponse.json({ 
-      response: fallbackResponse,
-      source: 'doctrinal-library-fallback'
+      response: "I could not find an answer in my knowledge base. Please try asking a different question or contact support for assistance.",
+      source: 'dify-only'
     });
 
   } catch (error) {
