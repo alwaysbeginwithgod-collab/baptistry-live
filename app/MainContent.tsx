@@ -742,67 +742,10 @@ const loadConversation = (conversationId: string) => {
       setStreamingText('');
       stopRequested.current = false;
 
-  const finalUserName = getUserName();
+      const finalUserName = getUserName();
 
-  try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        message: newContent,
-        history: newMessages,
-        userName: finalUserName, // ✅ Pass the user name
-        conversationId: difyConversationId,
-      }),
-    });
-
-        const data = await response.json();
-        
-        if (data.conversation_id) {
-          console.log('🆔 New Dify conversation ID:', data.conversation_id);
-          setDifyConversationId(data.conversation_id);
-          if (userId) {
-            localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
-          }
-        }
-        
-        let fullResponse = data.response || 'I apologize, but I encountered an error.';
-        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-        const chunkSize = 7;
-        const delay = 2;
-        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-          if (stopRequested.current) {
-            setIsGenerating(false);
-            setStreamingText('');
-            return;
-          }
-          setStreamingText(fullResponse.substring(0, i));
-          await new Promise(resolve => setTimeout(resolve, delay));       
-        }
-
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: fullResponse,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        setStreamingText('');
-        setIsGenerating(false);
-
-      } catch (error) {
-        console.error('Error:', error);
-        const errorMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: 'I apologize, but I am unable to respond at this moment.',
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, errorMessage]);
-        setIsGenerating(false);
-        setStreamingText('');
-      }
+      // ⭐ NEW: Use streaming fetch
+      await handleStreamingResponse(newContent, newMessages, finalUserName);
     };
 
     setTimeout(() => {
@@ -829,56 +772,147 @@ const loadConversation = (conversationId: string) => {
     setStreamingText('');
     stopRequested.current = false;
     
-  const finalUserName = getUserName();
+    const finalUserName = getUserName();
 
-  try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        message: userMessageContent, 
-        history: newMessages,
-        userName: finalUserName, // ✅ Pass the user name
-        conversationId: difyConversationId,
-      }),
-    });
+    // ⭐ NEW: Use streaming fetch
+    await handleStreamingResponse(userMessageContent, newMessages, finalUserName);
+  };
 
-      const data = await response.json();
+  // ============================================================
+  // ⭐ NEW: Handle streaming responses from the server
+  // ============================================================
+  const handleStreamingResponse = async (
+    messageContent: string, 
+    history: Message[], 
+    userName: string
+  ) => {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: messageContent,
+          history: history,
+          userName: userName,
+          conversationId: difyConversationId,
+        }),
+      });
+
+      // Check if response is a stream (check content type)
+      const contentType = response.headers.get('content-type') || '';
       
-      if (data.conversation_id) {
-        console.log('🆔 New Dify conversation ID:', data.conversation_id);
-        setDifyConversationId(data.conversation_id);
-        if (userId) {
-          localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
-        }
-      }
-      
-      let fullResponse = data.response || 'I apologize, but I encountered an error.';
-      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      if (contentType.includes('text/event-stream')) {
+        // ✅ It's a stream! Process it as it arrives
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullResponse = '';
+        let newConversationId = null;
+        let isFirstChunk = true;
 
-      const chunkSize = 7;
-      const delay = 2;
-      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-        if (stopRequested.current) {
-          setIsGenerating(false);
-          setStreamingText('');
-          return;
+        if (!reader) {
+          throw new Error('No reader available');
         }
-        setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
 
-      const newAssistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: fullResponse,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, newAssistantMessage]);
-      setStreamingText('');
-      setIsGenerating(false);
+        // Read the stream
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.substring(6));
+                
+                // Handle conversation ID
+                if (data.event === 'conversation_id' && data.conversation_id) {
+                  newConversationId = data.conversation_id;
+                  console.log('🆔 Got conversation ID from stream:', newConversationId);
+                }
+                
+                // Handle message chunks
+                if (data.event === 'message' && data.answer) {
+                  fullResponse += data.answer;
+                  setStreamingText(fullResponse);
+                  // Scroll to bottom as text streams in
+                  scrollToBottomImmediate();
+                }
+                
+                // Handle end of stream
+                if (data.event === 'message_end') {
+                  // Stream is complete
+                  setIsGenerating(false);
+                  setStreamingText('');
+                  
+                  // Save conversation ID
+                  if (newConversationId) {
+                    setDifyConversationId(newConversationId);
+                    if (userId) {
+                      localStorage.setItem(`dify_conversation_${userId}`, newConversationId);
+                    }
+                  }
+                  
+                  // Add the complete message to the chat
+                  const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+                  const assistantMessage: Message = {
+                    id: (Date.now() + 1).toString(),
+                    role: 'assistant',
+                    content: cleanResponse || 'I apologize, but I encountered an error.',
+                    timestamp: new Date(),
+                  };
+                  setMessages(prev => [...prev, assistantMessage]);
+                  
+                  return;
+                }
+              } catch (e) {
+                // Ignore parse errors for incomplete chunks
+              }
+            }
+          }
+        }
+      } else {
+        // ✅ Not a stream - fallback to regular JSON (for backward compatibility)
+        console.log('⚠️ Response is not a stream, using JSON fallback');
+        const data = await response.json();
+        
+        if (data.conversation_id) {
+          console.log('🆔 New Dify conversation ID:', data.conversation_id);
+          setDifyConversationId(data.conversation_id);
+          if (userId) {
+            localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+          }
+        }
+        
+        let fullResponse = data.response || 'I apologize, but I encountered an error.';
+        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+        // Use the existing typing animation
+        const chunkSize = 7;
+        const delay = 2;
+        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+          if (stopRequested.current) {
+            setIsGenerating(false);
+            setStreamingText('');
+            return;
+          }
+          setStreamingText(fullResponse.substring(0, i));
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: fullResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+      }
     } catch (error) {
-      console.error('Regeneration error:', error);
+      console.error('Error in streaming response:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -891,133 +925,75 @@ const loadConversation = (conversationId: string) => {
     }
   };
 
-const sendMessage = async () => {
-  if (!input.trim()) return;
-  if (isGenerating) return;
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    if (isGenerating) return;
 
-  const finalUserName = getUserName();
-  console.log('👤 Sending message with user name:', finalUserName);
+    const finalUserName = getUserName();
+    console.log('👤 Sending message with user name:', finalUserName);
 
-  let convId = currentConversationId;
-  
-  if (!convId) {
-    convId = difyConversationId || Date.now().toString();
-    setCurrentConversationId(convId);
+    let convId = currentConversationId;
     
-    const newConversation: Conversation = {
-      id: convId,
-      title: input.substring(0, 40),
-      messages: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      pinned: false,
-    };
-    setConversations(prev => {
-      const exists = prev.some(conv => conv.id === convId);
-      if (exists) {
-        return prev;
-      }
-      const withNew = [newConversation, ...prev];
-      const sorted = [...withNew].sort((a, b) => {
-        if (a.pinned && !b.pinned) return -1;
-        if (!a.pinned && b.pinned) return 1;
-        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    if (!convId) {
+      convId = difyConversationId || Date.now().toString();
+      setCurrentConversationId(convId);
+      
+      const newConversation: Conversation = {
+        id: convId,
+        title: input.substring(0, 40),
+        messages: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        pinned: false,
+      };
+      setConversations(prev => {
+        const exists = prev.some(conv => conv.id === convId);
+        if (exists) {
+          return prev;
+        }
+        const withNew = [newConversation, ...prev];
+        const sorted = [...withNew].sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        });
+        return sorted;
       });
-      return sorted;
-    });
-  }
-
-  const userMessage: Message = {
-    id: Date.now().toString(),
-    role: 'user',
-    content: input,
-    timestamp: new Date(),
-  };
-
-  setMessages(prev => [...prev, userMessage]);
-  const sentInput = input;
-  setInput('');
-  setIsGenerating(true);
-  setStreamingText('');
-  stopRequested.current = false;
-  
-  setTimeout(autoResizeTextarea, 0);
-
-  try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        message: sentInput, 
-        history: messages,
-        userName: finalUserName,
-        conversationId: difyConversationId,
-      }),
-    });
-
-    const data = await response.json();
-    
-    if (data.conversation_id) {
-      console.log('🆔 New Dify conversation ID:', data.conversation_id);
-      setDifyConversationId(data.conversation_id);
-      if (userId) {
-        localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
-      }
-    }
-    
-    let fullResponse = data.response || 'I apologize, but I encountered an error.';
-    fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-    // ✅ BALANCED: chunk size 5 with 2ms delay for visible typing animation
-    const chunkSize = 7;
-    const delay = 2;
-    for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-      if (stopRequested.current) {
-        setIsGenerating(false);
-        setStreamingText('');
-        return;
-      }
-      setStreamingText(fullResponse.substring(0, i));
-      await new Promise(resolve => setTimeout(resolve, delay));
     }
 
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: fullResponse,
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input,
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, assistantMessage]);
-    setStreamingText('');
-    setIsGenerating(false);
 
-  } catch (error) {
-    console.error('Error:', error);
-    const errorMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: 'I apologize, but I am unable to respond at this moment.',
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, errorMessage]);
-    setIsGenerating(false);
+    setMessages(prev => [...prev, userMessage]);
+    const sentInput = input;
+    setInput('');
+    setIsGenerating(true);
     setStreamingText('');
-  }
-};
+    stopRequested.current = false;
+    
+    setTimeout(autoResizeTextarea, 0);
 
-const stopResponse = () => {
-  stopRequested.current = true;
-  setIsGenerating(false);
-  setStreamingText('');
-  
-  const stopMessage: Message = {
-    id: (Date.now() + 1).toString(),
-    role: 'assistant',
-    content: "⏹️ You stopped me from responding. No worries! Feel free to **edit your message** and try again, or ask me something new. 🙏",
-    timestamp: new Date(),
+    // ⭐ NEW: Use the streaming handler
+    await handleStreamingResponse(sentInput, messages, finalUserName);
   };
-  setMessages(prev => [...prev, stopMessage]);
-};
+
+  const stopResponse = () => {
+    stopRequested.current = true;
+    setIsGenerating(false);
+    setStreamingText('');
+    
+    const stopMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: "⏹️ You stopped me from responding. No worries! Feel free to **edit your message** and try again, or ask me something new. 🙏",
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, stopMessage]);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
