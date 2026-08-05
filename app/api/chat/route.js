@@ -24,7 +24,6 @@ async function getWebsterDefinition(word) {
 // HELPERS: Reduce history size for faster processing
 // ============================================================
 function getRecentHistory(history, limit = 5) {
-  // Only send the last `limit` messages to reduce API load
   return history.slice(-limit);
 }
 
@@ -189,68 +188,7 @@ function buildDoctrinalResponse(doctrine, userQuery) {
 }
 
 // ============================================================
-// 📦 NEW: Helper to create a streaming response
-// ============================================================
-function createStreamingResponse(text, conversationId) {
-  // Create a ReadableStream that sends the text character by character
-  const stream = new ReadableStream({
-    start(controller) {
-      // Send the text in small chunks (like 5 characters at a time)
-      const chunkSize = 5;
-      let position = 0;
-      
-      // Send the conversation ID first (if we have one)
-      if (conversationId) {
-        const idMessage = JSON.stringify({ 
-          event: 'conversation_id', 
-          conversation_id: conversationId 
-        });
-        controller.enqueue(new TextEncoder().encode(`data: ${idMessage}\n\n`));
-      }
-      
-      // Now send the text in chunks
-      function sendNextChunk() {
-        if (position < text.length) {
-          // Take next chunk of text
-          const chunk = text.slice(position, position + chunkSize);
-          position += chunkSize;
-          
-          // Send it as a message event
-          const message = JSON.stringify({ 
-            event: 'message', 
-            answer: chunk 
-          });
-          controller.enqueue(new TextEncoder().encode(`data: ${message}\n\n`));
-          
-          // Small delay between chunks (makes it look like typing)
-          setTimeout(sendNextChunk, 10);
-        } else {
-          // All done - send the end event
-          const endMessage = JSON.stringify({ 
-            event: 'message_end' 
-          });
-          controller.enqueue(new TextEncoder().encode(`data: ${endMessage}\n\n`));
-          controller.close();
-        }
-      }
-      
-      // Start sending chunks
-      sendNextChunk();
-    }
-  });
-  
-  // Return a Response with the stream
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-    },
-  });
-}
-
-// ============================================================
-// MAIN POST FUNCTION - NOW RETURNS STREAMING RESPONSE
+// ⭐ SIMPLIFIED: Pass Dify stream directly to client
 // ============================================================
 export async function POST(request) {
   try {
@@ -269,13 +207,40 @@ export async function POST(request) {
       console.log('Looking up dictionary definition for:', word);
       const definition = await getWebsterDefinition(word);
       
-      if (definition) {
-        // Return streaming response for dictionary
-        return createStreamingResponse(definition, conversationId);
-      } else {
-        const errorMsg = `I couldn't find "${word}" in Webster's 1828 Dictionary. Please check the spelling or try another word.\n\nYou can also search directly at: https://webstersdictionary1828.com/Dictionary/${word}`;
-        return createStreamingResponse(errorMsg, conversationId);
-      }
+      // Return as a simple stream (not using Dify)
+      const text = definition || `I couldn't find "${word}" in Webster's 1828 Dictionary.`;
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start(controller) {
+          // Send the text in chunks
+          const chunks = text.match(/.{1,5}/g) || [text];
+          let index = 0;
+          
+          function sendChunk() {
+            if (index < chunks.length) {
+              const data = JSON.stringify({ 
+                event: 'message', 
+                answer: chunks[index] 
+              });
+              controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+              index++;
+              setTimeout(sendChunk, 10);
+            } else {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: 'message_end' })}\n\n`));
+              controller.close();
+            }
+          }
+          sendChunk();
+        }
+      });
+      
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
     }
 
     const DIFY_API_KEY = process.env.NEXT_PUBLIC_APP_KEY;
@@ -283,135 +248,134 @@ export async function POST(request) {
 
     if (!DIFY_API_KEY) {
       console.error('Missing API key');
-      return createStreamingResponse(
-        'Configuration error: Missing API key. Please contact support.',
-        conversationId
-      );
+      const errorMsg = 'Configuration error: Missing API key. Please contact support.';
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start(controller) {
+          const data = JSON.stringify({ event: 'message', answer: errorMsg });
+          controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: 'message_end' })}\n\n`));
+          controller.close();
+        }
+      });
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
     }
 
     // ============================================================
-    // STEP 1: Call Dify with STREAMING mode
+    // STEP 1: Forward request to Dify with streaming
     // ============================================================
-    console.log('STEP 1: Trying Dify Knowledge Base for:', message);
-    console.log('🆔 Conversation ID:', conversationId || 'New conversation');
+    console.log('📤 Forwarding to Dify:', message);
     console.log('👤 User Name:', userName || 'friend');
 
     const recentHistory = getRecentHistory(history, 5);
 
-    try {
-      const requestBody = {
-        inputs: {
-          user_name: userName || 'friend',
-        },
-        query: message,
-        response_mode: 'streaming',
-        user: 'baptistry_user',
-        conversation_history: recentHistory.map(msg => ({
-          role: msg.role === 'user' ? 'user' : 'assistant',
-          content: msg.content
-        })),
-      };
+    const requestBody = {
+      inputs: {
+        user_name: userName || 'friend',
+      },
+      query: message,
+      response_mode: 'streaming',
+      user: 'baptistry_user',
+      conversation_history: recentHistory.map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      })),
+    };
 
-      if (conversationId) {
-        requestBody.conversation_id = conversationId;
-      }
+    if (conversationId) {
+      requestBody.conversation_id = conversationId;
+    }
 
-      const response = await fetch(DIFY_API_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${DIFY_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
+    const response = await fetch(DIFY_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${DIFY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      console.log('Dify API error:', response.status);
+      const errorMsg = 'I apologize, but I encountered an error. Please try again later.';
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start(controller) {
+          const data = JSON.stringify({ event: 'message', answer: errorMsg });
+          controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: 'message_end' })}\n\n`));
+          controller.close();
+        }
       });
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
+    }
 
-      if (!response.ok) {
-        console.log('Dify API error:', response.status);
-        return createStreamingResponse(
-          'I apologize, but I encountered an error. Please try again later.',
-          conversationId
-        );
-      }
-
-      // ✅ NEW: Forward the Dify stream directly to the client
-      // This passes through the chunks as they arrive from Dify
-      const reader = response.body.getReader();
-      let fullResponse = '';
-      let newConversationId = null;
-
-      // We'll collect the response but also forward it
-      // This way we can use it for fallback if needed
-      const collectedChunks = [];
-      
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        // Decode and parse the chunk
-        const chunk = new TextDecoder().decode(value);
-        const lines = chunk.split('\n');
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.substring(6));
-              
-              // Save conversation ID if we get it
-              if (data.event === 'message_end' && data.conversation_id) {
-                newConversationId = data.conversation_id;
-              }
-              
-              // Collect text for potential fallback
-              if (data.event === 'message' && data.answer) {
-                fullResponse += data.answer;
-              }
-            } catch (e) {
-              // Ignore parse errors
+    // ============================================================
+    // ⭐ PASS THE STREAM DIRECTLY TO THE CLIENT
+    // ============================================================
+    // Get the response body as a stream
+    const reader = response.body.getReader();
+    const encoder = new TextEncoder();
+    
+    // Create a new stream that just passes through the data
+    const passthroughStream = new ReadableStream({
+      async start(controller) {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              controller.close();
+              break;
             }
+            // Forward the raw data to the client
+            controller.enqueue(value);
           }
+        } catch (error) {
+          console.error('Stream error:', error);
+          controller.error(error);
         }
       }
-      
-      // If we got a good response from Dify, return it
-      if (fullResponse && fullResponse.length > 50) {
-        console.log('✅ Dify streaming response received, length:', fullResponse.length);
-        // ⭐ NEW: Return a streaming response
-        return createStreamingResponse(fullResponse, newConversationId || conversationId);
-      } else {
-        console.log('⚠️ No substantive response from Dify, falling back to doctrinal library');
-      }
-    } catch (error) {
-      console.error('Dify API error:', error);
-    }
+    });
 
-    // ============================================================
-    // STEP 2: Fallback to Doctrinal Library
-    // ============================================================
-    console.log('STEP 2: Using doctrinal library fallback for:', message);
-
-    if (isAskingForStatementOfFaith(message)) {
-      const statementText = "Here is the Short Statement of Faith..."; // You can expand this
-      return createStreamingResponse(statementText, conversationId);
-    }
-
-    const detectedDoctrine = detectDoctrine(message);
-    
-    if (detectedDoctrine) {
-      console.log('Using doctrinal library for:', detectedDoctrine.key);
-      const doctrinalResponse = buildDoctrinalResponse(detectedDoctrine.doctrine, message);
-      return createStreamingResponse(doctrinalResponse, conversationId);
-    }
-
-    return createStreamingResponse(
-      "I could not find an answer in my knowledge base. Please try asking a different question or contact support for assistance.",
-      conversationId
-    );
+    // Return the passthrough stream
+    return new Response(passthroughStream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
 
   } catch (error) {
     console.error('Chat error:', error);
-    return createStreamingResponse(
-      'I apologize, but I am unable to respond at this moment. Please try again later.',
-      null
-    );
+    const errorMsg = 'I apologize, but I am unable to respond at this moment. Please try again later.';
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      start(controller) {
+        const data = JSON.stringify({ event: 'message', answer: errorMsg });
+        controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: 'message_end' })}\n\n`));
+        controller.close();
+      }
+    });
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
   }
 }
