@@ -744,7 +744,7 @@ const loadConversation = (conversationId: string) => {
 
       const finalUserName = getUserName();
 
-      // ⭐ NEW: Use streaming fetch
+      // ⭐ Use streaming fetch
       await handleStreamingResponse(newContent, newMessages, finalUserName);
     };
 
@@ -774,12 +774,12 @@ const loadConversation = (conversationId: string) => {
     
     const finalUserName = getUserName();
 
-    // ⭐ NEW: Use streaming fetch
+    // ⭐ Use streaming fetch
     await handleStreamingResponse(userMessageContent, newMessages, finalUserName);
   };
 
   // ============================================================
-  // ⭐ NEW: Handle streaming responses from the server
+  // ⭐ OPTIMIZED: Handle streaming responses with buffering
   // ============================================================
   const handleStreamingResponse = async (
     messageContent: string, 
@@ -798,16 +798,21 @@ const loadConversation = (conversationId: string) => {
         }),
       });
 
-      // Check if response is a stream (check content type)
+      // Check if response is a stream
       const contentType = response.headers.get('content-type') || '';
       
       if (contentType.includes('text/event-stream')) {
-        // ✅ It's a stream! Process it as it arrives
+        // ✅ PROCESS THE STREAM DIRECTLY
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
         let fullResponse = '';
         let newConversationId = null;
-        let isFirstChunk = true;
+        
+        // 🔥 BUFFER FOR SMOOTH RENDERING
+        let buffer = '';
+        let lastUpdateTime = Date.now();
+        const MIN_UPDATE_INTERVAL = 30; // Only update UI every 30ms
+        let timeoutId: NodeJS.Timeout | null = null;
 
         if (!reader) {
           throw new Error('No reader available');
@@ -835,13 +840,44 @@ const loadConversation = (conversationId: string) => {
                 // Handle message chunks
                 if (data.event === 'message' && data.answer) {
                   fullResponse += data.answer;
-                  setStreamingText(fullResponse);
-                  // Scroll to bottom as text streams in
-                  scrollToBottomImmediate();
+                  buffer += data.answer;
+                  
+                  // 🔥 SMART UPDATING: Only update UI if enough text or time passed
+                  const now = Date.now();
+                  const timeSinceLastUpdate = now - lastUpdateTime;
+                  
+                  // Update if: buffer is big enough OR it's been long enough
+                  if (buffer.length >= 20 || timeSinceLastUpdate >= MIN_UPDATE_INTERVAL) {
+                    // Clear any pending timeout
+                    if (timeoutId) {
+                      clearTimeout(timeoutId);
+                      timeoutId = null;
+                    }
+                    
+                    // Update the UI with cleaned text
+                    const cleanText = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+                    setStreamingText(cleanText);
+                    
+                    // Reset buffer and update time
+                    buffer = '';
+                    lastUpdateTime = now;
+                    
+                    // Scroll smoothly (but not too often)
+                    if (cleanText.length > 0 && cleanText.length % 50 < 10) {
+                      scrollToBottomImmediate();
+                    }
+                  }
                 }
                 
                 // Handle end of stream
                 if (data.event === 'message_end') {
+                  // Flush any remaining buffer
+                  if (buffer.length > 0) {
+                    const cleanText = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+                    setStreamingText(cleanText);
+                    buffer = '';
+                  }
+                  
                   // Stream is complete
                   setIsGenerating(false);
                   setStreamingText('');
@@ -864,6 +900,12 @@ const loadConversation = (conversationId: string) => {
                   };
                   setMessages(prev => [...prev, assistantMessage]);
                   
+                  // Cancel any pending timeout
+                  if (timeoutId) {
+                    clearTimeout(timeoutId);
+                    timeoutId = null;
+                  }
+                  
                   return;
                 }
               } catch (e) {
@@ -873,7 +915,7 @@ const loadConversation = (conversationId: string) => {
           }
         }
       } else {
-        // ✅ Not a stream - fallback to regular JSON (for backward compatibility)
+        // ✅ FALLBACK: Regular JSON response (for dictionary, doctrinal, etc.)
         console.log('⚠️ Response is not a stream, using JSON fallback');
         const data = await response.json();
         
@@ -888,58 +930,29 @@ const loadConversation = (conversationId: string) => {
         let fullResponse = data.response || 'I apologize, but I encountered an error.';
         fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-// ============================================================
-// ✅ IMPROVED: Smooth, professional typing animation
-// ============================================================
+        // ✅ SMOOTH TYPING ANIMATION FOR FALLBACK
+        const chunkSize = 15; // Larger chunks = smoother
+        const delay = 6; // Faster = less jerky
+        
+        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+          if (stopRequested.current) {
+            setIsGenerating(false);
+            setStreamingText('');
+            return;
+          }
+          setStreamingText(fullResponse.substring(0, i));
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
 
-// Use the optimized typing animation
-// Larger chunks = smoother, less UI re-rendering
-const chunkSize = 30; // Much larger chunks (was 2)
-const delay = 4; // Faster delay (was 20)
-
-// First, split into paragraphs for smoother display
-const paragraphs = fullResponse.split('\n\n');
-let currentText = '';
-
-for (let p = 0; p < paragraphs.length; p++) {
-  const paragraph = paragraphs[p];
-  const words = paragraph.split(' ');
-  let wordIndex = 0;
-  
-  // Show paragraph by paragraph
-  while (wordIndex < words.length) {
-    if (stopRequested.current) {
-      setIsGenerating(false);
-      setStreamingText('');
-      return;
-    }
-    
-    // Add words in small groups for natural flow
-    const groupSize = Math.min(3, words.length - wordIndex);
-    const wordGroup = words.slice(wordIndex, wordIndex + groupSize).join(' ');
-    currentText += (wordIndex === 0 && p > 0 ? '\n\n' : '') + wordGroup;
-    
-    // Update the UI with the new text
-    setStreamingText(currentText);
-    wordIndex += groupSize;
-    
-    // Natural typing speed with slight variation
-    const naturalDelay = delay + (Math.random() * 4 - 2);
-    await new Promise(resolve => setTimeout(resolve, naturalDelay));
-  }
-}
-
-// Final clean-up
-const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-const assistantMessage: Message = {
-  id: (Date.now() + 1).toString(),
-  role: 'assistant',
-  content: cleanResponse || 'I apologize, but I encountered an error.',
-  timestamp: new Date(),
-};
-setMessages(prev => [...prev, assistantMessage]);
-setStreamingText('');
-setIsGenerating(false);
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: fullResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
       }
     } catch (error) {
       console.error('Error in streaming response:', error);
@@ -1007,7 +1020,7 @@ setIsGenerating(false);
     
     setTimeout(autoResizeTextarea, 0);
 
-    // ⭐ NEW: Use the streaming handler
+    // ⭐ Use the streaming handler
     await handleStreamingResponse(sentInput, messages, finalUserName);
   };
 
