@@ -778,195 +778,180 @@ const loadConversation = (conversationId: string) => {
     await handleStreamingResponse(userMessageContent, newMessages, finalUserName);
   };
 
-  // ============================================================
-  // ⭐ OPTIMIZED: Handle streaming responses with buffering
-  // ============================================================
-  const handleStreamingResponse = async (
-    messageContent: string, 
-    history: Message[], 
-    userName: string
-  ) => {
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: messageContent,
-          history: history,
-          userName: userName,
-          conversationId: difyConversationId,
-        }),
-      });
+// ============================================================
+// ⭐ UPDATED: Handle streaming responses with thinking filter
+// ============================================================
+const handleStreamingResponse = async (
+  messageContent: string, 
+  history: Message[], 
+  userName: string
+) => {
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        message: messageContent,
+        history: history,
+        userName: userName,
+        conversationId: difyConversationId,
+      }),
+    });
 
-      // Check if response is a stream
-      const contentType = response.headers.get('content-type') || '';
-      
-      if (contentType.includes('text/event-stream')) {
-        // ✅ PROCESS THE STREAM DIRECTLY
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-        let fullResponse = '';
-        let newConversationId = null;
-        
-        // 🔥 BUFFER FOR SMOOTH RENDERING
-        let buffer = '';
-        let lastUpdateTime = Date.now();
-        const MIN_UPDATE_INTERVAL = 30; // Only update UI every 30ms
-        let timeoutId: NodeJS.Timeout | null = null;
+    // Check if response is a stream
+    const contentType = response.headers.get('content-type') || '';
+    
+    if (contentType.includes('text/event-stream')) {
+      // ✅ It's a stream! Process it as it arrives
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullRawResponse = ''; // Store raw response
+      let fullCleanedResponse = ''; // Store cleaned response
+      let newConversationId = null;
+      let isInsideThinkTag = false;
 
-        if (!reader) {
-          throw new Error('No reader available');
-        }
+      if (!reader) {
+        throw new Error('No reader available');
+      }
 
-        // Read the stream
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+      // Read the stream
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
 
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.substring(6));
-                
-                // Handle conversation ID
-                if (data.event === 'conversation_id' && data.conversation_id) {
-                  newConversationId = data.conversation_id;
-                  console.log('🆔 Got conversation ID from stream:', newConversationId);
-                }
-                
-                // Handle message chunks
-                if (data.event === 'message' && data.answer) {
-                  fullResponse += data.answer;
-                  buffer += data.answer;
-                  
-                  // 🔥 SMART UPDATING: Only update UI if enough text or time passed
-                  const now = Date.now();
-                  const timeSinceLastUpdate = now - lastUpdateTime;
-                  
-                  // Update if: buffer is big enough OR it's been long enough
-                  if (buffer.length >= 20 || timeSinceLastUpdate >= MIN_UPDATE_INTERVAL) {
-                    // Clear any pending timeout
-                    if (timeoutId) {
-                      clearTimeout(timeoutId);
-                      timeoutId = null;
-                    }
-                    
-                    // Update the UI with cleaned text
-                    const cleanText = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-                    setStreamingText(cleanText);
-                    
-                    // Reset buffer and update time
-                    buffer = '';
-                    lastUpdateTime = now;
-                    
-                    // Scroll smoothly (but not too often)
-                    if (cleanText.length > 0 && cleanText.length % 50 < 10) {
-                      scrollToBottomImmediate();
-                    }
-                  }
-                }
-                
-                // Handle end of stream
-                if (data.event === 'message_end') {
-                  // Flush any remaining buffer
-                  if (buffer.length > 0) {
-                    const cleanText = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-                    setStreamingText(cleanText);
-                    buffer = '';
-                  }
-                  
-                  // Stream is complete
-                  setIsGenerating(false);
-                  setStreamingText('');
-                  
-                  // Save conversation ID
-                  if (newConversationId) {
-                    setDifyConversationId(newConversationId);
-                    if (userId) {
-                      localStorage.setItem(`dify_conversation_${userId}`, newConversationId);
-                    }
-                  }
-                  
-                  // Add the complete message to the chat
-                  const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-                  const assistantMessage: Message = {
-                    id: (Date.now() + 1).toString(),
-                    role: 'assistant',
-                    content: cleanResponse || 'I apologize, but I encountered an error.',
-                    timestamp: new Date(),
-                  };
-                  setMessages(prev => [...prev, assistantMessage]);
-                  
-                  // Cancel any pending timeout
-                  if (timeoutId) {
-                    clearTimeout(timeoutId);
-                    timeoutId = null;
-                  }
-                  
-                  return;
-                }
-              } catch (e) {
-                // Ignore parse errors for incomplete chunks
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.substring(6));
+              
+              // Handle conversation ID
+              if (data.event === 'conversation_id' && data.conversation_id) {
+                newConversationId = data.conversation_id;
+                console.log('🆔 Got conversation ID from stream:', newConversationId);
               }
+              
+              // Handle message chunks
+              if (data.event === 'message' && data.answer) {
+                fullRawResponse += data.answer;
+                
+                // ⭐ FILTER OUT THINKING TAGS
+                // Remove <think>...</think> content before displaying
+                let cleanedText = fullRawResponse;
+                
+                // Remove all <think> tags and their content
+                cleanedText = cleanedText.replace(/<think>[\s\S]*?<\/think>/g, '');
+                
+                // Also handle any remaining "thinking" indicators
+                cleanedText = cleanedText.replace(/^.*?thinking.*?\n/i, '');
+                cleanedText = cleanedText.replace(/^.*?Let me think.*?\n/i, '');
+                
+                // Update the display with cleaned text
+                if (cleanedText !== fullCleanedResponse) {
+                  fullCleanedResponse = cleanedText;
+                  setStreamingText(cleanedText);
+                  // Scroll to bottom as text streams in
+                  scrollToBottomImmediate();
+                }
+              }
+              
+              // Handle end of stream
+              if (data.event === 'message_end') {
+                // Stream is complete - do one final cleaning
+                let finalCleaned = fullRawResponse;
+                
+                // Remove all think tags
+                finalCleaned = finalCleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
+                
+                // Clean up any leftover "thinking" phrases
+                finalCleaned = finalCleaned.replace(/^.*?thinking.*?\n/i, '');
+                finalCleaned = finalCleaned.replace(/^.*?Let me think.*?\n/i, '');
+                
+                // Remove extra whitespace
+                finalCleaned = finalCleaned.trim();
+                
+                setIsGenerating(false);
+                setStreamingText('');
+                
+                // Save conversation ID
+                if (newConversationId) {
+                  setDifyConversationId(newConversationId);
+                  if (userId) {
+                    localStorage.setItem(`dify_conversation_${userId}`, newConversationId);
+                  }
+                }
+                
+                // Add the complete cleaned message to the chat
+                const assistantMessage: Message = {
+                  id: (Date.now() + 1).toString(),
+                  role: 'assistant',
+                  content: finalCleaned || 'I apologize, but I encountered an error.',
+                  timestamp: new Date(),
+                };
+                setMessages(prev => [...prev, assistantMessage]);
+                
+                return;
+              }
+            } catch (e) {
+              // Ignore parse errors for incomplete chunks
             }
           }
         }
-      } else {
-        // ✅ FALLBACK: Regular JSON response (for dictionary, doctrinal, etc.)
-        console.log('⚠️ Response is not a stream, using JSON fallback');
-        const data = await response.json();
-        
-        if (data.conversation_id) {
-          console.log('🆔 New Dify conversation ID:', data.conversation_id);
-          setDifyConversationId(data.conversation_id);
-          if (userId) {
-            localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
-          }
-        }
-        
-        let fullResponse = data.response || 'I apologize, but I encountered an error.';
-        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-        // ✅ SMOOTH TYPING ANIMATION FOR FALLBACK
-        const chunkSize = 15; // Larger chunks = smoother
-        const delay = 5; // Faster = less jerky
-        
-        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-          if (stopRequested.current) {
-            setIsGenerating(false);
-            setStreamingText('');
-            return;
-          }
-          setStreamingText(fullResponse.substring(0, i));
-          await new Promise(resolve => setTimeout(resolve, delay));
-        }
-
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: fullResponse,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        setStreamingText('');
-        setIsGenerating(false);
       }
-    } catch (error) {
-      console.error('Error in streaming response:', error);
-      const errorMessage: Message = {
+    } else {
+      // ✅ Not a stream - fallback to regular JSON
+      console.log('⚠️ Response is not a stream, using JSON fallback');
+      const data = await response.json();
+      
+      if (data.conversation_id) {
+        console.log('🆔 New Dify conversation ID:', data.conversation_id);
+        setDifyConversationId(data.conversation_id);
+        if (userId) {
+          localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+        }
+      }
+      
+      let fullResponse = data.response || 'I apologize, but I encountered an error.';
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+      // Use the existing typing animation
+      const chunkSize = 15; // Larger chunks = smoother
+      const delay = 3; // Faster = less jerky
+      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+        if (stopRequested.current) {
+          setIsGenerating(false);
+          setStreamingText('');
+          return;
+        }
+        setStreamingText(fullResponse.substring(0, i));
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+
+      const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'I apologize, but I am unable to respond at this moment.',
+        content: fullResponse,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
-      setIsGenerating(false);
+      setMessages(prev => [...prev, assistantMessage]);
       setStreamingText('');
+      setIsGenerating(false);
     }
-  };
+  } catch (error) {
+    console.error('Error in streaming response:', error);
+    const errorMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: 'I apologize, but I am unable to respond at this moment.',
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, errorMessage]);
+    setIsGenerating(false);
+    setStreamingText('');
+  }
+};
 
   const sendMessage = async () => {
     if (!input.trim()) return;
