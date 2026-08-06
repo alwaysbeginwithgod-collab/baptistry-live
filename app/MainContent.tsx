@@ -11,6 +11,9 @@ import { api } from '../convex/_generated/api';
 import NameModal from './components/NameModal';
 import { useTheme } from './context/ThemeContext';
 
+// ============================================================
+// 📝 TYPE DEFINITIONS - What our data looks like
+// ============================================================
 type Message = {
   id: string;
   role: 'user' | 'assistant';
@@ -27,7 +30,9 @@ type Conversation = {
   pinned?: boolean;
 };
 
-// Expanded list of dynamic suggestions
+// ============================================================
+// 💡 SUGGESTIONS - Dynamic questions shown on welcome screen
+// ============================================================
 const SUGGESTIONS = [
   { text: "What is the Gospel?" },
   { text: "Explain John 3:16" },
@@ -56,32 +61,37 @@ export default function MainContent() {
   const userId = user?.id;
   const { darkMode } = useTheme();
 
-  // Convex hooks
+  // ============================================================
+  // 🗄️ CONVEX HOOKS - For cloud database operations
+  // ============================================================
   const saveConversationsToCloud = useMutation(api.conversations.saveConversationsClean);
   const loadConversationsFromCloud = useQuery(
     api.conversations.loadConversationsClean,
     userId ? { userId } : "skip"
   );
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
-  const [input, setInput] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [streamingText, setStreamingText] = useState('');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // ============================================================
+  // 📦 STATE VARIABLES - All the data we track
+  // ============================================================
+  const [messages, setMessages] = useState<Message[]>([]); // Current chat messages
+  const [conversations, setConversations] = useState<Conversation[]>([]); // All saved chats
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null); // Active chat ID
+  const [input, setInput] = useState(''); // Text input
+  const [isGenerating, setIsGenerating] = useState(false); // Is BAPTISTRY typing?
+  const [streamingText, setStreamingText] = useState(''); // Text being typed in real-time
+  const [sidebarOpen, setSidebarOpen] = useState(true); // Sidebar visibility
   const [messageFeedback, setMessageFeedback] = useState<Record<string, 'helpful' | 'unhelpful' | null>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const stopRequested = useRef(false);
+  const stopRequested = useRef(false); // For stopping generation
   
   // ============================================================
-  // DIFY CONVERSATION ID - For remembering user across sessions
+  // 🆔 DIFY CONVERSATION ID - For remembering user across sessions
   // ============================================================
   const [difyConversationId, setDifyConversationId] = useState<string | null>(null);
   
   // ============================================================
-  // DYNAMIC SUGGESTIONS STATE - Staggered updates with slide-up
+  // 🎯 DYNAMIC SUGGESTIONS - Rotating suggestions on welcome screen
   // ============================================================
   const [currentSuggestions, setCurrentSuggestions] = useState<string[]>([]);
   const [updateIndex, setUpdateIndex] = useState<number>(0);
@@ -90,16 +100,19 @@ export default function MainContent() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // ============================================================
-  // NAME MODAL STATE
+  // 👤 NAME MODAL - For guest users to set their name
   // ============================================================
   const [showNameModal, setShowNameModal] = useState(false);
   const [userName, setUserName] = useState<string>('');
 
   // ============================================================
-  // FORCE REFRESH - For manual sync when tab becomes visible
+  // 🔄 FORCE REFRESH - For manual sync when tab becomes visible
   // ============================================================
   const [forceRefresh, setForceRefresh] = useState<number>(0);
 
+  // ============================================================
+  // 📜 SCROLL FUNCTIONS - Auto-scroll to bottom
+  // ============================================================
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -116,6 +129,9 @@ export default function MainContent() {
     textareaRef.current?.focus();
   }, []);
 
+  // ============================================================
+  // 📝 TEXTAREA FUNCTIONS - Auto-resize input box
+  // ============================================================
   const autoResizeTextarea = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -129,31 +145,30 @@ export default function MainContent() {
     autoResizeTextarea();
   };
 
-// ============================================================
-// GET USER NAME - Always return a valid name
-// ============================================================
-const getUserName = (): string => {
-  // 1. Use the state value
-  if (userName) return userName;
-  
-  // 2. Try localStorage
-  if (userId) {
-    const savedName = localStorage.getItem(`baptistry_user_name_${userId}`);
-    if (savedName) return savedName;
-  }
-  
-  // 3. Try Clerk's user data
-  const clerkName = user?.fullName || user?.firstName || user?.username;
-  if (clerkName) return clerkName;
-  
-  // 4. Fallback
-  return 'Friend';
-};
+  // ============================================================
+  // 👤 GET USER NAME - Always return a valid name
+  // ============================================================
+  const getUserName = (): string => {
+    // 1. Use the state value
+    if (userName) return userName;
+    
+    // 2. Try localStorage
+    if (userId) {
+      const savedName = localStorage.getItem(`baptistry_user_name_${userId}`);
+      if (savedName) return savedName;
+    }
+    
+    // 3. Try Clerk's user data
+    const clerkName = user?.fullName || user?.firstName || user?.username;
+    if (clerkName) return clerkName;
+    
+    // 4. Fallback
+    return 'Friend';
+  };
 
   // ============================================================
-  // DYNAMIC SUGGESTIONS - Text slide-up animation
+  // 🎯 DYNAMIC SUGGESTIONS - Rotating questions animation
   // ============================================================
-  
   const getRandomSuggestions = useCallback(() => {
     const shuffled = [...SUGGESTIONS].sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 4).map(s => s.text);
@@ -237,7 +252,7 @@ const getUserName = (): string => {
   }, [messages.length, isGenerating, currentSuggestions.length, getRandomSuggestions, initializeTextKeys, updateSingleSuggestion]);
 
   // ============================================================
-  // LOAD USER NAME FROM LOCALSTORAGE
+  // 👤 LOAD USER NAME - From localStorage or Clerk
   // ============================================================
   useEffect(() => {
     if (userId && isLoaded) {
@@ -265,7 +280,7 @@ const getUserName = (): string => {
   }, [userId, isLoaded, user]);
 
   // ============================================================
-  // SAVE USER NAME
+  // 💾 SAVE USER NAME - To localStorage
   // ============================================================
   const handleNameSave = (name: string) => {
     console.log('💾 Saving name:', name);
@@ -278,7 +293,7 @@ const getUserName = (): string => {
   };
 
   // ============================================================
-  // LOAD DIFY CONVERSATION ID FROM LOCALSTORAGE
+  // 🆔 LOAD DIFY CONVERSATION ID - From localStorage
   // ============================================================
   useEffect(() => {
     if (userId) {
@@ -291,7 +306,7 @@ const getUserName = (): string => {
   }, [userId]);
 
   // ============================================================
-  // ✅ FIXED: Load conversations from Convex (with protection)
+  // 📥 LOAD CONVERSATIONS FROM CONVEX - Cloud sync
   // ============================================================
   useEffect(() => {
     console.log('🔵 LOAD EFFECT - userId:', userId, 'isLoaded:', isLoaded);
@@ -386,46 +401,46 @@ const getUserName = (): string => {
     }
   }, [userId, isLoaded, loadConversationsFromCloud, forceRefresh]);
 
-// ============================================================
-// ✅ FIXED: Save conversations ONLY when there are conversations
-// ============================================================
-useEffect(() => {
-  console.log('🔵 SAVE EFFECT - conversations:', conversations.length, 'userId:', userId);
-  
-  if (!userId) {
-    console.log('⚠️ No userId, skipping save');
-    return;
-  }
-  
-  // ✅ ONLY save if there are conversations
-  if (conversations.length === 0) {
-    console.log('⚠️ No conversations to save, skipping Convex save');
+  // ============================================================
+  // 💾 SAVE CONVERSATIONS - To localStorage and Convex
+  // ============================================================
+  useEffect(() => {
+    console.log('🔵 SAVE EFFECT - conversations:', conversations.length, 'userId:', userId);
+    
+    if (!userId) {
+      console.log('⚠️ No userId, skipping save');
+      return;
+    }
+    
+    // ✅ ONLY save if there are conversations
+    if (conversations.length === 0) {
+      console.log('⚠️ No conversations to save, skipping Convex save');
+      localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
+      return;
+    }
+    
     localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
-    return;
-  }
-  
-  localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(conversations));
-  console.log('💾 Saved to localStorage');
-  
-  const conversationsForCloud = conversations.map(conv => ({
-    ...conv,
-    messages: conv.messages.map(msg => ({
-      ...msg,
-      timestamp: msg.timestamp instanceof Date ? msg.timestamp.getTime() : msg.timestamp,
-    })),
-    createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
-    updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
-  }));
-  
-  console.log('💾 Sending to Convex:', conversationsForCloud.length, 'conversations');
-  
-  saveConversationsToCloud({ userId, conversations: conversationsForCloud })
-    .then(() => console.log('✅ Convex save successful'))
-    .catch((err) => console.error('❌ Convex save failed:', err));
-}, [conversations, userId]);
+    console.log('💾 Saved to localStorage');
+    
+    const conversationsForCloud = conversations.map(conv => ({
+      ...conv,
+      messages: conv.messages.map(msg => ({
+        ...msg,
+        timestamp: msg.timestamp instanceof Date ? msg.timestamp.getTime() : msg.timestamp,
+      })),
+      createdAt: conv.createdAt instanceof Date ? conv.createdAt.getTime() : conv.createdAt,
+      updatedAt: conv.updatedAt instanceof Date ? conv.updatedAt.getTime() : conv.updatedAt,
+    }));
+    
+    console.log('💾 Sending to Convex:', conversationsForCloud.length, 'conversations');
+    
+    saveConversationsToCloud({ userId, conversations: conversationsForCloud })
+      .then(() => console.log('✅ Convex save successful'))
+      .catch((err) => console.error('❌ Convex save failed:', err));
+  }, [conversations, userId]);
 
   // ============================================================
-  // ✅ AUTO-REFRESH: When tab becomes visible
+  // 🔄 AUTO-REFRESH: When tab becomes visible
   // ============================================================
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -442,7 +457,7 @@ useEffect(() => {
   }, [userId]);
 
   // ============================================================
-  // AUTO-REFRESH: When user signs in
+  // 🔄 AUTO-REFRESH: When user signs in
   // ============================================================
   useEffect(() => {
     if (userId && isLoaded) {
@@ -452,22 +467,33 @@ useEffect(() => {
   }, [userId, isLoaded]);
 
   // ============================================================
-  // SAVE CURRENT CONVERSATION
+  // 💾 SAVE CURRENT CONVERSATION - Save active chat
   // ============================================================
   const saveCurrentConversation = () => {
     if (!currentConversationId) return;
+    if (messages.length === 0) return; // Don't save empty conversations
     
     const title = messages[0]?.content?.substring(0, 40) || 'New Chat';
     const updatedConversations = conversations.map(conv =>
       conv.id === currentConversationId
-        ? { ...conv, title, messages: [...messages], updatedAt: new Date() }
+        ? { 
+            ...conv, 
+            title, 
+            messages: [...messages], // Make a copy
+            updatedAt: new Date() 
+          }
         : conv
     );
     setConversations(updatedConversations);
+    
+    // Also save to localStorage immediately for backup
+    if (userId) {
+      localStorage.setItem(`baptistry_conversations_${userId}`, JSON.stringify(updatedConversations));
+    }
   };
 
   // ============================================================
-  // START NEW CHAT
+  // 🆕 START NEW CHAT - Create a fresh conversation
   // ============================================================
   const startNewChat = () => {
     if (messages.length > 0 && currentConversationId) {
@@ -508,49 +534,29 @@ useEffect(() => {
     setTimeout(autoResizeTextarea, 0);
   };
 
-// ============================================================
-// ✅ FIXED: Load conversation WITHOUT overwriting all conversations
-// ============================================================
-const loadConversation = (conversationId: string) => {
-  console.log('🔵 loadConversation called for:', conversationId);
-  console.log('🔵 Current conversations count:', conversations.length);
-  
-  // ✅ Save current conversation first if any
-  if (messages.length > 0 && currentConversationId) {
-    saveCurrentConversation();
-  }
-  
-  // ✅ Try to find the conversation in the current state
-  let conversation = conversations.find(c => c.id === conversationId);
-  console.log('🔵 Found in state:', conversation ? 'Yes' : 'No');
-  
-  // ✅ If not found, try loading from localStorage WITHOUT replacing everything
-  if (!conversation && userId) {
-    console.log('🔵 Checking localStorage...');
-    const saved = localStorage.getItem(`baptistry_conversations_${userId}`);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        const withDates = parsed.map((conv: any) => ({
-          ...conv,
-          createdAt: new Date(conv.createdAt),
-          updatedAt: new Date(conv.updatedAt),
-          messages: conv.messages.map((msg: any) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp),
-          })),
-        }));
+  // ============================================================
+  // 📂 LOAD CONVERSATION - Load a saved chat when clicked
+  // ============================================================
+  const loadConversation = (conversationId: string) => {
+    console.log('🔵 loadConversation called for:', conversationId);
+    console.log('🔵 Current conversations count:', conversations.length);
+    
+    // ✅ Save current conversation first if any
+    if (messages.length > 0 && currentConversationId) {
+      saveCurrentConversation();
+    }
+    
+    // ✅ Helper function to actually load the conversation
+    const loadConversationData = (conversationData: Conversation | undefined) => {
+      if (conversationData) {
+        console.log('✅ Loading conversation:', conversationId);
+        console.log('📝 Messages count:', conversationData.messages?.length || 0);
         
-        // ✅ Find the conversation in localStorage data
-        conversation = withDates.find(c => c.id === conversationId);
-        console.log('🔵 Found in localStorage:', conversation ? 'Yes' : 'No');
-        
-        if (conversation) {
-          // ✅ ONLY load the messages, DON'T replace the entire conversations list
-          setMessages(conversation.messages);
+        if (conversationData.messages && conversationData.messages.length > 0) {
+          setMessages(conversationData.messages);
           setCurrentConversationId(conversationId);
           
-          // ✅ Update the updatedAt timestamp in the existing conversations list
+          // Update timestamp
           setConversations(prev => prev.map(conv =>
             conv.id === conversationId
               ? { ...conv, updatedAt: new Date() }
@@ -560,43 +566,108 @@ const loadConversation = (conversationId: string) => {
           setTimeout(() => {
             scrollToBottomImmediate();
           }, 100);
-          return;
+        } else {
+          console.log('⚠️ Conversation has no messages');
+          setMessages([]);
+          setCurrentConversationId(conversationId);
         }
-      } catch (e) {
-        console.error('Failed to load from localStorage', e);
+        return true;
+      }
+      return false;
+    };
+    
+    // ✅ Step 1: Try to find in current state
+    let conversation = conversations.find(c => c.id === conversationId);
+    console.log('🔵 Found in state:', conversation ? 'Yes' : 'No');
+    
+    if (conversation) {
+      loadConversationData(conversation);
+      return;
+    }
+    
+    // ✅ Step 2: Try localStorage
+    if (userId) {
+      console.log('🔵 Checking localStorage...');
+      const saved = localStorage.getItem(`baptistry_conversations_${userId}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          const withDates = parsed.map((conv: any) => ({
+            ...conv,
+            createdAt: new Date(conv.createdAt),
+            updatedAt: new Date(conv.updatedAt),
+            messages: conv.messages.map((msg: any) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp),
+            })),
+          }));
+          
+          conversation = withDates.find(c => c.id === conversationId);
+          console.log('🔵 Found in localStorage:', conversation ? 'Yes' : 'No');
+          
+          if (conversation) {
+            // ✅ Add to state if not already there
+            setConversations(prev => {
+              const exists = prev.some(c => c.id === conversationId);
+              if (!exists) {
+                return [conversation, ...prev];
+              }
+              return prev;
+            });
+            
+            loadConversationData(conversation);
+            return;
+          }
+        } catch (e) {
+          console.error('Failed to load from localStorage', e);
+        }
       }
     }
-  }
-  
-  // ✅ If found in state, load it
-  if (conversation) {
-    console.log('🔵 Loading conversation from state:', conversationId);
-    console.log('🔵 Messages count:', conversation.messages?.length || 0);
     
-    if (conversation.messages && conversation.messages.length > 0) {
-      setMessages(conversation.messages);
-      setCurrentConversationId(conversationId);
+    // ✅ Step 3: Wait for Convex data (force refresh)
+    console.log('🔄 Conversation not found, forcing refresh from Convex...');
+    
+    // Trigger a refresh
+    setForceRefresh(prev => prev + 1);
+    
+    // ✅ Step 4: After refresh, try again
+    setTimeout(() => {
+      const refreshedConversations = conversations;
+      const refreshedConv = refreshedConversations.find(c => c.id === conversationId);
       
-      // ✅ Update the updatedAt timestamp
-      setConversations(prev => prev.map(conv =>
-        conv.id === conversationId
-          ? { ...conv, updatedAt: new Date() }
-          : conv
-      ));
-      
-      setTimeout(() => {
-        scrollToBottomImmediate();
-      }, 100);
-    } else {
-      console.log('⚠️ Conversation has no messages');
-      setMessages([]);
-      setCurrentConversationId(conversationId);
-    }
-  } else {
-    console.log('❌ Conversation not found anywhere:', conversationId);
-  }
-};
+      if (refreshedConv) {
+        console.log('✅ Found after refresh, loading...');
+        loadConversationData(refreshedConv);
+      } else {
+        console.log('❌ Conversation still not found after refresh');
+        
+        // ✅ Step 5: Create a placeholder conversation
+        const newConversation: Conversation = {
+          id: conversationId,
+          title: 'Loading...',
+          messages: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          pinned: false,
+        };
+        
+        setConversations(prev => {
+          const exists = prev.some(c => c.id === conversationId);
+          if (!exists) {
+            return [newConversation, ...prev];
+          }
+          return prev;
+        });
+        
+        setCurrentConversationId(conversationId);
+        setMessages([]);
+      }
+    }, 500);
+  };
 
+  // ============================================================
+  // ✏️ RENAME CONVERSATION - Change chat title
+  // ============================================================
   const renameConversation = (conversationId: string, newTitle: string) => {
     setConversations(prev => prev.map(conv =>
       conv.id === conversationId
@@ -605,6 +676,9 @@ const loadConversation = (conversationId: string) => {
     ));
   };
 
+  // ============================================================
+  // 🗑️ DELETE CONVERSATION - Remove a chat
+  // ============================================================
   const deleteConversation = (conversationId: string) => {
     const updatedConversations = conversations.filter(conv => conv.id !== conversationId);
     setConversations(updatedConversations);
@@ -617,6 +691,9 @@ const loadConversation = (conversationId: string) => {
     }
   };
 
+  // ============================================================
+  // 📌 PIN CONVERSATION - Pin important chats to top
+  // ============================================================
   const pinConversation = (conversationId: string) => {
     setConversations(prevConversations => {
       const clickedConv = prevConversations.find(conv => conv.id === conversationId);
@@ -650,6 +727,9 @@ const loadConversation = (conversationId: string) => {
     });
   };
 
+  // ============================================================
+  // 🔍 SCROLL TO MESSAGE - Find and highlight a specific message
+  // ============================================================
   const scrollToMessage = (messageId: string) => {
     setTimeout(() => {
       const messageElement = document.getElementById(messageId);
@@ -665,6 +745,9 @@ const loadConversation = (conversationId: string) => {
     }, 100);
   };
 
+  // ============================================================
+  // 👍👎 FEEDBACK - Helpful/Unhelpful buttons
+  // ============================================================
   const handleFeedback = (messageId: string, feedback: 'helpful' | 'unhelpful' | null) => {
     setMessageFeedback(prev => ({ ...prev, [messageId]: feedback }));
     
@@ -696,6 +779,9 @@ const loadConversation = (conversationId: string) => {
     localStorage.setItem('baptistry_feedback', JSON.stringify(feedbackLog));
   };
 
+  // ============================================================
+  // ✏️ EDIT MESSAGE - Edit a user message and resend
+  // ============================================================
   const editMessage = (messageId: string, newContent: string) => {
     console.log('✏️ EDIT MESSAGE:', messageId, newContent);
 
@@ -744,7 +830,7 @@ const loadConversation = (conversationId: string) => {
 
       const finalUserName = getUserName();
 
-      // ⭐ NEW: Use streaming fetch
+      // ⭐ Use streaming fetch
       await handleStreamingResponse(newContent, newMessages, finalUserName);
     };
 
@@ -753,6 +839,9 @@ const loadConversation = (conversationId: string) => {
     }, 50);
   };
 
+  // ============================================================
+  // 🔄 REGENERATE MESSAGE - Get a new response for the same question
+  // ============================================================
   const regenerateMessage = async (assistantMessageId: string) => {
     const assistantIndex = messages.findIndex(m => m.id === assistantMessageId);
     if (assistantIndex === -1) return;
@@ -774,12 +863,12 @@ const loadConversation = (conversationId: string) => {
     
     const finalUserName = getUserName();
 
-    // ⭐ NEW: Use streaming fetch
+    // ⭐ Use streaming fetch
     await handleStreamingResponse(userMessageContent, newMessages, finalUserName);
   };
 
   // ============================================================
-  // ⭐ NEW: Handle streaming responses from the server
+  // 📡 HANDLE STREAMING RESPONSE - Process real-time chunks from Dify
   // ============================================================
   const handleStreamingResponse = async (
     messageContent: string, 
@@ -864,6 +953,11 @@ const loadConversation = (conversationId: string) => {
                   };
                   setMessages(prev => [...prev, assistantMessage]);
                   
+                  // ✅ Save conversation after receiving response
+                  if (currentConversationId) {
+                    saveCurrentConversation();
+                  }
+                  
                   return;
                 }
               } catch (e) {
@@ -888,7 +982,7 @@ const loadConversation = (conversationId: string) => {
         let fullResponse = data.response || 'I apologize, but I encountered an error.';
         fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-        // Use the existing typing animation
+        // Use the existing typing animation - KEEP YOUR PREFERRED SPEED
         const chunkSize = 5;
         const delay = 20;
         for (let i = 0; i <= fullResponse.length; i += chunkSize) {
@@ -910,6 +1004,11 @@ const loadConversation = (conversationId: string) => {
         setMessages(prev => [...prev, assistantMessage]);
         setStreamingText('');
         setIsGenerating(false);
+        
+        // ✅ Save conversation after receiving response
+        if (currentConversationId) {
+          saveCurrentConversation();
+        }
       }
     } catch (error) {
       console.error('Error in streaming response:', error);
@@ -925,6 +1024,9 @@ const loadConversation = (conversationId: string) => {
     }
   };
 
+  // ============================================================
+  // 📤 SEND MESSAGE - Send user message and get response
+  // ============================================================
   const sendMessage = async () => {
     if (!input.trim()) return;
     if (isGenerating) return;
@@ -977,10 +1079,13 @@ const loadConversation = (conversationId: string) => {
     
     setTimeout(autoResizeTextarea, 0);
 
-    // ⭐ NEW: Use the streaming handler
+    // ⭐ Use the streaming handler
     await handleStreamingResponse(sentInput, messages, finalUserName);
   };
 
+  // ============================================================
+  // ⏹️ STOP RESPONSE - Stop BAPTISTRY from typing
+  // ============================================================
   const stopResponse = () => {
     stopRequested.current = true;
     setIsGenerating(false);
@@ -995,6 +1100,9 @@ const loadConversation = (conversationId: string) => {
     setMessages(prev => [...prev, stopMessage]);
   };
 
+  // ============================================================
+  // ⌨️ KEYBOARD SHORTCUTS - Enter to send, Shift+Enter for new line
+  // ============================================================
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -1002,16 +1110,25 @@ const loadConversation = (conversationId: string) => {
     }
   };
 
+  // ============================================================
+  // 🆕 NEW CHAT - Start fresh
+  // ============================================================
   const handleNewChat = () => {
     startNewChat();
   };
 
+  // ============================================================
+  // 🏠 RETURN TO WELCOME - Clear messages
+  // ============================================================
   const handleReturnToWelcome = () => {
     setMessages([]);
     setInput('');
     setTimeout(autoResizeTextarea, 0);
   };
 
+  // ============================================================
+  // ✏️ FILL INPUT - Click suggestion to fill input
+  // ============================================================
   const fillInput = (text: string) => {
     if (textareaRef.current) {
       textareaRef.current.value = text;
@@ -1021,6 +1138,9 @@ const loadConversation = (conversationId: string) => {
     }
   };
 
+  // ============================================================
+  // 📋 SIDEBAR CONVERSATIONS - Format for sidebar display
+  // ============================================================
   const sidebarConversations = conversations.map(conv => ({
     id: conv.id,
     content: conv.title,
@@ -1028,6 +1148,9 @@ const loadConversation = (conversationId: string) => {
     pinned: conv.pinned || false,
   }));
 
+  // ============================================================
+  // 🎨 STYLES - CSS classes for components
+  // ============================================================
   const tryAskingButtonClass = "block w-full text-left text-sm text-blue-600 dark:text-blue-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-700 dark:hover:text-blue-300 px-3 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 overflow-hidden";
 
   // Text animation class - slides up from bottom
@@ -1038,8 +1161,12 @@ const loadConversation = (conversationId: string) => {
     ${isSliding ? 'translate-y-[-100%] opacity-0' : 'translate-y-0 opacity-100'}
   `;
 
+  // ============================================================
+  // 🖥️ RENDER - The actual UI
+  // ============================================================
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {/* 📂 SIDEBAR - Left navigation */}
       <Sidebar 
         isOpen={sidebarOpen} 
         onToggle={() => setSidebarOpen(!sidebarOpen)}
@@ -1054,20 +1181,23 @@ const loadConversation = (conversationId: string) => {
       />
 
       <div className="flex-1 flex flex-col min-w-0">
-<Header 
-  onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-  messageCount={messages.length}
-  messages={messages}
-  onLoadMessage={scrollToMessage}
-  onBooksClick={() => {
-    // Trigger the Books modal via custom event
-    const event = new CustomEvent('openBooks');
-    window.dispatchEvent(event);
-  }}
-/>
+        {/* 📋 HEADER - Top bar */}
+        <Header 
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+          messageCount={messages.length}
+          messages={messages}
+          onLoadMessage={scrollToMessage}
+          onBooksClick={() => {
+            // Trigger the Books modal via custom event
+            const event = new CustomEvent('openBooks');
+            window.dispatchEvent(event);
+          }}
+        />
 
+        {/* 💬 MESSAGES AREA - Main chat */}
         <div className="flex-1 overflow-y-auto">
           {messages.length === 0 && !isGenerating ? (
+            // 🏠 WELCOME SCREEN - Show when no messages
             <div className="flex items-center justify-center h-full">
               <div className="text-center max-w-md px-6">
                 <div className="flex justify-center mb-6">
@@ -1110,6 +1240,7 @@ const loadConversation = (conversationId: string) => {
                         </button>
                       ))
                     ) : (
+                      // Fallback suggestions if dynamic ones aren't loaded
                       <>
                         <button 
                           onClick={() => fillInput("What do you believe about salvation?")}
@@ -1142,6 +1273,7 @@ const loadConversation = (conversationId: string) => {
               </div>
             </div>
           ) : (
+            // 💬 CHAT MESSAGES - Show when there are messages
             <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
               {messages.map((message) => (
                 <MessageBubble 
@@ -1154,6 +1286,7 @@ const loadConversation = (conversationId: string) => {
                 />
               ))}
               
+              {/* ⏳ THINKING INDICATOR - Shows while BAPTISTRY is thinking */}
               {isGenerating && !streamingText && (
                 <div className="flex justify-start gap-2">
                   <div className="flex-shrink-0 mt-1">
@@ -1178,6 +1311,7 @@ const loadConversation = (conversationId: string) => {
                 </div>
               )}
               
+              {/* ⌨️ STREAMING TEXT - Shows real-time typing */}
               {streamingText && (
                 <div className="flex justify-start gap-2">
                   <div className="flex-shrink-0 mt-1">
@@ -1203,6 +1337,7 @@ const loadConversation = (conversationId: string) => {
           )}
         </div>
 
+        {/* ✏️ INPUT AREA - Bottom bar with text input */}
         <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
           <div className="max-w-4xl mx-auto">
             <div className="flex gap-3 items-end">
@@ -1218,6 +1353,7 @@ const loadConversation = (conversationId: string) => {
                 disabled={isGenerating}
               />
               {isGenerating ? (
+                // ⏹️ STOP BUTTON - Shows while generating
                 <button
                   onClick={stopResponse}
                   className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2 border border-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
@@ -1225,6 +1361,7 @@ const loadConversation = (conversationId: string) => {
                   ⏹️ Stop
                 </button>
               ) : (
+                // 📤 SEND BUTTON - Shows when not generating
                 <button
                   onClick={sendMessage}
                   disabled={!input.trim()}
@@ -1235,6 +1372,7 @@ const loadConversation = (conversationId: string) => {
               )}
             </div>
             
+            {/* 📜 FOOTER QUOTES */}
             <p className="text-xs text-gray-600 dark:text-gray-400 text-center italic mt-3">
               "A dose of God's Word a day, will keep you going all day."
             </p>
@@ -1245,7 +1383,7 @@ const loadConversation = (conversationId: string) => {
         </div>
       </div>
       
-      {/* RightSidebar - Only show when there are messages */}
+      {/* 📖 RIGHT SIDEBAR - Bible lookup and resources */}
       {messages.length > 0 && (
         <RightSidebar 
           messages={messages} 
@@ -1253,6 +1391,7 @@ const loadConversation = (conversationId: string) => {
         />
       )}
       
+      {/* 👤 NAME MODAL - For guest users */}
       <NameModal 
         isOpen={showNameModal} 
         onSave={handleNameSave} 
