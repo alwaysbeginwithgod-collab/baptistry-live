@@ -932,7 +932,7 @@ const loadConversation = (conversationId: string) => {
 
         // ✅ SMOOTH TYPING ANIMATION FOR FALLBACK
         const chunkSize = 15; // Larger chunks = smoother
-        const delay = 6; // Faster = less jerky
+        const delay = 5; // Faster = less jerky
         
         for (let i = 0; i <= fullResponse.length; i += chunkSize) {
           if (stopRequested.current) {
