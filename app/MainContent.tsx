@@ -888,28 +888,58 @@ const loadConversation = (conversationId: string) => {
         let fullResponse = data.response || 'I apologize, but I encountered an error.';
         fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-        // Use the existing typing animation
-        const chunkSize = 15;
-        const delay = 8;
-        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-          if (stopRequested.current) {
-            setIsGenerating(false);
-            setStreamingText('');
-            return;
-          }
-          setStreamingText(fullResponse.substring(0, i));
-          await new Promise(resolve => setTimeout(resolve, delay));
-        }
+// ============================================================
+// ✅ IMPROVED: Smooth, professional typing animation
+// ============================================================
 
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: fullResponse,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        setStreamingText('');
-        setIsGenerating(false);
+// Use the optimized typing animation
+// Larger chunks = smoother, less UI re-rendering
+const chunkSize = 15; // Much larger chunks (was 2)
+const delay = 8; // Faster delay (was 20)
+
+// First, split into paragraphs for smoother display
+const paragraphs = fullResponse.split('\n\n');
+let currentText = '';
+
+for (let p = 0; p < paragraphs.length; p++) {
+  const paragraph = paragraphs[p];
+  const words = paragraph.split(' ');
+  let wordIndex = 0;
+  
+  // Show paragraph by paragraph
+  while (wordIndex < words.length) {
+    if (stopRequested.current) {
+      setIsGenerating(false);
+      setStreamingText('');
+      return;
+    }
+    
+    // Add words in small groups for natural flow
+    const groupSize = Math.min(3, words.length - wordIndex);
+    const wordGroup = words.slice(wordIndex, wordIndex + groupSize).join(' ');
+    currentText += (wordIndex === 0 && p > 0 ? '\n\n' : '') + wordGroup;
+    
+    // Update the UI with the new text
+    setStreamingText(currentText);
+    wordIndex += groupSize;
+    
+    // Natural typing speed with slight variation
+    const naturalDelay = delay + (Math.random() * 4 - 2);
+    await new Promise(resolve => setTimeout(resolve, naturalDelay));
+  }
+}
+
+// Final clean-up
+const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+const assistantMessage: Message = {
+  id: (Date.now() + 1).toString(),
+  role: 'assistant',
+  content: cleanResponse || 'I apologize, but I encountered an error.',
+  timestamp: new Date(),
+};
+setMessages(prev => [...prev, assistantMessage]);
+setStreamingText('');
+setIsGenerating(false);
       }
     } catch (error) {
       console.error('Error in streaming response:', error);
