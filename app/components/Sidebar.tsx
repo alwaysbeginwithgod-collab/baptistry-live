@@ -60,7 +60,7 @@ export default function Sidebar({
     setBibleVerse(getDailyVerse());
   }, []);
 
-  // ✅ Listen for "openDevotion" event from NotificationBell (ONLY ONCE)
+  // ✅ Listen for "openDevotion" event from NotificationBell
   useEffect(() => {
     const handleOpenDevotion = () => {
       console.log('📖 openDevotion event received in Sidebar');
@@ -72,7 +72,7 @@ export default function Sidebar({
     };
   }, []);
 
-  // ✅ Listen for "openBooks" event from MainContent (for Books Showroom)
+  // ✅ Listen for "openBooks" event from MainContent
   useEffect(() => {
     const handleOpenBooks = () => {
       console.log('📚 openBooks event received in Sidebar');
@@ -147,6 +147,26 @@ export default function Sidebar({
   const handleMenuToggle = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setMenuOpenId(menuOpenId === id ? null : id);
+  };
+
+  // ============================================================
+  // ✅ IMPROVED: Handle conversation click with debugging
+  // ============================================================
+  const handleConversationClick = (convId: string) => {
+    console.log('🖱️ Sidebar: Clicked conversation:', convId);
+    console.log('🖱️ Current conversations in sidebar:', conversations.length);
+    
+    // Find the conversation to verify it exists
+    const found = conversations.find(c => c.id === convId);
+    console.log('🖱️ Found in sidebar state:', found ? 'Yes' : 'No');
+    
+    if (found) {
+      console.log('🖱️ Conversation title:', found.content);
+      console.log('🖱️ Messages count:', found.messages?.length || 'N/A');
+    }
+    
+    // Call the parent's load function
+    onLoadConversation(convId);
   };
 
   return (
@@ -260,7 +280,13 @@ export default function Sidebar({
         </div>
 
         <div className="px-4 pb-4">
-          <input type="text" placeholder="Search conversations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input 
+            type="text" 
+            placeholder="Search conversations..." 
+            value={searchQuery} 
+            onChange={(e) => setSearchQuery(e.target.value)} 
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-4">
@@ -284,22 +310,46 @@ export default function Sidebar({
                     )}
                     
                     {editingId === conv.id ? (
-                      <input type="text" value={editingTitle} onChange={(e) => setEditingTitle(e.target.value)} onBlur={saveRename} onKeyDown={handleKeyDown} className="w-full px-3 py-2 text-sm border border-blue-400 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" autoFocus />
+                      <input 
+                        type="text" 
+                        value={editingTitle} 
+                        onChange={(e) => setEditingTitle(e.target.value)} 
+                        onBlur={saveRename} 
+                        onKeyDown={handleKeyDown} 
+                        className="w-full px-3 py-2 text-sm border border-blue-400 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                        autoFocus 
+                      />
                     ) : (
-                      <div onClick={() => onLoadConversation(conv.id)} className="flex items-center justify-between px-3 py-2 cursor-pointer">
+                      <div 
+                        // ✅ IMPROVED: Use the new handler with debugging
+                        onClick={() => handleConversationClick(conv.id)} 
+                        className="flex items-center justify-between px-3 py-2 cursor-pointer"
+                      >
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-700 dark:text-gray-300 truncate font-medium group-hover:text-gray-900 dark:group-hover:text-white">{conv.content}</p>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 group-hover:text-gray-700 dark:group-hover:text-white">{new Date(conv.timestamp).toLocaleDateString()}</p>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 truncate font-medium group-hover:text-gray-900 dark:group-hover:text-white">
+                            {conv.content}
+                          </p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 group-hover:text-gray-700 dark:group-hover:text-white">
+                            {new Date(conv.timestamp).toLocaleDateString()}
+                          </p>
                         </div>
-                        <button onClick={(e) => handleMenuToggle(conv.id, e)} className="flex-shrink-0 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200 dark:hover:bg-gray-700">
-                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                        <button 
+                          onClick={(e) => handleMenuToggle(conv.id, e)} 
+                          className="flex-shrink-0 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200 dark:hover:bg-gray-700"
+                        >
+                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                          </svg>
                         </button>
                       </div>
                     )}
+                    
                     {menuOpenId === conv.id && (
                       <div ref={menuRef} className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-1 overflow-hidden">
                         <button onClick={() => startRename(conv)} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
-                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
                           <span>Rename</span>
                         </button>
                         {onPinConversation && (
@@ -315,7 +365,9 @@ export default function Sidebar({
                           </button>
                         )}
                         <button onClick={() => handleDelete(conv.id)} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors duration-150">
-                          <svg className="w-4 h-4 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          <svg className="w-4 h-4 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
                           <span>Delete</span>
                         </button>
                       </div>
