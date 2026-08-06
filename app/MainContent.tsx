@@ -894,7 +894,7 @@ const loadConversation = (conversationId: string) => {
 
 // Use the optimized typing animation
 // Larger chunks = smoother, less UI re-rendering
-const chunkSize = 15; // Much larger chunks (was 2)
+const chunkSize = 30; // Much larger chunks (was 2)
 const delay = 8; // Faster delay (was 20)
 
 // First, split into paragraphs for smoother display
