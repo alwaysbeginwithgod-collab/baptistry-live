@@ -744,7 +744,7 @@ const loadConversation = (conversationId: string) => {
 
       const finalUserName = getUserName();
 
-      // ⭐ Use streaming fetch
+      // ⭐ NEW: Use streaming fetch
       await handleStreamingResponse(newContent, newMessages, finalUserName);
     };
 
@@ -774,184 +774,156 @@ const loadConversation = (conversationId: string) => {
     
     const finalUserName = getUserName();
 
-    // ⭐ Use streaming fetch
+    // ⭐ NEW: Use streaming fetch
     await handleStreamingResponse(userMessageContent, newMessages, finalUserName);
   };
 
-// ============================================================
-// ⭐ UPDATED: Handle streaming responses with thinking filter
-// ============================================================
-const handleStreamingResponse = async (
-  messageContent: string, 
-  history: Message[], 
-  userName: string
-) => {
-  try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        message: messageContent,
-        history: history,
-        userName: userName,
-        conversationId: difyConversationId,
-      }),
-    });
+  // ============================================================
+  // ⭐ NEW: Handle streaming responses from the server
+  // ============================================================
+  const handleStreamingResponse = async (
+    messageContent: string, 
+    history: Message[], 
+    userName: string
+  ) => {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: messageContent,
+          history: history,
+          userName: userName,
+          conversationId: difyConversationId,
+        }),
+      });
 
-    // Check if response is a stream
-    const contentType = response.headers.get('content-type') || '';
-    
-    if (contentType.includes('text/event-stream')) {
-      // ✅ It's a stream! Process it as it arrives
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let fullRawResponse = ''; // Store raw response
-      let fullCleanedResponse = ''; // Store cleaned response
-      let newConversationId = null;
-      let isInsideThinkTag = false;
+      // Check if response is a stream (check content type)
+      const contentType = response.headers.get('content-type') || '';
+      
+      if (contentType.includes('text/event-stream')) {
+        // ✅ It's a stream! Process it as it arrives
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullResponse = '';
+        let newConversationId = null;
+        let isFirstChunk = true;
 
-      if (!reader) {
-        throw new Error('No reader available');
-      }
+        if (!reader) {
+          throw new Error('No reader available');
+        }
 
-      // Read the stream
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+        // Read the stream
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.substring(6));
-              
-              // Handle conversation ID
-              if (data.event === 'conversation_id' && data.conversation_id) {
-                newConversationId = data.conversation_id;
-                console.log('🆔 Got conversation ID from stream:', newConversationId);
-              }
-              
-              // Handle message chunks
-              if (data.event === 'message' && data.answer) {
-                fullRawResponse += data.answer;
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.substring(6));
                 
-                // ⭐ FILTER OUT THINKING TAGS
-                // Remove <think>...</think> content before displaying
-                let cleanedText = fullRawResponse;
+                // Handle conversation ID
+                if (data.event === 'conversation_id' && data.conversation_id) {
+                  newConversationId = data.conversation_id;
+                  console.log('🆔 Got conversation ID from stream:', newConversationId);
+                }
                 
-                // Remove all <think> tags and their content
-                cleanedText = cleanedText.replace(/<think>[\s\S]*?<\/think>/g, '');
-                
-                // Also handle any remaining "thinking" indicators
-                cleanedText = cleanedText.replace(/^.*?thinking.*?\n/i, '');
-                cleanedText = cleanedText.replace(/^.*?Let me think.*?\n/i, '');
-                
-                // Update the display with cleaned text
-                if (cleanedText !== fullCleanedResponse) {
-                  fullCleanedResponse = cleanedText;
-                  setStreamingText(cleanedText);
+                // Handle message chunks
+                if (data.event === 'message' && data.answer) {
+                  fullResponse += data.answer;
+                  setStreamingText(fullResponse);
                   // Scroll to bottom as text streams in
                   scrollToBottomImmediate();
                 }
-              }
-              
-              // Handle end of stream
-              if (data.event === 'message_end') {
-                // Stream is complete - do one final cleaning
-                let finalCleaned = fullRawResponse;
                 
-                // Remove all think tags
-                finalCleaned = finalCleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-                
-                // Clean up any leftover "thinking" phrases
-                finalCleaned = finalCleaned.replace(/^.*?thinking.*?\n/i, '');
-                finalCleaned = finalCleaned.replace(/^.*?Let me think.*?\n/i, '');
-                
-                // Remove extra whitespace
-                finalCleaned = finalCleaned.trim();
-                
-                setIsGenerating(false);
-                setStreamingText('');
-                
-                // Save conversation ID
-                if (newConversationId) {
-                  setDifyConversationId(newConversationId);
-                  if (userId) {
-                    localStorage.setItem(`dify_conversation_${userId}`, newConversationId);
+                // Handle end of stream
+                if (data.event === 'message_end') {
+                  // Stream is complete
+                  setIsGenerating(false);
+                  setStreamingText('');
+                  
+                  // Save conversation ID
+                  if (newConversationId) {
+                    setDifyConversationId(newConversationId);
+                    if (userId) {
+                      localStorage.setItem(`dify_conversation_${userId}`, newConversationId);
+                    }
                   }
+                  
+                  // Add the complete message to the chat
+                  const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+                  const assistantMessage: Message = {
+                    id: (Date.now() + 1).toString(),
+                    role: 'assistant',
+                    content: cleanResponse || 'I apologize, but I encountered an error.',
+                    timestamp: new Date(),
+                  };
+                  setMessages(prev => [...prev, assistantMessage]);
+                  
+                  return;
                 }
-                
-                // Add the complete cleaned message to the chat
-                const assistantMessage: Message = {
-                  id: (Date.now() + 1).toString(),
-                  role: 'assistant',
-                  content: finalCleaned || 'I apologize, but I encountered an error.',
-                  timestamp: new Date(),
-                };
-                setMessages(prev => [...prev, assistantMessage]);
-                
-                return;
+              } catch (e) {
+                // Ignore parse errors for incomplete chunks
               }
-            } catch (e) {
-              // Ignore parse errors for incomplete chunks
             }
           }
         }
-      }
-    } else {
-      // ✅ Not a stream - fallback to regular JSON
-      console.log('⚠️ Response is not a stream, using JSON fallback');
-      const data = await response.json();
-      
-      if (data.conversation_id) {
-        console.log('🆔 New Dify conversation ID:', data.conversation_id);
-        setDifyConversationId(data.conversation_id);
-        if (userId) {
-          localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+      } else {
+        // ✅ Not a stream - fallback to regular JSON (for backward compatibility)
+        console.log('⚠️ Response is not a stream, using JSON fallback');
+        const data = await response.json();
+        
+        if (data.conversation_id) {
+          console.log('🆔 New Dify conversation ID:', data.conversation_id);
+          setDifyConversationId(data.conversation_id);
+          if (userId) {
+            localStorage.setItem(`dify_conversation_${userId}`, data.conversation_id);
+          }
         }
-      }
-      
-      let fullResponse = data.response || 'I apologize, but I encountered an error.';
-      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+        
+        let fullResponse = data.response || 'I apologize, but I encountered an error.';
+        fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-      // Use the existing typing animation
-      const chunkSize = 15; // Larger chunks = smoother
-      const delay = 3; // Faster = less jerky
-      for (let i = 0; i <= fullResponse.length; i += chunkSize) {
-        if (stopRequested.current) {
-          setIsGenerating(false);
-          setStreamingText('');
-          return;
+        // Use the existing typing animation
+        const chunkSize = 15;
+        const delay = 3;
+        for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+          if (stopRequested.current) {
+            setIsGenerating(false);
+            setStreamingText('');
+            return;
+          }
+          setStreamingText(fullResponse.substring(0, i));
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
-        setStreamingText(fullResponse.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
 
-      const assistantMessage: Message = {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: fullResponse,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setStreamingText('');
+        setIsGenerating(false);
+      }
+    } catch (error) {
+      console.error('Error in streaming response:', error);
+      const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: fullResponse,
+        content: 'I apologize, but I am unable to respond at this moment.',
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, assistantMessage]);
-      setStreamingText('');
+      setMessages(prev => [...prev, errorMessage]);
       setIsGenerating(false);
+      setStreamingText('');
     }
-  } catch (error) {
-    console.error('Error in streaming response:', error);
-    const errorMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: 'I apologize, but I am unable to respond at this moment.',
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, errorMessage]);
-    setIsGenerating(false);
-    setStreamingText('');
-  }
-};
+  };
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -1005,7 +977,7 @@ const handleStreamingResponse = async (
     
     setTimeout(autoResizeTextarea, 0);
 
-    // ⭐ Use the streaming handler
+    // ⭐ NEW: Use the streaming handler
     await handleStreamingResponse(sentInput, messages, finalUserName);
   };
 
