@@ -157,8 +157,8 @@ export default function BooksModal({ isOpen, onClose }: BooksModalProps) {
       number: 5,
       title: "Ignited By Promises",
       cover: "/books/ignited-5-promises.jpg",
-      flipbookLink: "#",
-      amazonLink: "https://www.amazon.com/dp/YOUR_AMAZON_LINK",
+      flipbookLink: "https://online.fliphtml5.com/xmsuz/Book-4---Ignited-By-Faith---Preview/",
+      amazonLink: "https://a.co/d/0aPWy0A9",
       tagline: "Claim God's promises, and never live in fear again.",
       description: "Stand on the solid ground of God's unfailing promises."
     },
