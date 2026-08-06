@@ -162,7 +162,8 @@ export default function Sidebar({
     
     if (found) {
       console.log('🖱️ Conversation title:', found.content);
-      console.log('🖱️ Messages count:', found.messages?.length || 'N/A');
+      // ✅ REMOVED: messages doesn't exist in sidebar conversations
+      // console.log('🖱️ Messages count:', found.messages?.length || 'N/A');
     }
     
     // Call the parent's load function
