@@ -162,6 +162,8 @@ export default function Sidebar({
     
     if (found) {
       console.log('🖱️ Conversation title:', found.content);
+      // ✅ REMOVED: messages doesn't exist in sidebar conversations
+      // console.log('🖱️ Messages count:', found.messages?.length || 'N/A');
     }
     
     // Call the parent's load function
@@ -269,26 +271,6 @@ export default function Sidebar({
               Support BAPTISTRY
             </button>
           </div>
-
-          {/* ✅ NEW: Daily Verse Widget - Moved here next to Support button */}
-          {bibleVerse.text && (
-            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="flex items-start gap-2">
-                <span className="text-blue-500 text-sm mt-0.5">📖</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                    Daily Verse
-                  </p>
-                  <p className="text-xs text-gray-700 dark:text-gray-300 italic mt-0.5 leading-relaxed">
-                    "{bibleVerse.text}"
-                  </p>
-                  <p className="text-xs text-blue-500 dark:text-blue-400 font-medium mt-1">
-                    — {bibleVerse.reference} (KJV)
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="px-4 pb-4">
@@ -340,6 +322,7 @@ export default function Sidebar({
                       />
                     ) : (
                       <div 
+                        // ✅ IMPROVED: Use the new handler with debugging
                         onClick={() => handleConversationClick(conv.id)} 
                         className="flex items-center justify-between px-3 py-2 cursor-pointer"
                       >
@@ -397,7 +380,15 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* ✅ REMOVED: Old Daily Verse Widget from bottom - Now moved to top section */}
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          {bibleVerse.text && (
+            <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="text-xs text-blue-600 dark:text-blue-400 text-center font-medium">📖 Daily Bible Promise</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 text-center italic mt-1">"{bibleVerse.text}"</p>
+              <p className="text-xs text-blue-500 dark:text-blue-500 text-center mt-1">— {bibleVerse.reference} (KJV)</p>
+            </div>
+          )}
+        </div>
       </aside>
 
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
