@@ -19,6 +19,7 @@ type Message = {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  isTruncated?: boolean; // ✅ Flag for truncated messages
 };
 
 type Conversation = {
@@ -873,6 +874,119 @@ export default function MainContent() {
   };
 
   // ============================================================
+  // 🔍 TRUNCATION DETECTION - Check if a response was cut off
+  // ============================================================
+  function isResponseTruncated(text: string): boolean {
+    if (!text || text.length < 100) return false;
+    
+    // Patterns that indicate a complete response
+    const completePatterns = [
+      /\.$/,           // Ends with a period
+      /\?$/,           // Ends with a question mark
+      /\!$/,           // Ends with an exclamation
+      /["']$/,         // Ends with a quote
+      /\)$/,           // Ends with a parenthesis
+      /\]$/,           // Ends with a bracket
+      /\}$/,           // Ends with a brace
+      /—$/,            // Ends with an em dash
+      /:$/,            // Ends with a colon
+      /…$/,            // Ends with an ellipsis
+      /\n\s*$/,        // Ends with a newline
+    ];
+    
+    // If it ends with any of these, it's likely complete
+    for (const pattern of completePatterns) {
+      if (pattern.test(text)) {
+        return false;
+      }
+    }
+    
+    // If the text is long (>500 chars) and doesn't end with punctuation, it's likely truncated
+    if (text.length > 500) {
+      // Check if it ends mid-word (last word has no space after)
+      const lastChar = text.trim().slice(-1);
+      if (lastChar.match(/[a-zA-Z0-9]/) && !/[.!?"']/.test(lastChar)) {
+        return true;
+      }
+    }
+    
+    // Check for common truncation indicators
+    const truncationIndicators = [
+      /\.\.\.$/,       // Ends with ellipsis (might be intentional though)
+      /,$/,            // Ends with a comma (unlikely to end here)
+      /;$/,            // Ends with a semicolon (unlikely to end here)
+      /:$/,            // Ends with a colon (unlikely to end here)
+    ];
+    
+    for (const pattern of truncationIndicators) {
+      if (pattern.test(text)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+// ============================================================
+// 📖 CONTINUE RESPONSE - Continue a truncated message
+// ============================================================
+const handleContinue = async (truncatedMessage: Message) => {
+  console.log('📖 Continue button clicked for message:', truncatedMessage.id);
+  
+  // Find the original user message that triggered this response
+  const messageIndex = messages.findIndex(m => m.id === truncatedMessage.id);
+  let userMessageIndex = messageIndex - 1;
+  let userMessage: Message | null = null;
+  
+  // Find the last user message before this assistant message
+  while (userMessageIndex >= 0) {
+    if (messages[userMessageIndex].role === 'user') {
+      userMessage = messages[userMessageIndex];
+      break;
+    }
+    userMessageIndex--;
+  }
+  
+  if (!userMessage) {
+    console.error('Could not find original user message');
+    return;
+  }
+  
+  // Create a "continue" prompt
+  const continuePrompt = `Please continue your previous response from where you left off. You were saying:\n\n"${truncatedMessage.content.slice(-200)}..."\n\nPlease continue with the rest of your teaching from where you stopped.`;
+  
+  // Create a new user message for the continuation
+  const continueUserMessage: Message = {
+    id: Date.now().toString(),
+    role: 'user',
+    content: continuePrompt,
+    timestamp: new Date(),
+  };
+  
+  // Add the continuation user message
+  setMessages(prev => [...prev, continueUserMessage]);
+  
+  // ✅ Remove the truncated flag from the original message (no note removal needed)
+  setMessages(prev => prev.map(msg => 
+    msg.id === truncatedMessage.id 
+      ? { ...msg, isTruncated: false }
+      : msg
+  ));
+  
+  // Send the continuation request
+  setIsGenerating(true);
+  setStreamingText('');
+  stopRequested.current = false;
+  
+  const finalUserName = getUserName();
+  
+  // Use the same history but remove the truncated assistant message from history
+  const historyWithoutTruncated = messages.slice(0, messageIndex);
+  
+  await handleStreamingResponse(continuePrompt, historyWithoutTruncated, finalUserName);
+};
+
+  // ============================================================
   // 📡 HANDLE STREAMING RESPONSE - Process real-time chunks from Dify
   // 🆕 UPDATED: Now properly handles stop button with AbortController
   // ============================================================
@@ -960,47 +1074,52 @@ export default function MainContent() {
                   scrollToBottomImmediate();
                 }
                 
-                // Handle end of stream
-                if (data.event === 'message_end') {
-                  // 🆕 Check if stop was requested before completing
-                  if (stopRequested.current) {
-                    console.log('⏹️ Stop requested - ignoring message_end');
-                    setIsGenerating(false);
-                    setStreamingText('');
-                    abortControllerRef.current = null;
-                    return;
-                  }
-                  
-                  // Stream is complete
-                  setIsGenerating(false);
-                  setStreamingText('');
-                  
-                  // Save conversation ID
-                  if (newConversationId) {
-                    setDifyConversationId(newConversationId);
-                    if (userId) {
-                      localStorage.setItem(`dify_conversation_${userId}`, newConversationId);
-                    }
-                  }
-                  
-                  // Add the complete message to the chat
-                  const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-                  const assistantMessage: Message = {
-                    id: (Date.now() + 1).toString(),
-                    role: 'assistant',
-                    content: cleanResponse || 'I apologize, but I encountered an error.',
-                    timestamp: new Date(),
-                  };
-                  setMessages(prev => [...prev, assistantMessage]);
-                  
-                  // ✅ Save conversation after receiving response
-                  if (currentConversationId) {
-                    saveCurrentConversation();
-                  }
-                  
-                  abortControllerRef.current = null;
-                  return;
-                }
+// Handle end of stream
+if (data.event === 'message_end') {
+  // 🆕 Check if stop was requested before completing
+  if (stopRequested.current) {
+    console.log('⏹️ Stop requested - ignoring message_end');
+    setIsGenerating(false);
+    setStreamingText('');
+    abortControllerRef.current = null;
+    return;
+  }
+  
+  // Stream is complete
+  setIsGenerating(false);
+  setStreamingText('');
+  
+  // Save conversation ID
+  if (newConversationId) {
+    setDifyConversationId(newConversationId);
+    if (userId) {
+      localStorage.setItem(`dify_conversation_${userId}`, newConversationId);
+    }
+  }
+  
+  // Add the complete message to the chat
+  const cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+  
+  // ✅ Check if the response is truncated
+  const isTruncated = isResponseTruncated(cleanResponse);
+  
+  const assistantMessage: Message = {
+    id: (Date.now() + 1).toString(),
+    role: 'assistant',
+    content: cleanResponse || 'I apologize, but I encountered an error.',
+    timestamp: new Date(),
+    isTruncated: isTruncated,
+  };
+  setMessages(prev => [...prev, assistantMessage]);
+  
+  // ✅ Save conversation after receiving response
+  if (currentConversationId) {
+    saveCurrentConversation();
+  }
+  
+  abortControllerRef.current = null;
+  return;
+}
               } catch (e) {
                 // Ignore parse errors for incomplete chunks
               }
@@ -1048,11 +1167,17 @@ export default function MainContent() {
           await new Promise(resolve => setTimeout(resolve, delay));
         }
 
+        // ✅ NEW: Check if the response is truncated
+        const isTruncated = isResponseTruncated(fullResponse);
+        
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: fullResponse,
+          content: isTruncated 
+            ? fullResponse + '\n\n---\n\n⏳ *This response was truncated. Click "Continue" to get the rest.*'
+            : fullResponse || 'I apologize, but I encountered an error.',
           timestamp: new Date(),
+          isTruncated: isTruncated,
         };
         setMessages(prev => [...prev, assistantMessage]);
         setStreamingText('');
@@ -1150,7 +1275,6 @@ export default function MainContent() {
 
   // ============================================================
   // ⏹️ STOP RESPONSE - Stop BAPTISTRY from typing
-  // 🆕 UPDATED: Now properly aborts the fetch request
   // ============================================================
   const stopResponse = () => {
     console.log('⏹️ Stop button clicked - aborting request...');
@@ -1353,14 +1477,30 @@ export default function MainContent() {
             // 💬 CHAT MESSAGES - Show when there are messages
             <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
               {messages.map((message) => (
-                <MessageBubble 
-                  key={message.id} 
-                  message={message} 
-                  onFeedback={handleFeedback}
-                  onEdit={editMessage}
-                  onRegenerate={message.role === 'assistant' ? regenerateMessage : undefined}
-                  feedbackStatus={messageFeedback[message.id] || null}
-                />
+                <div key={message.id}>
+                  <MessageBubble 
+                    message={message} 
+                    onFeedback={handleFeedback}
+                    onEdit={editMessage}
+                    onRegenerate={message.role === 'assistant' ? regenerateMessage : undefined}
+                    feedbackStatus={messageFeedback[message.id] || null}
+                  />
+
+                  {/* ✅ Continue button for truncated messages */}
+                  {message.role === 'assistant' && message.isTruncated && (
+                    <div className="flex justify-start mt-2 ml-24">
+                      <button
+                        onClick={() => handleContinue(message)}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm hover:shadow-md min-h-[44px] touch-manipulation"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 13l-7 7-7-7m14-8l-7 7-7-7" />
+                        </svg>
+                        Continue Response
+                      </button>
+                    </div>
+                  )}
+                </div>
               ))}
               
               {/* ⏳ THINKING INDICATOR - Shows while BAPTISTRY is thinking */}
