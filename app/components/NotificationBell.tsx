@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { getDailyEncouragement } from '../lib/dailyEncouragements';
+import { getDailyEncouragement } from '../admin/dailyEncouragements';
 
 interface Notification {
   id: string;
