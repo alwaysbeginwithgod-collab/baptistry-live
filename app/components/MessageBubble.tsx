@@ -62,9 +62,9 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
   };
 
   // ============================================================
-  // 📝 Render message with verse hyperlinks
+  // 📝 Convert text with verse links to React elements
   // ============================================================
-  const renderMessageWithLinks = (text: string) => {
+  const renderWithVerseLinks = (text: string) => {
     if (!text || isUser) return text;
     
     // Find all verse references
@@ -85,8 +85,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
       }
       
       // Add the linked reference
-      let displayText = ref.fullText;
-      
       parts.push(
         <button
           key={`${ref.book}-${ref.chapter}-${ref.verse}-${ref.startIndex}`}
@@ -94,7 +92,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
           className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline font-medium cursor-pointer transition-colors"
           title={`Open ${formatVerseReference(ref.book, ref.chapter, ref.verse, ref.verseEnd)} in Bible`}
         >
-          {displayText}
+          {ref.fullText}
         </button>
       );
       
@@ -107,6 +105,31 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
     }
     
     return parts;
+  };
+
+  // ============================================================
+  // 📝 Custom paragraph renderer with verse links
+  // ============================================================
+  const renderParagraph = (children: React.ReactNode) => {
+    // If children is a string, process it for verse links
+    if (typeof children === 'string') {
+      const linkedContent = renderWithVerseLinks(children);
+      return <p className="mb-3 leading-relaxed">{linkedContent}</p>;
+    }
+    
+    // If children is an array, process each element
+    if (Array.isArray(children)) {
+      const processedChildren = children.map((child, index) => {
+        if (typeof child === 'string') {
+          const linkedContent = renderWithVerseLinks(child);
+          return <span key={index}>{linkedContent}</span>;
+        }
+        return child;
+      });
+      return <p className="mb-3 leading-relaxed">{processedChildren}</p>;
+    }
+    
+    return <p className="mb-3 leading-relaxed">{children}</p>;
   };
 
   const handleFeedback = (type: 'helpful' | 'unhelpful') => {
@@ -245,25 +268,8 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                           hr: ({node, ...props}) => <hr className="my-4 border-gray-300 dark:border-gray-700" {...props} />,
                           blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-400 pl-4 italic my-3" {...props} />,
                           a: ({node, ...props}) => <a className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
-                          // ✅ Override default paragraph to handle verse links (only one p definition)
-                          p: ({node, children, ...props}) => {
-                            // Get the text content from children
-                            let textContent = '';
-                            if (typeof children === 'string') {
-                              textContent = children;
-                            } else if (Array.isArray(children)) {
-                              textContent = children.map(c => typeof c === 'string' ? c : '').join('');
-                            }
-                            
-                            // If no text content or user message, render normally
-                            if (!textContent || isUser) {
-                              return <p className="mb-3 leading-relaxed" {...props}>{children}</p>;
-                            }
-                            
-                            // Render with verse links
-                            const linkedContent = renderMessageWithLinks(textContent);
-                            return <p className="mb-3 leading-relaxed" {...props}>{linkedContent}</p>;
-                          },
+                          // ✅ Simple p renderer with verse links
+                          p: ({children}) => renderParagraph(children),
                         }}
                       >
                         {cleanedContent}
