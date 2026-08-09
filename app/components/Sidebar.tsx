@@ -1,7 +1,3 @@
-# Open Sidebar.tsx and add a comment at the top
-# Add this line at the very beginning:
-// Refresh: 2026-08-10
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
