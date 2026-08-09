@@ -237,7 +237,6 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                           h2: ({node, ...props}) => <h2 className="text-lg font-semibold mt-3 mb-2" {...props} />,
                           h3: ({node, ...props}) => <h3 className="text-md font-semibold mt-2 mb-1" {...props} />,
                           h4: ({node, ...props}) => <h4 className="text-sm font-semibold mt-2 mb-1" {...props} />,
-                          p: ({node, ...props}) => <p className="mb-3 leading-relaxed" {...props} />,
                           ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
                           ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
                           li: ({node, ...props}) => <li className="mb-1" {...props} />,
@@ -246,7 +245,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                           hr: ({node, ...props}) => <hr className="my-4 border-gray-300 dark:border-gray-700" {...props} />,
                           blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-400 pl-4 italic my-3" {...props} />,
                           a: ({node, ...props}) => <a className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
-                          // ✅ Override default paragraph to handle verse links
+                          // ✅ Override default paragraph to handle verse links (only one p definition)
                           p: ({node, children, ...props}) => {
                             // Get the text content from children
                             let textContent = '';
