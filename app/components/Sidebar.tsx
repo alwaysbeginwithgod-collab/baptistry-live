@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { getDailyPromise } from '../admin/biblePromises';
+import { getDailyVerse } from '../admin/biblePromises';
 import BooksModal from './BooksModal';
 import SupportModal from './SupportModal';
 import AboutModal from './AboutModal';
@@ -59,7 +59,7 @@ export default function Sidebar({
   );
 
   useEffect(() => {
-    setBibleVerse(getDailyPromise());
+    setBibleVerse(getDailyVerse());
   }, []);
 
   // ✅ Listen for "openDevotion" event from NotificationBell
