@@ -266,7 +266,7 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                           strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
                           em: ({node, ...props}) => <em className="italic" {...props} />,
                           hr: ({node, ...props}) => <hr className="my-4 border-gray-300 dark:border-gray-700" {...props} />,
-                          // ✅ Fixed blockquote - only the quoted text is italic, reference stays normal
+                          // ✅ Fixed blockquote - handles multiple reference formats
                           blockquote: ({node, children, ...props}) => {
                             // Process children to apply italic only to the quoted text
                             const processedChildren = React.Children.map(children, (child) => {
@@ -274,22 +274,43 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                                 // Split by newlines to separate reference from quoted text
                                 const lines = child.split('\n');
                                 return lines.map((line, index) => {
-                                  // Check if this line looks like a reference (e.g., "— John 3:16")
-                                  if (line.trim().startsWith('—') || line.trim().match(/^[—\-]\s*[A-Za-z]+\s+\d+:\d+/)) {
+                                  const trimmed = line.trim();
+                                  
+                                  // Check if this line looks like a reference:
+                                  // Format 1: "— John 3:16" (em dash)
+                                  // Format 2: "Revelation 1:19 (KJV):" (book name with reference)
+                                  // Format 3: "— John 3:16 (KJV)" (em dash with KJV)
+                                  // Format 4: "John 3:16" (just the reference)
+                                  const isReference = 
+                                    trimmed.startsWith('—') || 
+                                    trimmed.startsWith('-') ||
+                                    // Pattern: Book name followed by chapter:verse
+                                    /^[A-Za-z]+\s+\d+:\d+/.test(trimmed) ||
+                                    // Pattern: Book name followed by chapter:verse (KJV)
+                                    /^[A-Za-z]+\s+\d+:\d+\s*\(KJV\)/.test(trimmed) ||
+                                    // Pattern: Book name followed by chapter:verse (KJV):
+                                    /^[A-Za-z]+\s+\d+:\d+\s*\(KJV\):/.test(trimmed) ||
+                                    // Pattern: Book name followed by chapter:verse (KJV) —
+                                    /^[A-Za-z]+\s+\d+:\d+\s*\(KJV\)\s*[—\-]/.test(trimmed);
+                                  
+                                  if (isReference) {
                                     // This is the reference - keep it normal (not italic)
                                     return (
                                       <span key={index} className="block text-blue-600 dark:text-blue-400 font-medium not-italic mt-2">
-                                        {line.trim()}
+                                        {trimmed}
                                       </span>
                                     );
                                   }
+                                  
                                   // This is the quoted scripture - make it italic
+                                  // Skip empty lines
+                                  if (!trimmed) return null;
                                   return (
                                     <span key={index} className="block italic">
                                       {line}
                                     </span>
                                   );
-                                });
+                                }).filter(Boolean); // Remove null/empty entries
                               }
                               return child;
                             });
