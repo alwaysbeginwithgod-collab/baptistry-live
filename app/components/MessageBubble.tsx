@@ -266,9 +266,41 @@ export default function MessageBubble({ message, onFeedback, onEdit, onRegenerat
                           strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
                           em: ({node, ...props}) => <em className="italic" {...props} />,
                           hr: ({node, ...props}) => <hr className="my-4 border-gray-300 dark:border-gray-700" {...props} />,
-                          blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-400 pl-4 italic my-3" {...props} />,
+                          // ✅ Fixed blockquote - only the quoted text is italic, reference stays normal
+                          blockquote: ({node, children, ...props}) => {
+                            // Process children to apply italic only to the quoted text
+                            const processedChildren = React.Children.map(children, (child) => {
+                              if (typeof child === 'string') {
+                                // Split by newlines to separate reference from quoted text
+                                const lines = child.split('\n');
+                                return lines.map((line, index) => {
+                                  // Check if this line looks like a reference (e.g., "— John 3:16")
+                                  if (line.trim().startsWith('—') || line.trim().match(/^[—\-]\s*[A-Za-z]+\s+\d+:\d+/)) {
+                                    // This is the reference - keep it normal (not italic)
+                                    return (
+                                      <span key={index} className="block text-blue-600 dark:text-blue-400 font-medium not-italic mt-2">
+                                        {line.trim()}
+                                      </span>
+                                    );
+                                  }
+                                  // This is the quoted scripture - make it italic
+                                  return (
+                                    <span key={index} className="block italic">
+                                      {line}
+                                    </span>
+                                  );
+                                });
+                              }
+                              return child;
+                            });
+                            
+                            return (
+                              <blockquote className="border-l-4 border-blue-400 pl-4 my-3" {...props}>
+                                {processedChildren}
+                              </blockquote>
+                            );
+                          },
                           a: ({node, ...props}) => <a className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
-                          // ✅ Simple p renderer with verse links
                           p: ({children}) => renderParagraph(children),
                         }}
                       >

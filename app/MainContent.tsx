@@ -1152,7 +1152,7 @@ if (data.event === 'message_end') {
         fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
         // Use the existing typing animation - KEEP YOUR PREFERRED SPEED
-        const chunkSize = 5;
+        const chunkSize = 3;
         const delay = 20;
         for (let i = 0; i <= fullResponse.length; i += chunkSize) {
           // 🆕 Check stop flag during typing animation

@@ -1,3 +1,4 @@
+// app/components/VersePopup.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -32,12 +33,18 @@ export default function VersePopup({ isOpen, onClose, reference, verseText }: Ve
   if (!isOpen) return null;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(`${reference}\n${verseText}`);
+    navigator.clipboard.writeText(`${reference}\n\n${verseText}`);
     setCopied(true);
   };
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) onClose();
+  };
+
+  // Clean the verse text - remove any extra formatting
+  const cleanVerseText = (text: string) => {
+    // Remove any leading/trailing whitespace
+    return text.trim();
   };
 
   return (
@@ -63,18 +70,22 @@ export default function VersePopup({ isOpen, onClose, reference, verseText }: Ve
         </button>
 
         <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-lg">📖</span>
-            <h3 className="text-lg font-bold text-blue-600 dark:text-blue-400">
+          {/* Header with book icon */}
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg">🕮</span>
+            <h3 className="text-xl font-bold text-blue-600 dark:text-blue-400">
               {reference}
             </h3>
-            <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto">KJV</span>
           </div>
 
-          {/* Verse text */}
-          <p className="text-gray-800 dark:text-gray-200 leading-relaxed text-base">
-            {verseText}
+          {/* King James Version label */}
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium">
+            King James Version
+          </p>
+
+          {/* Verse text - italic */}
+          <p className="text-gray-800 dark:text-gray-200 leading-relaxed text-base italic">
+            {cleanVerseText(verseText)}
           </p>
 
           {/* Copy button */}
