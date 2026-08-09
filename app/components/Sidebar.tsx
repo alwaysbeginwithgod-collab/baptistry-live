@@ -1,3 +1,5 @@
+// Refresh: 2026-08-10
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
