@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { devotions, Devotion } from '../data/devotions';
+import { devotions, Devotion } from '../admin/devotions';
 
 interface DevotionModalProps {
   isOpen: boolean;
