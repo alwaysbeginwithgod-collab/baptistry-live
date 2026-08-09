@@ -12,11 +12,13 @@ export default defineSchema({
         id: v.string(),
         role: v.string(),
         content: v.string(),
-        timestamp: v.number(), // ✅ Must be number
+        timestamp: v.number(),
       })
     ),
-    createdAt: v.number(), // ✅ Must be number
-    updatedAt: v.number(), // ✅ Must be number
+    createdAt: v.number(),
+    updatedAt: v.number(),
     pinned: v.boolean(),
-  }).index("by_userId", ["userId"]),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_updatedAt", ["updatedAt"]), // ✅ This helps cleanup run faster
 });

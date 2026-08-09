@@ -86,6 +86,11 @@ export default function MainContent() {
   const stopRequested = useRef(false); // For stopping generation
   
   // ============================================================
+  // 🆕 📡 ABORT CONTROLLER - For cancelling fetch requests when stop is clicked
+  // ============================================================
+  const abortControllerRef = useRef<AbortController | null>(null);
+  
+  // ============================================================
   // 🆔 DIFY CONVERSATION ID - For remembering user across sessions
   // ============================================================
   const [difyConversationId, setDifyConversationId] = useState<string | null>(null);
@@ -869,12 +874,17 @@ export default function MainContent() {
 
   // ============================================================
   // 📡 HANDLE STREAMING RESPONSE - Process real-time chunks from Dify
+  // 🆕 UPDATED: Now properly handles stop button with AbortController
   // ============================================================
   const handleStreamingResponse = async (
     messageContent: string, 
     history: Message[], 
     userName: string
   ) => {
+    // 🆕 Create a new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -885,6 +895,8 @@ export default function MainContent() {
           userName: userName,
           conversationId: difyConversationId,
         }),
+        // 🆕 Pass the abort signal so fetch can be cancelled
+        signal: abortController.signal,
       });
 
       // Check if response is a stream (check content type)
@@ -896,7 +908,6 @@ export default function MainContent() {
         const decoder = new TextDecoder();
         let fullResponse = '';
         let newConversationId = null;
-        let isFirstChunk = true;
 
         if (!reader) {
           throw new Error('No reader available');
@@ -904,6 +915,16 @@ export default function MainContent() {
 
         // Read the stream
         while (true) {
+          // 🆕 Check if stop was requested before reading next chunk
+          if (stopRequested.current) {
+            console.log('⏹️ Stop requested - cancelling stream reading');
+            reader.cancel();
+            setIsGenerating(false);
+            setStreamingText('');
+            abortControllerRef.current = null;
+            return;
+          }
+
           const { done, value } = await reader.read();
           if (done) break;
 
@@ -911,6 +932,16 @@ export default function MainContent() {
           const lines = chunk.split('\n');
 
           for (const line of lines) {
+            // 🆕 Check stop flag before processing each line
+            if (stopRequested.current) {
+              console.log('⏹️ Stop requested - breaking out of loop');
+              reader.cancel();
+              setIsGenerating(false);
+              setStreamingText('');
+              abortControllerRef.current = null;
+              return;
+            }
+
             if (line.startsWith('data: ')) {
               try {
                 const data = JSON.parse(line.substring(6));
@@ -931,6 +962,15 @@ export default function MainContent() {
                 
                 // Handle end of stream
                 if (data.event === 'message_end') {
+                  // 🆕 Check if stop was requested before completing
+                  if (stopRequested.current) {
+                    console.log('⏹️ Stop requested - ignoring message_end');
+                    setIsGenerating(false);
+                    setStreamingText('');
+                    abortControllerRef.current = null;
+                    return;
+                  }
+                  
                   // Stream is complete
                   setIsGenerating(false);
                   setStreamingText('');
@@ -958,6 +998,7 @@ export default function MainContent() {
                     saveCurrentConversation();
                   }
                   
+                  abortControllerRef.current = null;
                   return;
                 }
               } catch (e) {
@@ -970,6 +1011,15 @@ export default function MainContent() {
         // ✅ Not a stream - fallback to regular JSON (for backward compatibility)
         console.log('⚠️ Response is not a stream, using JSON fallback');
         const data = await response.json();
+        
+        // 🆕 Check if stop was requested
+        if (stopRequested.current) {
+          console.log('⏹️ Stop requested - ignoring JSON response');
+          setIsGenerating(false);
+          setStreamingText('');
+          abortControllerRef.current = null;
+          return;
+        }
         
         if (data.conversation_id) {
           console.log('🆔 New Dify conversation ID:', data.conversation_id);
@@ -986,9 +1036,12 @@ export default function MainContent() {
         const chunkSize = 5;
         const delay = 20;
         for (let i = 0; i <= fullResponse.length; i += chunkSize) {
+          // 🆕 Check stop flag during typing animation
           if (stopRequested.current) {
+            console.log('⏹️ Stop requested - stopping typing animation');
             setIsGenerating(false);
             setStreamingText('');
+            abortControllerRef.current = null;
             return;
           }
           setStreamingText(fullResponse.substring(0, i));
@@ -1009,8 +1062,19 @@ export default function MainContent() {
         if (currentConversationId) {
           saveCurrentConversation();
         }
+        
+        abortControllerRef.current = null;
       }
-    } catch (error) {
+    } catch (error: any) {
+      // 🆕 Check if this was an abort error (user stopped it)
+      if (error.name === 'AbortError' || error.message?.includes('aborted')) {
+        console.log('⏹️ Fetch was aborted by user');
+        setIsGenerating(false);
+        setStreamingText('');
+        abortControllerRef.current = null;
+        return;
+      }
+      
       console.error('Error in streaming response:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -1021,6 +1085,7 @@ export default function MainContent() {
       setMessages(prev => [...prev, errorMessage]);
       setIsGenerating(false);
       setStreamingText('');
+      abortControllerRef.current = null;
     }
   };
 
@@ -1085,12 +1150,24 @@ export default function MainContent() {
 
   // ============================================================
   // ⏹️ STOP RESPONSE - Stop BAPTISTRY from typing
+  // 🆕 UPDATED: Now properly aborts the fetch request
   // ============================================================
   const stopResponse = () => {
+    console.log('⏹️ Stop button clicked - aborting request...');
+    
+    // 🆕 Abort the fetch request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      console.log('✅ Fetch request aborted');
+    }
+    
+    // ✅ Set flags
     stopRequested.current = true;
     setIsGenerating(false);
     setStreamingText('');
     
+    // ✅ Show the stop message
     const stopMessage: Message = {
       id: (Date.now() + 1).toString(),
       role: 'assistant',
