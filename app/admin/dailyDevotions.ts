@@ -258,7 +258,7 @@ What trial are you currently enduring that you've been treating as an obstacle r
 
   {
     id: 'Devotion-9',
-    title: 'Don't Quit Yet',
+    title: "Don't Quit Yet",
     tagline: `âœï¸ "The trial was never meant to make us quit,\n     but to build a faith that refuses to split."`,
     scripture: 'James 1:3 "Knowing this, that the trying of your faith worketh patience."',
     content: `We all have a quitting point from battles nobody else can see"”a threshold where pressure outlasts patience. They don't break us suddenly"”they wear us down slowly. Delays. Disappointments. Dead ends. It's not always the fire that scares us"”it's the length of it. And sometimes quitting feels easier than enduring. The question is not whether we feel like quitting but whether we will quit before patience finishes her work.
