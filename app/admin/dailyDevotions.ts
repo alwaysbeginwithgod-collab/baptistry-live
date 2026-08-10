@@ -784,7 +784,7 @@ What burden are you still carrying"”guilt, fear, shame, or endless striving? Y
 
   {
     id: 'Devotion-26',
-    title: 'It's Already Yours',
+    title: 'It\'s Already Yours',
     tagline: `✍️ "Faith does not wait for proof to appear;\n     It receives God's promise as already here."`,
     scripture: 'Mark 11:24 "Therefore I say unto you, What things soever ye desire, when ye pray, believe that ye receive them, and ye shall have them."',
     content: `Many believers pray yet secretly expect nothing. We ask cautiously, expect minimally, and receive accordingly"”then wonder why our faith feels weak. We treat God's promises like items on a shelf we are not sure we are allowed to take. The question is not whether God answers prayer but whether we truly believe Him enough to receive what He has promised.
