@@ -15,7 +15,7 @@ export const devotions: Devotion[] = [
   {
     id: 'Devotion-1',
     title: 'Ask and Receive',
-    tagline: `âœï¸ "When every road is dark and you don't know the way,\n     Ask God for wisdom"”His light will guide the way."`,
+    tagline: `✍️ "When every road is dark and you don't know the way,\n     Ask God for wisdom"”His light will guide the way."`,
     scripture: 'James 1:5 "If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him"',
     content: `Life is full of crossroads. It often confronts us with decisions bigger than our understanding. We have all been there"”staring at a decision that feels impossible. Should I stay or go? Speak or stay silent? Wait or move forward? Whether we are facing uncertainty, confusion, or a major decision, the question is not whether we need wisdom"”but where we are seeking it.
     
@@ -42,7 +42,7 @@ What decision has been weighing heavily on your heart? Where have you been relyi
   {
     id: 'Devotion-2',
     title: 'Believe God Now',
-    tagline: `âœï¸ "Without Faith we cannot please God.\n     Without God we cannot have Faith."`,
+    tagline: `✍️ "Without Faith we cannot please God.\n     Without God we cannot have Faith."`,
     scripture: 'Hebrews 11:6 "But without faith it is impossible to please him: for he that cometh to God must believe that he is, and that he is a rewarder of them that diligently seek him."',
     content: `We fill our lives with religious activity"”services attended, verses memorized, offerings given"”yet quietly wonder why God feels distant. We perform without trusting, pray without believing, and serve while our hearts drift. God is not impressed by our busyness; He is moved by our belief. The question is not whether we are doing enough for God, but whether we actually believe He is who He says He is.
 
@@ -73,7 +73,7 @@ What is the one place where you are hesitating to trust God today? You cannot pl
   {
     id: 'Devotion-3',
     title: 'Walking Beyond Sight',
-    tagline: `âœï¸ "We walk not by what our eyes can explain,\n     But by trusting the God who forever remains."`,
+    tagline: `✍️ "We walk not by what our eyes can explain,\n     But by trusting the God who forever remains."`,
     scripture: '2 Corinthians 5:7 "For we walk by faith, not by sight."',
     content: `Oftentimes, we are addicted to visibility. We check the weather before we step outside, read reviews before we order, and demand a roadmap before we move. Whether we are navigating a career shift, a strained relationship, or a season of silence, the question is not whether we can see the whole path but whether we trust God enough to walk when we cannot see.
 
@@ -104,7 +104,7 @@ Where are you waiting for sight before you obey? You cannot walk with God while 
   {
     id: 'Devotion-4',
     title: 'Faith From God',
-    tagline: `âœï¸ "Faith is not formed by what we feel or say,\n     It rises when God's Word has the final say."`,
+    tagline: `✍️ "Faith is not formed by what we feel or say,\n     It rises when God's Word has the final say."`,
     scripture: 'Romans 10:17 "So then faith cometh by hearing, and hearing by the word of God."',
     content: `Many of us wait to feel more faith before we act"”as though faith were an emotion that arrives on its own schedule. We pray for more faith, yet rarely open the Book that produces it. Whether we realize it or not, what we hear is shaping what we believe. The question is not whether God wants us to have faith but whether we are listening to the voice that builds it.
 
@@ -135,7 +135,7 @@ What are you consistently listening to that is shaping your faith today? You can
   {
     id: 'Devotion-5',
     title: 'God Never Fails',
-    tagline: `âœï¸ "God does not change, nor speak in vain,\n     What He has promised"”He will sustain."`,
+    tagline: `✍️ "God does not change, nor speak in vain,\n     What He has promised"”He will sustain."`,
     scripture: 'Numbers 23:19 "God is not a man, that he should lie; neither the son of man, that he should repent: hath he said, and shall he not do it? or hath he spoken, and shall he not make it good?"',
     content: `We know what it is to be disappointed by someone who looked sincere yet proved unreliable. We all carry memories of promises made"”and broken. Whether we admit it or not, disappointment has trained us to hesitate and trust cautiously. The question is not whether people have failed us; but whether we truly believe that God never fails.
 
@@ -166,7 +166,7 @@ Is there a promise of God you have quietly stopped believing because someone in 
   {
     id: 'Devotion-6',
     title: 'Trust Beyond Feelings',
-    tagline: `âœï¸ "Feelings may falter, emotions may sway,\n     but trusting God's Word will never decay."`,
+    tagline: `✍️ "Feelings may falter, emotions may sway,\n     but trusting God's Word will never decay."`,
     scripture: 'Proverbs 3:5 "Trust in the LORD with all thine heart; and lean not unto thine own understanding."',
     content: `Feelings are powerful navigators, but they are unreliable ones. They shift with circumstance, bend under pressure, and when we have trusted the impression and leaned on what seemed reasonable, we have found ourselves further from God's path. The question is not whether our feelings are real, but whether we are wise enough to know they were never meant to lead.
 
@@ -197,7 +197,7 @@ Is there a decision you are currently navigating by feeling alone "” leaning o
   {
     id: 'Devotion-7',
     title: 'Take The First Step',
-    tagline: `âœï¸ "Courage is not born from what we see,\n     but from trusting the God who walks with thee."`,
+    tagline: `✍️ "Courage is not born from what we see,\n     but from trusting the God who walks with thee."`,
     scripture: 'Joshua 1:9 "Have not I commanded thee? Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest."',
     content: `Most of us are not waiting for permission to move"”we are waiting to feel ready. We want certainty before surrender, confidence before commitment, and guarantees before movement. Yet life's defining moments often begin with trembling steps. The question is not whether fear is present"”but whether we trust God enough to move forward anyway.
 
@@ -228,7 +228,7 @@ What step has God been calling you to take that fear keeps delaying? You don't n
   {
     id: 'Devotion-8',
     title: 'Refined or Ruined',
-    tagline: `âœï¸ "The fire was not sent to make us fall apart,\n     but to burn what is false and refine the heart."`,
+    tagline: `✍️ "The fire was not sent to make us fall apart,\n     but to burn what is false and refine the heart."`,
     scripture: '1 Peter 1:7 "That the trial of your faith, being much more precious than of gold that perisheth, though it be tried with fire, might be found unto praise and honour and glory at the appearing of Jesus Christ:"',
     content: `Trials do not leave us the same. They either refine us or ruin us. None of us naturally welcomes them. We pray for peace, stability, and comfort, yet when the trial comes, we treat it as an interruption rather than a solution. Whether a job loss, a diagnosis, or a broken relationship, some come out bitter, while others come out better. The question is not whether the fire is painful"”but whether it is refining us or ruining us.
 
@@ -259,7 +259,7 @@ What trial are you currently enduring that you've been treating as an obstacle r
   {
     id: 'Devotion-9',
     title: 'Don\'t Quit Yet',
-    tagline: `âœï¸ "The trial was never meant to make us quit,\n     but to build a faith that refuses to split."`,
+    tagline: `✍️ "The trial was never meant to make us quit,\n     but to build a faith that refuses to split."`,
     scripture: 'James 1:3 "Knowing this, that the trying of your faith worketh patience."',
     content: `We all have a quitting point from battles nobody else can see"”a threshold where pressure outlasts patience. They don't break us suddenly"”they wear us down slowly. Delays. Disappointments. Dead ends. It's not always the fire that scares us"”it's the length of it. And sometimes quitting feels easier than enduring. The question is not whether we feel like quitting but whether we will quit before patience finishes her work.
 
@@ -290,7 +290,7 @@ Where are you closest to giving up right now? And have you asked God what He is 
   {
     id: 'Devotion-10',
     title: 'Fear Loses Here',
-    tagline: `âœï¸ "Fear may whisper, threaten, and appear,\n     but faith rises when God draws near."`,
+    tagline: `✍️ "Fear may whisper, threaten, and appear,\n     but faith rises when God draws near."`,
     scripture: 'Isaiah 41:10 "Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee; yea, I will uphold thee with the right hand of my righteousness."',
     content: `Fear has a way of speaking louder in times of trouble. A doctor's report, a financial burden, an uncertain future, or a painful loss can quietly begin dictating our decisions. We smile outwardly while battling anxiety, worry, and dread inwardly. Fear magnifies problems, paralyzes faith, and minimizes God. The question is not whether fear will appear but whether we will trust God's presence when it does.
 
@@ -321,7 +321,7 @@ What fear has been controlling your thoughts more than God's truth? You don't ne
   {
     id: 'Devotion-11',
     title: 'Don\'t Rush God',
-    tagline: `âœï¸ "We rush ahead and miss what God prepared,\n     the fruit of waiting belongs to those who dared."`,
+    tagline: `✍️ "We rush ahead and miss what God prepared,\n     the fruit of waiting belongs to those who dared."`,
     scripture: 'Psalm 27:14 "Wait on the LORD: be of good courage, and he shall strengthen thine heart: wait, I say, on the LORD."',
     content: `Waiting is one of the hardest tests of faith in an age addicted to instant results"”hasty deliveries, immediate answers, real-time updates, and quick solutions. That speed has quietly reshaped our patience for everything, including God. We often mistake waiting for denial. The question is not whether waiting is difficult"”it is whether we have the faith to wait without rushing Him.
 
@@ -352,7 +352,7 @@ What answer have you been trying to force because the waiting feels longer than 
   {
     id: 'Devotion-12',
     title: 'Step Anyway',
-    tagline: `âœï¸ "Though uncertainty clouds the road ahead;\n     Trust God anyway and move forward instead."`,
+    tagline: `✍️ "Though uncertainty clouds the road ahead;\n     Trust God anyway and move forward instead."`,
     scripture: 'Hebrews 11:8 "By faith Abraham, when he was called to go out into a place which he should after receive for an inheritance, obeyed; and he went out, not knowing whither he went."',
     content: `Most of us are willing to obey God"”as long as we know where the road ends. We want details before decisions, explanations before obedience, and certainty before surrender. Yet faith rarely receives the full picture upfront. God often calls us forward while leaving parts of the path unseen. The question is not whether the road feels uncertain"”but whether we trust God enough to step anyway.
 
@@ -383,7 +383,7 @@ What has God been calling you to do that you keep postponing until life feels mo
   {
     id: 'Devotion-13',
     title: 'Hold The Line',
-    tagline: `âœï¸ "What falls is not the faith that's tried and pressed,\n     What falls is faith that never stood the test."`,
+    tagline: `✍️ "What falls is not the faith that's tried and pressed,\n     What falls is faith that never stood the test."`,
     scripture: '1 Corinthians 16:13 "Watch ye, stand fast in the faith, quit you like men, be strong."',
     content: `We are living in a generation pressured to compromise. Truth is mocked, conviction is softened, and faithfulness is fading. The pressure to blend in is relentless"”at work, online, in relationships, and even inside churches. Many are not abandoning the faith all at once; they are drifting one compromise at a time. The question is not whether pressure will come"”but whether our faith can still stand when it does.
 
@@ -414,7 +414,7 @@ Where have you been tempted to compromise because the pressure feels overwhelmin
   {
     id: 'Devotion-14',
     title: 'Step Out First',
-    tagline: `âœï¸ "God parts no sea for feet that never move.\n     The miracle begins when faith steps out to prove."`,
+    tagline: `✍️ "God parts no sea for feet that never move.\n     The miracle begins when faith steps out to prove."`,
     scripture: 'Joshua 3:13 "And it shall come to pass, as soon as the soles of the feet of the priests that bear the ark of the LORD, the Lord of all the earth, shall rest in the waters of Jordan, that the waters of Jordan shall be cut off from the waters that come down from above; and they shall stand upon an heap."',
     content: `Many of us keep waiting for God to move first before we obey. We want an introduction before a conclusion, confirmation before commitment, and proof before movement. Yet Scripture repeatedly shows that God often moves after His people move in faith. The question is not whether God is able to move, but whether we are willing to trust Him enough to step out first.
 
@@ -445,7 +445,7 @@ What river has been stopping you"”fear, finances, failure, or just the unknown
   {
     id: 'Devotion-15',
     title: 'Say What Matters',
-    tagline: `âœï¸ "Fear speaks defeat before the battle is won.\n     Faith speaks God's Word and sees it's done."`,
+    tagline: `✍️ "Fear speaks defeat before the battle is won.\n     Faith speaks God's Word and sees it's done."`,
     scripture: 'Mark 11:23 "For verily I say unto you, That whosoever shall say unto this mountain, Be thou removed, and be thou cast into the sea; and shall not doubt in his heart, but shall believe that those things which he saith shall come to pass; he shall have whatsoever he saith."',
     content: `Words reveal what the heart truly believes. We are an incredibly vocal generation, and in moments of pressure, fear often speaks first"”complaining, doubting, arguing, and surrendering before the battle even begins. We live in a world filled with careless words, empty opinions, and constant negativity. The question is not whether we are speaking, but whether our words are agreeing with fear or with God's truth.
 
@@ -476,7 +476,7 @@ What have your words been revealing about your faith lately? You don't need Chri
   {
     id: 'Devotion-16',
     title: 'Leave The Boat',
-    tagline: `âœï¸ "Faith is not proven by staying afloat;\n     It is proven when you risk the boat."`,
+    tagline: `✍️ "Faith is not proven by staying afloat;\n     It is proven when you risk the boat."`,
     scripture: 'Mark 14:29 "And he said, Come. And when Peter was come down out of the ship, he walked on the water, to go to Jesus."',
     content: `Most of us admire bold faith until it requires personal risk. Comfort is one of the most dangerous places a believer can settle. We want safety before surrender, guarantees before obedience, and calm waters before stepping out. Yet the greatest moments of faith often happen in the middle of storms. The question is not whether we feel safe in the boat but whether we trust Christ enough to leave it anyway.
 
@@ -507,7 +507,7 @@ What boat have you been sitting in because fear feels safer than obedience? You 
   {
     id: 'Devotion-17',
     title: 'Release Your Grip',
-    tagline: `âœï¸ "The hand that grips too tight will never know.\n     The harvest God reserves for those who let it go."`,
+    tagline: `✍️ "The hand that grips too tight will never know.\n     The harvest God reserves for those who let it go."`,
     scripture: '2 Corinthians 9:7 "Every man according as he purposeth in his heart, so let him give; not grudgingly, or of necessity: for God loveth a cheerful giver."',
     content: `We live in a world trained to hold tightly"”money, security, possessions, opportunities, and authority. Fear tells us that if we release too much, we may not have enough left for ourselves. So we calculate, protect, and preserve. Yet God often tests our faith not by what we receive, but by what we are willing to release. The question is not whether we have resources"”but whether we trust the Source of them all.
 
@@ -538,7 +538,7 @@ What are you holding so tightly that God calls you to release"”time, talent, t
   {
     id: 'Devotion-18',
     title: 'Love Does More',
-    tagline: `âœï¸ "Faith is not loud in words alone;\n     It is loudest when love is shown."`,
+    tagline: `✍️ "Faith is not loud in words alone;\n     It is loudest when love is shown."`,
     scripture: 'Galatians 5:6 "For in Jesus Christ neither circumcision availeth any thing, nor uncircumcision; but faith which worketh by love."',
     content: `We often measure faith by how much we know, how much we pray, or how strongly we believe. But Scripture reveals a deeper truth: faith is proven by love in action. Real faith does not sit still"”it serves. The question is not whether we claim to have faith"”it is whether our faith expresses love.
 
@@ -569,7 +569,7 @@ Who around you needs more than your words right now"”someone who needs your se
   {
     id: 'Devotion-19',
     title: 'Sent Not Silent',
-    tagline: `âœï¸ "Faith is not proven by staying still;\n     It is proven when we obey His will."`,
+    tagline: `✍️ "Faith is not proven by staying still;\n     It is proven when we obey His will."`,
     scripture: 'Matthew 28:19 "Go ye therefore, and teach all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Ghost:"',
     content: `We live in a generation that talks endlessly but tells nothing of eternity. We repost opinions, share stories, and speak about everything"”yet often stay silent about Christ. Fear of rejection, awkwardness, criticism, or inconvenience keeps many believers spiritually motionless. The question is not whether the world needs the Gospel"”but whether we are willing to be sent rather than remain silent.
 
@@ -600,7 +600,7 @@ Who in your life has never heard the Gospel because you have remained silent? A 
   {
     id: 'Devotion-20',
     title: 'Tomorrow Can Wait',
-    tagline: `âœï¸ "Tomorrow's burdens are not yours to borrow.\n     Trust God for today, and leave the rest for tomorrow."`,
+    tagline: `✍️ "Tomorrow's burdens are not yours to borrow.\n     Trust God for today, and leave the rest for tomorrow."`,
     scripture: 'Matthew 6:34 "Take therefore no thought for the morrow: for the morrow shall take thought for the things of itself. Sufficient unto the day is the evil thereof."',
     content: `We are a generation of chronic overthinkers, wrestling with shadows before tomorrow even arrives. Anxiety carries the burden of next day's bills, next month's inflation, next year's decisions, and the next decade's options"”forgetting we were never designed to carry a future we do not own. The question is not whether we will survive tomorrow but whether we trust God enough to live faithfully today.
 
@@ -631,7 +631,7 @@ What tomorrow has been stealing your peace today? You do not need Christ merely 
   {
     id: 'Devotion-21',
     title: 'Unseen But Certain',
-    tagline: `âœï¸ "Faith does not wait for proof to appear.\n     It trusts God's voice when the path is unclear."`,
+    tagline: `✍️ "Faith does not wait for proof to appear.\n     It trusts God's voice when the path is unclear."`,
     scripture: 'Hebrews 11:1 "Now faith is the substance of things hoped for, the evidence of things not seen."',
     content: `We all crave certainty. We want answers before decisions, contracts before investment, guarantees before commitment, and evidence before engagement. We have mistaken caution for wisdom. We fear what we cannot see, then wonder why our faith feels more like a transaction than a transformation. The question is not whether uncertainty exists but whether our faith can remain steady when clarity does not.
 
@@ -662,7 +662,7 @@ What uncertainty are you facing today"”direction, provision, decisions, relati
   {
     id: 'Devotion-22',
     title: 'All on the Altar',
-    tagline: `âœï¸ "Faith is not proven by what we keep;\n     It is proven when we lay all at His feet."`,
+    tagline: `✍️ "Faith is not proven by what we keep;\n     It is proven when we lay all at His feet."`,
     scripture: 'Romans 12:1 "I beseech you therefore, brethren, by the mercies of God, that ye present your bodies a living sacrifice, holy, acceptable unto God, which is your reasonable service."',
     content: `We know what it is to hold back the best while offering God the rest"”the convenient hours, the comfortable resources, and the controllable corners of our lives. Yet faith is not simply believing"”it is surrendering. God does not ask for weekend religion"”He asks for our whole lives. The question is not whether we have given something, but whether we have placed everything on the altar.
 
@@ -690,7 +690,7 @@ What area of your life have you been withholding from God"”your future, relati
   {
     id: 'Devotion-23',
     title: 'Calm in Chaos',
-    tagline: `âœï¸ "When waves surround and fears increase;\n     Christ speaks one word, and storms find peace."`,
+    tagline: `✍️ "When waves surround and fears increase;\n     Christ speaks one word, and storms find peace."`,
     scripture: 'Mark 4:40 "And he said unto them, Why are ye so fearful? how is it that ye have no faith?"',
     content: `Storms have a way of exposing what we truly trust. Calm seasons make faith easy to speak about, but chaos tests whether that faith can still stand. A sudden diagnosis, financial collapse, broken relationships, unexpected loss, or burdens too heavy to explain"”life can shift without warning. The question is not whether storms will come but whether we still trust Christ when they do.
 
@@ -721,7 +721,7 @@ What chaos surrounds you today"”fear, loss, uncertainty, sickness, conflict, o
   {
     id: 'Devotion-24',
     title: 'Hold On Tight',
-    tagline: `âœï¸ "When every strength within us starts to fall apart;\n     God remains the refuge holding every heart."`,
+    tagline: `✍️ "When every strength within us starts to fall apart;\n     God remains the refuge holding every heart."`,
     scripture: 'Psalm 46:1 "God is our refuge and strength, a very present help in trouble."',
     content: `Life has a way of presenting challenges that feel overwhelming"”unexpected loss, crushing burdens, deep uncertainty, and storms that arrive without warning. We often smile outwardly while inwardly wondering how much longer we can hold on. The question is not whether storms will come"”but whether we know where to run when they do.
 
@@ -754,7 +754,7 @@ What burden have you been trying to carry alone"”fear, pressure, grief, uncert
   {
     id: 'Devotion-25',
     title: 'Rest Before Ruin',
-    tagline: `âœï¸ "No striving earns what grace has done;\n     The work is finished; rest, My son."`,
+    tagline: `✍️ "No striving earns what grace has done;\n     The work is finished; rest, My son."`,
     scripture: 'Hebrews 4:9"“10 "There remaineth therefore a rest to the people of God. For he that is entered into his rest, he also hath ceased from his own works, as God did from his."',
     content: `We live in a restless age. Deadlines, demands, and burdens keep us running, yet rest is what our souls long for. Even believers often strive as though God's grace depends on their effort. But true faith is not about endless striving"”it is about resting in what Christ has already finished. The question is not whether we can work enough for God"”it is whether we trust that His work is enough for us.
 
@@ -785,7 +785,7 @@ What burden are you still carrying"”guilt, fear, shame, or endless striving? Y
   {
     id: 'Devotion-26',
     title: 'It's Already Yours',
-    tagline: `âœï¸ "Faith does not wait for proof to appear;\n     It receives God's promise as already here."`,
+    tagline: `✍️ "Faith does not wait for proof to appear;\n     It receives God's promise as already here."`,
     scripture: 'Mark 11:24 "Therefore I say unto you, What things soever ye desire, when ye pray, believe that ye receive them, and ye shall have them."',
     content: `Many believers pray yet secretly expect nothing. We ask cautiously, expect minimally, and receive accordingly"”then wonder why our faith feels weak. We treat God's promises like items on a shelf we are not sure we are allowed to take. The question is not whether God answers prayer but whether we truly believe Him enough to receive what He has promised.
 
@@ -816,7 +816,7 @@ What promise of God have you stopped believing for"”peace, wisdom, provision, 
   {
     id: 'Devotion-27',
     title: 'Due Season Comes',
-    tagline: `âœï¸ "Many quit before the harvest ever comes;\n     Faith keeps sowing because due season comes."`,
+    tagline: `✍️ "Many quit before the harvest ever comes;\n     Faith keeps sowing because due season comes."`,
     scripture: 'Galatians 6:9 "And let us not be weary in well doing: for in due season we shall reap, if we faint not."',
     content: `Doing good is inspiring"”until it becomes exhausting. Serving, praying, giving, loving, standing for truth, and obeying daily can wear on the soul when results seem absent. Many do not quit believing in God, but they grow weary while waiting for the harvest. The question is not how difficult the journey becomes, but whether we will remain faithful until due season comes.
 
@@ -847,7 +847,7 @@ So, are you weary today? What area of your life tempts you to quit"”unanswered
   {
     id: 'Devotion-28',
     title: 'Still I Will Rejoice',
-    tagline: `âœï¸ "When everything you counted on has gone;\n     Still you will rejoice, for God is still your song."`,
+    tagline: `✍️ "When everything you counted on has gone;\n     Still you will rejoice, for God is still your song."`,
     scripture: 'Habakkuk 3:17"“18  "Although the fig tree shall not blossom, neither shall fruit be in the vines; the labour of the olive shall fail, and the fields shall yield no meat; the flock shall be cut off from the fold, and there shall be no herd in the stalls: Yet I will rejoice in the LORD, I will joy in the God of my salvation."',
     content: `Joy is easy when life is full, but faith is revealed when life feels empty. We praise God when the bills are paid, the doctor gives a good report, and the family is well. But what happens when the fig tree does not blossom, the vine bears no fruit, and the fields yield no increase? The question is not whether you will rejoice when life is easy"”it is whether you will still rejoice when life is falling apart.
 
@@ -878,7 +878,7 @@ What circumstance has been stealing your joy lately"”unanswered prayers, delay
   {
     id: 'Devotion-29',
     title: 'Victory Starts Here',
-    tagline: `âœï¸ "You cannot win the war by fighting from within;\n     Victory starts the moment you are born of Him."`,
+    tagline: `✍️ "You cannot win the war by fighting from within;\n     Victory starts the moment you are born of Him."`,
     scripture: '1 John 5:4 "For whatsoever is born of God overcometh the world: and this is the victory that overcometh the world, even our faith."',
     content: `Joy is easy when life is full, but faith is revealed when life feels empty. We praise God when the bills are paid, the doctor gives a good report, and the family is well. But what happens when the fig tree does not blossom, the vine bears no fruit, and the fields yield no increase? The question is not whether you will rejoice when life is easy"”it is whether you will still rejoice when life is falling apart.
 
@@ -909,7 +909,7 @@ What circumstance has been stealing your joy lately"”unanswered prayers, delay
   {
     id: 'Devotion-30',
     title: 'Finish Strong',
-    tagline: `âœï¸ "The start is good; the middle can be long;\n     But only those who finish prove their faith was strong."`,
+    tagline: `✍️ "The start is good; the middle can be long;\n     But only those who finish prove their faith was strong."`,
     scripture: '2 Timothy 4:7 "I have fought a good fight, I have finished my course, I have kept the faith."',
     content: `Starting is exciting. Finishing is costly. Many begin the Christian life with enthusiasm, bold promises, and sincere devotion. Yet time, trials, disappointments, distractions, and weariness reveal what excitement alone cannot sustain. Crowds gather at starting lines, but far fewer remain at the finish. The question is not whether you started the race"”it's whether you will finish it faithfully.
 
