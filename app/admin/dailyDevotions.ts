@@ -320,7 +320,7 @@ What fear has been controlling your thoughts more than God's truth? You don't ne
 
   {
     id: 'Devotion-11',
-    title: 'Don't Rush God',
+    title: 'Don\'t Rush God',
     tagline: `âœï¸ "We rush ahead and miss what God prepared,\n     the fruit of waiting belongs to those who dared."`,
     scripture: 'Psalm 27:14 "Wait on the LORD: be of good courage, and he shall strengthen thine heart: wait, I say, on the LORD."',
     content: `Waiting is one of the hardest tests of faith in an age addicted to instant results"”hasty deliveries, immediate answers, real-time updates, and quick solutions. That speed has quietly reshaped our patience for everything, including God. We often mistake waiting for denial. The question is not whether waiting is difficult"”it is whether we have the faith to wait without rushing Him.
