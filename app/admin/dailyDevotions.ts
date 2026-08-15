@@ -936,5 +936,315 @@ Are you still running with the same faith you started with—or have you drifted
     image: '/devotions/Devotion-30.jpg',
     facebookLink: 'https://www.facebook.com/BeginWithGod/'
   },
+
+  {
+    id: 'Devotion-31',
+    title: 'Never Broken',
+    tagline: `✍️ "What God has spoken will surely remain;\n     His promises stand when all else has changed in vain."`,
+    scripture: 'Numbers 23:19 "God is not a man, that he should lie; neither the son of man, that he should repent: hath he said, and shall he not do it? or hath he spoken, and shall he not make it good?"',
+    content: `We have all been disappointed by words that sounded certain. A promise was made, hope was built, expectations rose—and then everything collapsed. Relationships fail, plans unravel, and even our own commitments can crumble overnight. The question is not whether promises exist, but whether there is any promise strong enough to hold us when everything else gives way.
+
+---
+
+Numbers 23:19 declares, “God is not a man, that he should lie; neither the son of man, that he should repent...” These words were spoken through Balaam when Balak sought to curse Israel. Despite man's schemes, God affirmed that what He had spoken could not be reversed. His promises are rooted in His perfect character, not changing circumstances.
+
+God’s promises are like an anchor deep beneath the ocean floor. Storms rage and waves crash, but the anchor stays firm. Likewise, God’s Word stands steady beneath changing emotions, fears, and circumstances. What God declares is never shaken by the storms.
+
+---
+
+The Bible declares that God cannot lie (Titus 1:2), for it is impossible for Him to do so (Hebrews 6:18). His Word stands forever (Isaiah 40:8), settled in heaven (Psalm 119:89), and when He speaks, creation obeys (Psalm 33:9). What God promised Abraham, He performed. What He promised Israel, He fulfilled. What He promises His people today are just as certain.
+
+We often trust temporal things while doubting the eternal Word of God. Yet heaven and earth shall pass away before God's words fail (Matthew 24:35). A broken bridge cannot carry a traveler home, but God's promises never collapse under the weight of those who trust them. The strength of our hope rests not in our grip on God, but in His grip on His Word.
+
+---
+
+Christ Himself is the fulfillment of every promise: “For all the promises of God in him are yea, and in him Amen” (2 Corinthians 1:20). The Word made flesh (John 1:14) guarantees that what God has spoken will never be broken. The same Saviour who died and rose again is the living proof that His promises stand.
+
+---
+
+So, are you building your life on God's promises, or merely admiring them from a distance? What promise of God have you quietly stopped believing? You don't need God's promises merely for comfort in a crisis—you need them as the foundation beneath every step you take. If God's Word cannot fail, what excuse remains for our unbelief?`,
+    prayer: `Heavenly Father, we confess that we have trusted the words of men more than Yours. Forgive us. Teach us to build our lives on the certainty of Your Word — not on feelings, not on circumstances, but on every promise You have spoken. You cannot lie, and we are grateful. In Jesus' Name. Amen.`,
+    image: '/devotions/Devotion-31.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-32',
+    title: 'Solid Foundation',
+    tagline: `✍️ "Build your life upon the Rock,\n     Or fall when storms attack."`,
+    scripture: 'Matthew 7:24 "Therefore whosoever heareth these sayings of mine, and doeth them, I will liken him unto a wise man, which built his house upon a rock."',
+    content: `Every year, buildings collapse because hidden weaknesses were ignored. The structure looked strong on the outside, but the foundation could not bear the pressure. The same is true in life. Trials expose what comfort conceals. Whether we are facing uncertainty, temptation, or disappointment, the question is not whether storms will come—but whether we are standing on something strong enough to endure them.
+
+---
+
+Jesus said in Matthew 7:24, “Therefore whosoever heareth these sayings of mine, and doeth them, I will liken him unto a wise man, which built his house upon a rock.” These words conclude the Sermon on the Mount. Christ was not merely calling people to hear truth but to obey it. Wisdom is not measured by knowledge alone but by a life built upon God's Word.
+
+A foundation is rarely admired because it is hidden beneath the surface. Yet when the storm arrives, everything depends upon it. God's Word is that unseen rock. The winds may howl, the rain may fall, and the floodwaters may rise, but what is anchored to God's truth stands when everything else begins to shake.
+
+---
+
+Scripture repeatedly points us to the stability of God's Word. “For ever, O LORD, thy word is settled in heaven” (Psalm 119:89). “The grass withereth, the flower fadeth: but the word of our God shall stand for ever” (Isaiah 40:8). The wise believer does not build upon feelings, opinions, or trends, but upon what God has spoken.
+
+James 1:22 commands, “Be ye doers of the word, and not hearers only, deceiving your own selves.” Hearing without doing is not humility—it is showy. We cannot claim to stand on God's promises while ignoring God's commands. Don't live like telling others the direction while your own wheels spin in the sinking sand. Obedience is the evidence that our foundation is real.
+
+---
+
+Ultimately, Jesus Christ is the Rock beneath our feet in this weary land. He is the living Word (John 1:1), the chief cornerstone (Ephesians 2:20), and the sure foundation that cannot be moved. Through His death and resurrection, He secured a hope that no storm can destroy. The safest place in life is not where trouble is absent, but where Christ is present.
+
+---
+
+So, what part of God's truth have you heard but failed to obey? You don't need Christ merely to rescue you when storms come—you need Him as the foundation you stand on before they arrive. Build on the Rock today, before the rain begins to fall. The wise man builds his house upon the solid ground.`,
+    prayer: `Heavenly Father, I surrender my restless striving and submit to Your Word. Forgive my shallow obedience. Grant me steadfast faith to lay my life upon Christ alone, trusting Your eternal truth above every shifting circumstance. In Jesus' Name. Amen.`,
+    image: '/devotions/Devotion-32.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-33',
+    title: 'Still True Today',
+    tagline: `✍️ "The years may pass; the world may drift away.\n     God’s Word stands firm, unchanged from day to day."`,
+    scripture: 'Psalm 119:89 "For ever, O LORD, thy word is settled in heaven."',
+    content: `Everything around us expires—food spoils, empires fall, technologies become obsolete, and philosophies fade. Even the strongest marriages, the elite soldiers, and the most honored names—all eventually become a story. Whether you are young and questioning or old and weary, the question is not what works right now but what remains when everything else is gone.
+
+---
+
+Psalm 119:89 declares, “For ever, O LORD, thy word is settled in heaven.” The psalmist points us beyond this temporal earth to the eternal heaven. God's Word is not revised by culture, amended by lawmakers, or weakened by time passing. What God has spoken remains unchangeable because God Himself is immutable.
+
+God's Word is like the North Star to a traveler in the wilderness. Seasons come and go, storms cover the sky, and generations rise and fall, yet the star remains in its place. In the same way, God's truth continues to shine through every age, providing direction when the world seems lost and confused.
+
+---
+
+Scripture proclaims God's Word is “settled in heaven.” Not debated. Not evolving. Not up for a vote. Settled. “The grass withereth, the flower fadeth: but the word of our God shall stand for ever” (Isaiah 40:8). Jesus declared, “Heaven and earth shall pass away, but my words shall not pass away” (Matthew 24:35).
+
+“The counsel of the LORD standeth for ever” (Psalm 33:11). Psalm 100:5 says “his truth endureth to all generations.” Do not navigate life with a map that redraws itself every decade. Time cannot bend the law of God, because it is settled in heaven—eternal, unchanging, and forever true.
+
+---
+
+Jesus is the eternal Word made flesh (John 1:1, 14). He did not merely speak God's Word; He is “the Word of God.” He is the proof that God's promises never expire. He is “the same yesterday, and to day, and for ever” (Hebrews 13:8). The same voice heard in creation is the One who defeated death through His resurrection.
+
+---
+
+Will you allow the changing voices of the world to shape your beliefs, or will you stand upon the unchanging Word of God? Trends come and go, but truth remains. You don't need Christ merely to help you navigate changing times—you need Him because He is the unchanging Lord in an ever-changing world. What voice are you following today?`,
+    prayer: `Heavenly Father, we thank You that Your Word remains forever and Your promises never grow old. Forgive our drifting hearts and strengthen us to stand upon Your truth when everything around us changes. Anchor us in Christ, and teach us to trust what You have spoken. In Jesus' Name. Amen.`,
+    image: '/devotions/Devotion-33.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-34',
+    title: 'Never Changing',
+    tagline: `✍️ "The world may change and drift each day,\n     But our God remains the same alway."`,
+    scripture: 'Malachi 3:6 "For I am the LORD, I change not; therefore ye sons of Jacob are not consumed."',
+    content: `Change is constant in this world. Trends come and go. Economies rise and fall. Emotions rise and fall. Friendships drift, plans unravel, and even our own hearts can feel different from one day to the next. Whether we are facing uncertainty, loss, or disappointment, the question is not whether things will change—but whether we trust the One who never does.
+
+---
+
+Malachi 3:6 declares, “For I am the LORD, I change not; therefore ye sons of Jacob are not consumed.” God spoke these words to a nation that had wandered far from Him. Though Israel had changed, God had not. His covenant faithfulness remained intact because His character remained unchanged.
+
+God's character is like a mountain that stands through every season. Storms may beat against it, winds may howl around it, and generations may pass before it, yet the mountain remains. In the same way, God's holiness, truth, mercy, and faithfulness never weaken, diminish, or drift.
+
+---
+
+Because God never changes, His promises never change. “Jesus Christ the same yesterday, and to day, and for ever” (Hebrews 13:8). “With whom is no variableness, neither shadow of turning” (James 1:17). If God could change, His promises could become uncertain. But because He is immutable, what He has spoken remains eternally trustworthy.
+
+Many of our fears come from the instability of life. We worry because circumstances change. We hesitate because people change. We doubt because feelings change. But it is “impossible for God to lie” (Hebrews 6:18). Don't trust God like you trust a weather forecast—hoping for sun but carrying an umbrella just in case. Your doubt does not dethrone His character. He is what He is—forever.
+
+---
+
+Jesus Christ is the same yesterday, today, and forever (Hebrews 13:8). The One who healed and wept will judge the world and wipe away tears. Because He is unchanging, His blood still cleanses, His resurrection still guarantees victory, and His return remains certain.
+
+---
+
+Are you trusting in circumstances that change, or in the God who never changes? God's promises are not built upon shifting emotions or changing conditions. A changing world desperately needs an unchanging God. You don't need Christ just to help you survive uncertain days—you need Him because He is the unchangeable God from ancient days. His character guarantees His promises are never changing.`,
+    prayer: `Heavenly Father, we thank You for never changing. We confess how easily our hearts fear when circumstances shift. Forgive us and help us rest in Your unchanging character. Strengthen our trust in Christ and teach us to stand upon Your faithful promises. In Jesus' Name. Amen.`,
+    image: '/devotions/Devotion-34.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-35',
+    title: 'Word for the Lost World',
+    tagline: `✍️ "A world drowning in lies has one hope to find;\n     The God who cannot lie left no promise behind."`,
+    scripture: 'Titus 1:2 "In hope of eternal life, which God, that cannot lie, promised before the world began."',
+    content: `We live in a world flooded with misinformation. Headlines contradict one another, promises are broken, and trust grows thinner by the day. People fact-check everything because deception has become so common. Whether we are sorting through conflicting voices or battling personal doubts, the question is not whether lies exist but whether we truly believe that God never lies.
+
+---
+
+Titus 1:2 declares, “In hope of eternal life, which God, that cannot lie, promised before the world began.” Paul points believers to the certainty of God's promise by pointing them to God's character. Eternal life is not secured by the wishing well, but by the God who cannot lie. Before time began, God had already purposed and promised redemption.
+
+Before Adam drew his first breath. Before the first star was hung in its place. Before there was a world to lie to, God had already spoken the promise of eternal life—and it was already true. Like a surgeon who prepares every instrument before the operation begins, God prepared the plan of salvation before the world existed.
+
+---
+
+Scripture affirms God's truthfulness. “It was impossible for God to lie” (Hebrews 6:18). “God is not a man, that he should lie” (Numbers 23:19). Satan is called “a liar, and the father of it” (John 8:44), but every word God speaks is pure and trustworthy. The battle between truth and error has existed since Eden, yet God's truth has never once failed.
+
+Many people treat God's promises like human contracts—something to question, negotiate, or search for loopholes to escape. “The words of the LORD are pure words: as silver tried in a furnace of earth, purified seven times” (Psalm 12:6). Any unbelief does not introduce a single lie into His character. His Word does not need correction because He is the “Truth,” and Truth requires no justification.
+
+---
+
+Our lost world hungers for this word. We stand on God's pure Word—not merely His promises, but the very character behind them. Jesus Christ, the revelation of God's truth, said, “I am the way, the truth, and the life” (John 14:6). The eternal life promised before the world began is secured in Him alone.
+
+---
+
+So, what promise of God have you quietly questioned because circumstances seem louder than Scripture? You don't need Christ merely to escape lies—you need Him because He is the Truth who saves. If God cannot lie, why do we still doubt what He has said? Take one of His promises to your heart today, then share it with someone who needs to know that God does not lie.`,
+    prayer: `Heavenly Father, we thank You that You cannot lie and that every promise You have spoken is true. Forgive us for the doubts we entertain and the fears we allow to overshadow Your Word. Help us rest in Christ, trust what You have spoken, and walk in the certainty of Your truth. In Jesus' Name. Amen.`,
+    image: '/devotions/Devotion-35.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-36',
+    title: 'Certain and Sure',
+    tagline: `✍️ "When doubts arise and hope seem far away;\n     God’s faithfulness will never lose its way."`,
+    scripture: 'Hebrews 10:23 "Let us hold fast the profession of our faith without wavering; (for he is faithful that promised;)."',
+    content: `Life has a way of testing our confidence. Prayers seem delayed, burdens grow heavier, and answers do not always arrive when we expect them. In those moments, doubt whispers that God has forgotten, abandoned, or changed His mind. Whether we are enduring a trial or waiting for God's timing, the question is not whether our faith will be tested—but whether God's faithfulness can ever fail.
+
+---
+
+Hebrews 10:23 declares, “Let us hold fast the profession of our faith without wavering; (for he is faithful that promised;).” To “hold fast” is to grip the rope with both hands, feet planted firmly on the ground, refusing to let pressure, persecution, or the currents of this world pull you away. The writer does not tell believers to hold on because they are strong. He tells them to hold on because God is faithful.
+
+Faithfulness is like a lighthouse standing through a century of storms. Generations come and go. Waves pound against the shore. Winds scream through the night. Yet the light continues to shine. God's faithfulness is far greater. Long after kingdoms have fallen and civilizations have disappeared, He remains exactly as He has always been.
+
+---
+
+Scripture affirms this truth: “Faithful is he that calleth you, who also will do it” (1 Thessalonians 5:24). “The LORD is faithful, who shall stablish you, and keep you from evil” (2 Thessalonians 3:3). His mercies are new every morning (Lamentations 3:23), His covenant cannot be broken (Psalm 89:34). God does not plant a vine and walk away. He tends to what He has promised.
+
+“He that hath begun a good work in you will perform it” (Philippians 1:6). Don’t live like a panicking passenger grabbing the steering wheel from a competent driver. We often treat God's promises like a package stuck in transit, wondering if it will ever arrive. But God's promises are never delayed by weakness, confusion, or oversight. Heaven has never misplaced a single one.
+
+---
+
+Christ is the living proof of God’s faithfulness. “For all the promises of God in him are yea, and in him Amen” (2 Corinthians 1:20). Every prophecy concerning His death, burial, and resurrection was fulfilled exactly as promised. He did it willingly so our hands can hold fast to Him.
+
+---
+
+Where have you been loosening your grip—on prayer, on God's promises, or on the confession of faith you once made before Him? You don't need Christ merely to help you endure uncertainty—you need Him because He is the faithful Saviour who never fails. If God has never broken a promise, why are we so quick to let go of them? Hold fast today. The God who promised is still faithful.`,
+    prayer: `Heavenly Father, we thank You for Your unwavering faithfulness. Forgive us for the times we doubt Your promises when answers seem delayed. Strengthen our hearts to hold fast without wavering, and help us rest in Christ, knowing that what You have promised, You will surely perform. In Jesus' Name. Amen.`,
+    image: '/devotions/Devotion-36.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-37',
+    title: 'The Battle Within',
+    tagline: `✍️ "The loudest war is not outside,\n     But in the chambers of fear inside."`,
+    scripture: 'Isaiah 41:10 "Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee; yea, I will uphold thee with the right hand of my righteousness."',
+    content: `The enemy outside is loud. But the enemy inside is louder. Fear screams through our thoughts at 3 AM. Doubt plants landmines in your thoughts. Discouragement wraps around your chest like a weight. Whether you are fighting anxiety, shame, or the quiet dread that never leaves, the question is not will the battle come—but who is fighting beside you in the trenches of your mind.
+
+---
+
+Isaiah 41:10 declares, “Fear thou not; for I am with thee: be not dismayed; for I am thy God...” God spoke these words to His people during troubled days. Notice that He did not promise the absence of trouble. He promised His presence in the middle of it. The cure for fear is not a change of circumstances—it is the presence of God.
+
+Fear is a storm that sweeps through our hearts—unexpected diagnoses, financial pressures, broken relationships, or uncertain futures. God's promise is like an anchor dropped deep beneath all these raging waves in our lives. He said, “fear not because I am with you”—Presence, not ceasefire, is the promise.
+
+---
+
+Scripture repeatedly points us to God's presence. “God is our refuge and strength, a very present help in trouble” (Psalm 46:1). “I will never leave thee, nor forsake thee” (Hebrews 13:5). When Moses faced Pharaoh, when Joshua faced Canaan, and when Daniel faced lions, God's presence proved greater than their fears.
+
+Fear grows when we measure our problems against ourselves. Faith grows when we measure our problems against God. Don’t act like a flashlight battery running low—flickering whenever darkness increases. But God's presence never weakens, never flickers, and never runs out. The darker the night, the brighter His faithfulness shines.
+
+---
+
+Jesus Christ is the ultimate proof that God is with us. He is “Emmanuel, which being interpreted is, God with us” (Matthew 1:23). At the cross He bore our greatest fear—separation from God—so that those who trust Him would never be abandoned. Because Christ lives, His presence has never left His people.
+
+---
+
+What fear has been occupying your thoughts lately? What storm has made you forget that God is near? You don't need Christ merely to calm the storm—you need Him because He is with you in it. If God is beside you, why are you listening to fear as though you are alone? Lift your eyes from the waves and fix them on the Saviour. The storm may continue, but so will His presence.`,
+    prayer: `Heavenly Father, we thank You that You never leave us in our battles. Forgive us for listening to fear more than Your promises. When our hearts are troubled and our minds grow weary, help us rest in Your presence and trust Christ, who is always with us. In Jesus' Name. Amen.`,
+    image: '/devotions/Devotion-37.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-38',
+    title: 'Lay It Down',
+    tagline: `✍️ "When burdens grow heavy and troubles vastly roam,\n     Christ still invites the weary to come home."`,
+    scripture: 'Matthew 11:28 "Come unto me, all ye that labour and are heavy laden, and I will give you rest."',
+    content: `We are the most exhausting generation in history. Calendars are full, deadlines pile up, minds are crowded, and hearts are running empty. Many of us are tired—not just physically, but spiritually. We have all felt that kind of weariness that sleep cannot fix. Whether we are carrying grief, guilt, pressure, or disappointment, the question is not whether we are weary—but where we are taking our weariness.
+
+---
+
+Jesus gives this invitation in Matthew 11:28: “Come unto me, all ye that labour and are heavy laden, and I will give you rest.” Notice the promise. Christ does not say, “Come to a system.” He says, “Come unto me.” Rest is not found in escaping our burdens but in bringing them to the Saviour.
+
+A weary traveler may sit beside a well, yet remain thirsty if he never drinks. In the same way, many stand near Christ, hear about Christ, and admire Christ—yet never come to Him. The invitation is not to observe. The invitation is to come.
+
+---
+
+Scripture reminds us that God “giveth power to the faint” (Isaiah 40:29). Psalm 68:19 calls God “the LORD, who daily loadeth us with benefits.” But we trade benefits for burdens. Galatians 6:2 commands, “Bear ye one another's burdens, and so fulfil the law of Christ.” Yet we bear our own until we collapse. Exodus 33:14 promises, “My presence shall go with thee, and I will give thee rest.” Not will eventually. Will give.
+
+But we trade benefits for burdens. Galatians 6:2 commands, “Bear ye one another's burdens, and so fulfil the law of Christ.” The weary are welcomed, the broken are received, and the burdened are invited. Yet we carry loads God never asked us to bear. Don't treat your soul like a machine that never needs rest. Even the strongest bow will break if it remains stretched forever. Rest is not weakness when it leads us to Christ.
+
+---
+
+Jesus carried the heaviest burden of all—the burden of our sin. At the cross, He bore what we could never carry so that we might find peace with God, “It is finished” (John 19:30). The rest we seek is not earned, but received in Christ alone.
+
+---
+
+What burden have you been carrying alone? What weight has slowly drained your joy and peace? You don't need Christ merely to lighten the load—you need Him because He alone can give rest to your soul. Stop striving. Stop carrying what belongs to Him. Come to Christ and rest.`,
+    prayer: `Heavenly Father, we thank You for Christ's invitation to come and rest. Forgive us for carrying burdens You never asked us to bear and for striving in our own strength. Teach us to lay every care at the feet of Jesus and find true rest in Him alone. In Jesus' Name. Amen.`,
+    image: '/devotions/Devotion-38.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-39',
+    title: 'Fear Doesn’t Win',
+    tagline: `✍️ "When fear rises fast and courage feels thin,\n     I trust in the Lord, my refuge within."`,
+    scripture: 'Psalm 56:3 "What time I am afraid, I will trust in thee."',
+    content: `Fear is a relentless adversary. Sometimes it creeps in quietly—through a doctor’s report, a financial collapse, or a betrayal that breaks trust. It does not ask permission. It simply attacks. In those moments, fear is not just a feeling—it feels like an assault on the soul. Whether rooted in uncertainty, failure, or the unknown, the question is not whether fear comes but how we respond when it does.
+
+---
+
+Psalm 56:3 declares, “What time I am afraid, I will trust in thee.” David does not deny fear; he redirects it. Fear may visit, but trust decides where the heart will remain. The psalm does not say “if I am afraid,” but “what time”—meaning fear is expected but not victorious.
+
+Fear is like a storm cloud passing over the soul. It may darken the sky for a moment, but it cannot remain forever. Beneath it stands a deeper truth: God has not moved. The cloud may shift the atmosphere, but it cannot shift the throne.
+
+---
+
+The Bible calls us back to trust. “In God have I put my trust; I will not be afraid what man can do unto me” (Psalm 56:11). Fear is not a master—it is a messenger. It reveals where our trust is weak. Proverbs 29:25 warns, “The fear of man bringeth a snare: but whoso putteth his trust in the LORD shall be safe.” Fear traps. Trust frees.
+
+Scripture never pretends fear does not exist, but it did not come from God. 2 Timothy 1:7 declares, “God hath not given us the spirit of fear; but of power, and of love, and of a sound mind.” Many treat fear like a ruler over our decisions, as if it has final authority. Don't act like a man who sees a lion and pretends it is a house cat. Fear is real. But God is bigger.
+
+---
+
+Jesus Christ entered the deepest place of human fear in Gethsemane, where His soul was sorrowful unto death (Luke 22:44). Yet He did not surrender to fear—He surrendered to the Father. At the cross, He faced judgment in our place and broke fear’s final authority. Because He conquered sin and death, fear no longer has the final word.
+
+---
+
+What fear has been speaking louder than God’s promises in your heart? What situation has caused you to trust feelings more than truth? You don’t need Christ merely to reduce your fear—you need Him because He is greater than what you fear. Remember, fear doesn’t win when you place your trust firmly in Him. Stand boldly against your fears today!`,
+    prayer: `Heavenly Father, we thank You that fear does not rule over us. Forgive us for believing fear more than Your Word. Strengthen our hearts to trust You in every anxious moment, and anchor us in Christ, who has already overcome all fear. In Jesus' Name. Amen.`,
+    image: '/devotions/Devotion-39.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
+
+  {
+    id: 'Devotion-40',
+    title: 'While You Wait',
+    tagline: `✍️ "God is not idle while we wait and pray;\n     He strengthens our hearts along the way."`,
+    scripture: 'Isaiah 40:31 "But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles; they shall run, and not be weary; and they shall walk, and not faint."',
+    content: `Waiting is one of the hardest battles we fight. Not the waiting in traffic or in long lines, but the waiting in life. We wait for answers, healing, provision, and direction. We pray, trust, and hope, yet nothing seems to change. The silence can feel longer than the trial itself. Whether we are waiting for God's timing, provision, or intervention, the question is not whether we can wait but what God is doing while we wait.
+
+---
+
+Isaiah 40:31 declares, “But they that wait upon the LORD shall renew their strength...” Notice that God does not promise renewed strength after the waiting, but during it. Waiting is not wasted time in God's economy. It is often the workshop where He strengthens faith, deepens dependence, and prepares hearts for what comes next.
+
+Waiting is like an eagle riding unseen currents above the earth. It does not panic when the wind changes. It rises because it trusts the current beneath its wings. In the same way, God's people learn to rise above discouragement by resting in His unseen work.
+
+---
+
+Scripture repeatedly connects waiting with hope. “Wait on the LORD: be of good courage, and he shall strengthen thine heart” (Psalm 27:14). “My soul, wait thou only upon God; for my expectation is from him” (Psalm 62:5). God's delays are never His denials. What appears to be inactivity is often divine preparation.
+
+We often want God to move faster than He chooses. We watch the clock while God shapes the character. We focus on the destination while God works on the traveler. Lamentations 3:25 declares, “The LORD is good unto them that wait for him, to the soul that seeketh him.” Don't dig up the seed every day to see if it is growing. Growth happens beneath the surface long before it appears above the ground.
+
+---
+
+Jesus Christ knew well about waiting. He waited thirty years before His ministry began. He waited three days between death and resurrection. But His waiting was not wasted. The empty tomb proved that what looks like delay is often God's preparation. Because He rose, your waiting is not empty. It is the elevator lifting you to what He has already prepared.
+
+---
+
+What have you been waiting for so long that you have stopped hoping? You have grown weary of asking, weary of watching, weary of waiting. But you don't need Christ just to help you endure the waiting—you need Him because He is working while you wait. Trust His timing. Trust His wisdom. Trust His heart. The wait is not empty when God is in it.`,
+    prayer: `Heavenly Father, we thank You that You are working even when we cannot see it. Forgive us for growing impatient when Your answers seem delayed. Teach us to wait upon You with hope, confidence, and surrender. Renew our strength through Christ, and help us trust Your perfect timing. In Jesus' Name. Amen.`,
+    image: '/devotions/Devotion-40.jpg',
+    facebookLink: 'https://www.facebook.com/BeginWithGod/'
+  },
   // Add more devotions here
 ];
