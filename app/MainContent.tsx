@@ -10,6 +10,9 @@ import { useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import NameModal from './components/NameModal';
 import { useTheme } from './context/ThemeContext';
+// ✅ NEW: Import version check hook and UpdateBanner
+import { useVersionCheck } from '../hooks/useVersionCheck';
+import UpdateBanner from './components/UpdateBanner';
 
 // ============================================================
 // 📝 TYPE DEFINITIONS - What our data looks like
@@ -115,6 +118,9 @@ export default function MainContent() {
   // 🔄 FORCE REFRESH - For manual sync when tab becomes visible
   // ============================================================
   const [forceRefresh, setForceRefresh] = useState<number>(0);
+
+  // ✅ NEW: Version check hook for auto-updates
+  const { showUpdateBanner, applyUpdate, dismissUpdate } = useVersionCheck();
 
   // ============================================================
   // 📜 SCROLL FUNCTIONS - Auto-scroll to bottom
@@ -1367,6 +1373,14 @@ if (data.event === 'message_end') {
   // ============================================================
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {/* ✅ NEW: Update Banner at top */}
+      {showUpdateBanner && (
+        <UpdateBanner 
+          onUpdate={applyUpdate} 
+          onDismiss={dismissUpdate} 
+        />
+      )}
+
       {/* 📂 SIDEBAR - Left navigation */}
       <Sidebar 
         isOpen={sidebarOpen} 

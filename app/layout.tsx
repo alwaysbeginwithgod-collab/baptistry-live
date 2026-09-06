@@ -17,6 +17,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // ✅ Get version from environment variable or use timestamp
+  const appVersion = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA || 
+                     process.env.NEXT_PUBLIC_APP_VERSION || 
+                     new Date().toISOString();
+
   return (
     <ConvexProvider client={convex}>
       <ClerkProvider>
@@ -24,7 +29,7 @@ export default function RootLayout({
           <html lang="en">
             <head>
               <link rel="manifest" href="/manifest.json" />
-              <meta name="theme-color" content="#0a1628" /> {/* Updated to dark navy */}
+              <meta name="theme-color" content="#0a1628" />
               <meta name="apple-mobile-web-app-capable" content="yes" />
               <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
               <link rel="apple-touch-icon" href="/baptistry-logo.png" />
@@ -34,6 +39,9 @@ export default function RootLayout({
               {/* Golden-yellow brand color for browser UI */}
               <meta name="theme-color" content="#D4A017" media="(prefers-color-scheme: light)" />
               <meta name="theme-color" content="#0a1628" media="(prefers-color-scheme: dark)" />
+              
+              {/* ✅ NEW: App version meta tag for update detection */}
+              <meta name="app-version" content={appVersion} />
             </head>
             <body className="app-container">
               <Script 
