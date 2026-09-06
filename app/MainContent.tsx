@@ -1503,12 +1503,7 @@ if (data.event === 'message_end') {
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* ✅ NEW: Update Banner at top */}
-      {showUpdateBanner && (
-        <UpdateBanner 
-          onUpdate={applyUpdate} 
-          onDismiss={dismissUpdate} 
-        />
-      )}
+{showUpdateBanner && <UpdateBanner />}
 
       {/* 📂 SIDEBAR - Left navigation */}
       <Sidebar 
