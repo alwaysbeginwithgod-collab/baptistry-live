@@ -52,9 +52,6 @@ export function useVersionCheck() {
       });
     }
 
-    // Clear localStorage (optional - keep user data)
-    // localStorage.clear();
-
     // Clear sessionStorage
     sessionStorage.clear();
 

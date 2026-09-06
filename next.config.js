@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   // ✅ Add deploymentId for version skew protection
   deploymentId: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA || new Date().toISOString(),
   // ✅ Reduce client-side cache to update faster
