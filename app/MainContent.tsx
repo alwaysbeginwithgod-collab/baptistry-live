@@ -127,8 +127,8 @@ const hardReset = () => {
     });
   }
   sessionStorage.clear();
-  window.location.href = window.location.href.split('?')[0] + '?v=' + Date.now();
-  window.location.reload(true);
+  // Force reload with cache busting
+  window.location.replace(window.location.href.split('?')[0] + '?v=' + Date.now());
 };
 
 const checkForUpdate = () => {
