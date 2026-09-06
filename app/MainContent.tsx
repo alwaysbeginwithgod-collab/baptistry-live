@@ -10,9 +10,6 @@ import { useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import NameModal from './components/NameModal';
 import { useTheme } from './context/ThemeContext';
-// ✅ NEW: Import version check hook and UpdateBanner
-import { useVersionCheck } from '../hooks/useVersionCheck';
-import UpdateBanner from './components/UpdateBanner';
 
 // ============================================================
 // 📝 TYPE DEFINITIONS - What our data looks like
@@ -88,6 +85,141 @@ export default function MainContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const stopRequested = useRef(false); // For stopping generation
+  const [showUpdateBanner, setShowUpdateBanner] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+
+// ============================================================
+// 🔄 VERSION CHECK - Auto-update detection
+// ============================================================
+const VERSION_KEY = 'baptistry_app_version';
+const CHECK_INTERVAL = 30000;
+
+const getCurrentVersion = () => {
+  const version = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA || 
+                  document.querySelector('meta[name="app-version"]')?.getAttribute('content') ||
+                  'unknown';
+  return version;
+};
+
+const getStoredVersion = () => {
+  try {
+    return localStorage.getItem(VERSION_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const setStoredVersion = (version: string) => {
+  try {
+    localStorage.setItem(VERSION_KEY, version);
+  } catch {
+    // Ignore
+  }
+};
+
+const hardReset = () => {
+  console.log('🔄 Hard resetting...');
+  if ('caches' in window) {
+    caches.keys().then((names) => {
+      for (const name of names) {
+        caches.delete(name);
+      }
+    });
+  }
+  sessionStorage.clear();
+  window.location.href = window.location.href.split('?')[0] + '?v=' + Date.now();
+  window.location.reload(true);
+};
+
+const checkForUpdate = () => {
+  try {
+    const currentVersion = getCurrentVersion();
+    const storedVersion = getStoredVersion();
+    if (!storedVersion) {
+      setStoredVersion(currentVersion);
+      return;
+    }
+    if (currentVersion !== storedVersion && currentVersion !== 'unknown') {
+      console.log('🔄 New version detected!', { storedVersion, currentVersion });
+      setShowUpdateBanner(true);
+    }
+  } catch (error) {
+    console.error('Error checking version:', error);
+  }
+};
+
+// Check on mount and periodically
+useEffect(() => {
+  checkForUpdate();
+  const interval = setInterval(checkForUpdate, CHECK_INTERVAL);
+  return () => clearInterval(interval);
+}, []);
+
+const applyUpdate = () => {
+  const currentVersion = getCurrentVersion();
+  setStoredVersion(currentVersion);
+  setShowUpdateBanner(false);
+  hardReset();
+};
+
+const dismissUpdate = () => {
+  setShowUpdateBanner(false);
+};
+
+// ============================================================
+// 📢 UPDATE BANNER - Shows when new version is available
+// ============================================================
+const UpdateBanner = () => {
+  if (!showUpdateBanner) return null;
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          applyUpdate();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [showUpdateBanner]);
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-800 dark:to-blue-900 shadow-lg animate-slide-down">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🔄</span>
+          <div>
+            <p className="text-white font-semibold text-sm">New Version Available!</p>
+            <p className="text-blue-100 text-xs">
+              {countdown > 0 
+                ? `Updating in ${countdown} second${countdown > 1 ? 's' : ''}...` 
+                : 'Updating now...'}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={applyUpdate}
+            className="px-4 py-1.5 bg-white text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors"
+          >
+            Update Now
+          </button>
+          <button
+            onClick={dismissUpdate}
+            className="text-white hover:text-blue-200 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
   
   // ============================================================
   // 🆕 📡 ABORT CONTROLLER - For cancelling fetch requests when stop is clicked
