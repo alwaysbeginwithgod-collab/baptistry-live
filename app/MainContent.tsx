@@ -251,9 +251,6 @@ const UpdateBanner = () => {
   // ============================================================
   const [forceRefresh, setForceRefresh] = useState<number>(0);
 
-  // ✅ NEW: Version check hook for auto-updates
-  const { showUpdateBanner, applyUpdate, dismissUpdate } = useVersionCheck();
-
   // ============================================================
   // 📜 SCROLL FUNCTIONS - Auto-scroll to bottom
   // ============================================================
